@@ -199,3 +199,67 @@ work proceeds — this file is the live source of truth for progress.
 
 Adapter interfaces for WhatsApp/SMS notification and ERP sync, documented
 in `decisions.md`, only if P0+P1 are complete with time remaining.
+
+---
+
+## Post-P1 Enhancements (from full feature-catalog gap analysis, `gap-analysis.md`)
+
+All Done and verified (curl + Playwright, cross-checked against manual
+DB queries where numeric). Full detail in
+`docs/specs/001-customer-support-crm/gap-analysis.md` and
+`docs/verification.md`.
+
+| ID | Requirement | Goal | Status |
+|---|---|---|---|
+| TASK-027 | CRM-KB-002 | KB search (title/body/category) | Done |
+| TASK-028 | CRM-TICKET-003 | Ticket category field (create/filter/display) | Done |
+| TASK-029 | CRM-CUSTOMER-003 | Customer interaction-history view (staff-only) | Done |
+| TASK-030 | CRM-REPORT-003 | Aggregate CSAT + agent-performance report cards | Done |
+| TASK-031 | CRM-AI-003 | AI ticket summary | Done |
+| TASK-032 | CRM-AI-004 | AI-suggested KB articles | Done |
+| TASK-033 | CRM-SLA-ESCALATE-001 | SLA escalation sweep (bump priority to Urgent on breach) | Done |
+| TASK-034 | CRM-NOTIFY-001 | In-app notification badge (breached/at-risk counts) | Done |
+| TASK-035 | CRM-INTEGRATION-001 | P2 notification adapter (email/SMS/WhatsApp interface + mocks) | Done |
+| TASK-036 | CRM-INTEGRATION-002 | P2 ERP adapter (interface + mock) | Done |
+
+---
+
+## Planned — Approved, Not Yet Built
+
+### TASK-037
+**Requirement:** CRM-SLA-CONFIG-001
+**Goal:** Admin can edit SLA response/resolution thresholds per priority without a code change.
+**Dependencies:** none (extends existing `services/sla.ts`)
+**Database:** new `SlaPolicy` model — `priority` (unique enum), `responseMinutes`, `resolutionMinutes`, `updatedAt`. Seeded with the current hardcoded values (Urgent 30/240, High 120/480, Medium 480/1440, Low 1440/4320 minutes).
+**Backend:** `GET /admin/sla-config` (Admin only, list all 4 rows), `PATCH /admin/sla-config/:priority` (Admin only, update one row's minutes). `computeSlaDueDates()` reads from the DB instead of the in-code constant map.
+**Frontend:** Admin-only "SLA Settings" page — one row per priority with editable response/resolution minute fields, save button.
+**Verification:** Change a threshold via UI → create a new ticket at that priority → confirm its due timestamps use the new value. Confirm existing tickets' due dates are unaffected (matches the compute-on-write architecture — no retroactive recompute). Non-admin blocked (403).
+**Status:** Not Started
+
+### TASK-038
+**Requirement:** CRM-CUSTOMER-004
+**Goal:** Staff can leave internal notes on a customer's profile, separate from ticket messages (e.g. "VIP customer", "prefers phone contact").
+**Dependencies:** none (extends existing customer detail page)
+**Database:** new `CustomerNote` model — `customerId` (FK → User), `authorId` (FK → User), `body`, `createdAt`.
+**Backend:** `GET /customers/:id/notes` (Admin/Manager/Agent), `POST /customers/:id/notes` (Admin/Manager/Agent).
+**Frontend:** "Notes" section on the customer detail page (staff-only), list in reverse-chronological order with author name, simple add form.
+**Verification:** Staff adds a note → visible to other staff on reload → Customer role cannot see it (403 or simply never rendered/never fetched, matching the internal-note pattern already used for tickets). Non-staff blocked.
+**Status:** Not Started
+
+Explicitly out of scope for both: file attachments (materially more work
+— storage, size limits, type validation), note editing/deletion,
+per-department SLA policies (see discussion items below).
+
+---
+
+## Under Discussion — Not Yet Approved
+
+These are real scope expansions beyond the original P0/P1 plan, not
+small additions. Specs exist to support the discussion, not as a
+commitment to build. See each file for goal, draft scope, and why it's
+bigger than it looks:
+
+- `features/discussion-multi-department-branch.md`
+- `features/discussion-custom-branding.md`
+- `features/discussion-ai-chatbot.md`
+- `features/discussion-real-communication-providers.md`

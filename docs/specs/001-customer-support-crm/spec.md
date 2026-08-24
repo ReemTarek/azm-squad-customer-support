@@ -59,6 +59,23 @@ IDs are referenced from architecture/data-model/api-contract/plan/traceability d
 | CRM-ADMIN-002 | Expanded admin (role/permission editing) |
 | CRM-REPORT-002 | Richer reports (SLA breach trends, per-period) |
 
+### Approved post-P1 additions (from full feature-catalog gap analysis, `gap-analysis.md`)
+
+| ID | Requirement |
+|----|-------------|
+| CRM-KB-002 | KB search |
+| CRM-TICKET-003 | Ticket category field |
+| CRM-CUSTOMER-003 | Customer interaction-history view |
+| CRM-REPORT-003 | Aggregate CSAT + agent-performance reports |
+| CRM-AI-003 | AI ticket summary |
+| CRM-AI-004 | AI-suggested KB articles |
+| CRM-SLA-ESCALATE-001 | SLA escalation sweep |
+| CRM-NOTIFY-001 | In-app notification badge |
+| CRM-INTEGRATION-001 | P2 notification adapter (interface + mocks) |
+| CRM-INTEGRATION-002 | P2 ERP adapter (interface + mock) |
+| CRM-SLA-CONFIG-001 | Admin-editable SLA configuration — Not Started |
+| CRM-CUSTOMER-004 | Customer notes — Not Started |
+
 ### P2 — do not let these consume the deadline
 
 Real WhatsApp/SMS/ERP providers, real-time chat infra, complex branding

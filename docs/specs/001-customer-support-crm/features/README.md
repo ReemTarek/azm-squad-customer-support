@@ -20,7 +20,18 @@ complement (not replace) the project-level `spec.md`,
 | [11](11-responsive-ui.md) | Responsive UI | CRM-UI-001 |
 | [12](12-validation-error-handling.md) | Validation & error handling | CRM-VALID-001 |
 | [13](13-integration-adapters.md) | External integration adapters (P2) | none numbered — see gap-analysis.md |
+| [14](14-post-p1-enhancements.md) | Post-P1 enhancements (10 items) | CRM-KB-002, CRM-TICKET-003, CRM-CUSTOMER-003, CRM-REPORT-003, CRM-AI-003, CRM-AI-004, CRM-SLA-ESCALATE-001, CRM-NOTIFY-001, CRM-INTEGRATION-001/002 |
+| [15](15-sla-configuration.md) | Admin-editable SLA configuration | CRM-SLA-CONFIG-001 |
+| [16](16-customer-notes.md) | Customer notes | CRM-CUSTOMER-004 |
 
-All 12 are Done as of this writing. 01-database.md records one
-deliberate deviation from the original wording of CRM-DB-001: the app
-runs on SQLite, not SQL Server, by final decision — not a pending item.
+01-14 are Done. 01-database.md records one deliberate deviation from
+the original wording of CRM-DB-001: the app runs on SQLite, not SQL
+Server, by final decision — not a pending item. 15-16 are approved but
+**Not Started** (see `implementation-plan.md` TASK-037/038).
+
+Four further items were discussed but are **not approved** — specs
+exist only to support that decision, not as a build commitment:
+[multi-department/branch](discussion-multi-department-branch.md),
+[custom branding](discussion-custom-branding.md),
+[AI chatbot](discussion-ai-chatbot.md),
+[real communication providers](discussion-real-communication-providers.md).
