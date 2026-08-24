@@ -53,7 +53,7 @@ does not replace reading the file.
 |---|---|---|
 | `.auth-page` | `min-vh-100 d-flex align-items-center justify-content-center bg-light` | |
 | `.auth-form` | `card p-4 shadow-sm` | Keep a small custom rule for its fixed width: `.auth-form { width: 320px; }` — Bootstrap has no "320px" utility. |
-| `.auth-form label`, `.entity-form label`, `.ticket-controls label` (label wrapping input) | Restructure to Bootstrap's real form pattern: `<div className="mb-3"><label className="form-label">Text</label><input className="form-control" .../></div>` | This is a structural change (label and input become siblings, not nested) — apply it everywhere a label currently wraps its input. |
+| `.auth-form label`, `.entity-form label`, `.ticket-controls label` (label wrapping input) | Restructure to Bootstrap's real form pattern **with an explicit `htmlFor`/`id` pairing**: `<div className="mb-3"><label className="form-label" htmlFor="<unique-id>">Text</label><input id="<unique-id>" className="form-control" .../></div>` | This is a structural change (label and input become siblings, not nested) — apply it everywhere a label currently wraps its input. **Added after Task 3's review** (2026-08-24): the nested pattern gave an implicit label/input association for free; the sibling pattern loses it unless `htmlFor`/`id` are added explicitly — without them, clicking the label text no longer focuses the input and screen readers lose the association. Pick a unique, stable id per field (e.g. derived from the field's name/purpose, unique within the page). Task 3 (auth pages) shipped without this pairing and was not reopened to retrofit it (tracked as a parked minor finding) — every task from Task 4 onward must include it. |
 | `.form-error` | `alert alert-danger` (keep existing `role="alert"`) | |
 | `.form-hint` | `form-text text-muted` | |
 | `.form-success` | `alert alert-success` | |
@@ -508,7 +508,9 @@ since it touches the largest number of Style Guide rows.
 - [ ] **Step 2: Apply the Style Guide mapping to each file**
 
 Every label/input pair → the same `mb-3`/`form-label`/`form-control`
-restructure as Task 3. Every checkbox+label (e.g. the internal-note
+restructure as Task 3, **including the `htmlFor`/`id` pairing added to
+the Style Guide after Task 3's review** — Task 3 shipped without it,
+this task must not repeat that gap. Every checkbox+label (e.g. the internal-note
 checkbox on the ticket reply composer) → the `form-check` pattern.
 Ticket meta line → `d-flex flex-wrap gap-4 text-secondary mb-3`.
 Ticket controls (status/assign dropdowns) →
