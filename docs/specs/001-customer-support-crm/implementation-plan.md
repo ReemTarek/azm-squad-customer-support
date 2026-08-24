@@ -189,7 +189,7 @@ work proceeds — this file is the live source of truth for progress.
 | ID | Requirement | Goal |
 |---|---|---|
 | TASK-021 | CRM-TASK-002 | Agent tasks/reminders on a ticket — **Done**, verified (curl + Playwright): create/list/complete tasks scoped to a ticket, Agent restricted to their own tasks, Customer blocked (403) |
-| TASK-022 | CRM-QUICKREPLY-002 | Saved quick-reply templates |
+| TASK-022 | CRM-QUICKREPLY-002 | Saved quick-reply templates — **Done**, verified (curl + Playwright): create/list/delete quick replies, Customer blocked (403), inserted into a ticket's reply box from the detail page |
 | TASK-023 | CRM-ASSIGN-002 | Automatic assignment (least-loaded agent) |
 | TASK-024 | CRM-CSAT-002 | Customer feedback rating after resolution |
 | TASK-025 | CRM-AUDIT-002 | Audit log UI |

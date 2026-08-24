@@ -378,6 +378,15 @@
   border-bottom: 1px solid #eee;
 }
 
+.quick-replies-list {
+  margin-top: 1.5rem;
+}
+
+.quick-replies-list li {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
 .kb-category {
   color: #777;
   font-size: 0.8rem;
@@ -390,6 +399,19 @@
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 600;
+}
+
+.reply-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.reply-toolbar select {
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
 }
 
 .secondary-button {

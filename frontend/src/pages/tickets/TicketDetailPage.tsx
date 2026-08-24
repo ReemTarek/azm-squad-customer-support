@@ -14,6 +14,7 @@ import {
 import type { TicketStatus } from "../../lib/ticketsApi";
 import { listUsersByRole } from "../../lib/usersApi";
 import { createTask, listTasks, updateTask } from "../../lib/tasksApi";
+import { listQuickReplies } from "../../lib/quickRepliesApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
 import { useAuth } from "../../auth/AuthContext";
 import { SlaBadge } from "../../components/SlaBadge";
@@ -32,6 +33,7 @@ export function TicketDetailPage() {
   const historyQuery = useQuery({ queryKey: ["ticket", id, "history"], queryFn: () => listHistory(id!), enabled: Boolean(id) });
   const agentsQuery = useQuery({ queryKey: ["agents"], queryFn: () => listUsersByRole("Agent"), enabled: canAssign });
   const tasksQuery = useQuery({ queryKey: ["ticket", id, "tasks"], queryFn: () => listTasks(id!), enabled: Boolean(id) && canManage });
+  const quickRepliesQuery = useQuery({ queryKey: ["quick-replies"], queryFn: listQuickReplies, enabled: canManage });
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
@@ -161,14 +163,29 @@ export function TicketDetailPage() {
             <textarea value={replyBody} onChange={(e) => setReplyBody(e.target.value)} required rows={3} />
           </label>
           {canManage && (
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={() => suggestMutation.mutate()}
-              disabled={suggestMutation.isPending}
-            >
-              {suggestMutation.isPending ? "Asking Gemini…" : "Suggest Reply"}
-            </button>
+            <div className="reply-toolbar">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => suggestMutation.mutate()}
+                disabled={suggestMutation.isPending}
+              >
+                {suggestMutation.isPending ? "Asking Gemini…" : "Suggest Reply"}
+              </button>
+              <select
+                aria-label="Insert quick reply"
+                value=""
+                onChange={(e) => {
+                  const qr = quickRepliesQuery.data?.find((q) => q.id === e.target.value);
+                  if (qr) setReplyBody((prev) => (prev ? `${prev}\n${qr.body}` : qr.body));
+                }}
+              >
+                <option value="">Insert quick reply…</option>
+                {quickRepliesQuery.data?.map((qr) => (
+                  <option key={qr.id} value={qr.id}>{qr.title}</option>
+                ))}
+              </select>
+            </div>
           )}
           {canManage && (
             <label className="checkbox-label">

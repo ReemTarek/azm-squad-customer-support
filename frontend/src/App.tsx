@@ -12,6 +12,7 @@ import { KbListPage } from "./pages/kb/KbListPage";
 import { KbFormPage } from "./pages/kb/KbFormPage";
 import { KbDetailPage } from "./pages/kb/KbDetailPage";
 import { ReportsPage } from "./pages/ReportsPage";
+import { QuickRepliesPage } from "./pages/QuickRepliesPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -72,6 +73,14 @@ function App() {
             element={
               <RequireAuth roles={["Admin", "Manager"]}>
                 <ReportsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/quick-replies"
+            element={
+              <RequireAuth roles={["Admin", "Manager", "Agent"]}>
+                <QuickRepliesPage />
               </RequireAuth>
             }
           />
