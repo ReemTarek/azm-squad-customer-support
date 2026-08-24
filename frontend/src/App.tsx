@@ -8,6 +8,9 @@ import { CustomerDetailPage } from "./pages/customers/CustomerDetailPage";
 import { TicketsListPage } from "./pages/tickets/TicketsListPage";
 import { TicketFormPage } from "./pages/tickets/TicketFormPage";
 import { TicketDetailPage } from "./pages/tickets/TicketDetailPage";
+import { KbListPage } from "./pages/kb/KbListPage";
+import { KbFormPage } from "./pages/kb/KbFormPage";
+import { KbDetailPage } from "./pages/kb/KbDetailPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -53,6 +56,16 @@ function App() {
           <Route path="/tickets" element={<TicketsListPage />} />
           <Route path="/tickets/new" element={<TicketFormPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
+          <Route path="/kb" element={<KbListPage />} />
+          <Route
+            path="/kb/new"
+            element={
+              <RequireAuth roles={["Admin", "Agent"]}>
+                <KbFormPage />
+              </RequireAuth>
+            }
+          />
+          <Route path="/kb/:id" element={<KbDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

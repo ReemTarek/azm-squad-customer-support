@@ -5,6 +5,7 @@ import authRouter from "./routes/auth";
 import usersRouter from "./routes/users";
 import customersRouter from "./routes/customers";
 import ticketsRouter from "./routes/tickets";
+import kbRouter from "./routes/kb";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -17,6 +18,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/tickets", ticketsRouter);
+app.use("/api/kb", kbRouter);
 
 app.use(errorHandler);
 

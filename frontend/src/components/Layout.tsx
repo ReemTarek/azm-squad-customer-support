@@ -14,6 +14,7 @@ export function Layout() {
             <Link to="/customers">Customers</Link>
           )}
           <Link to="/tickets">Tickets</Link>
+          <Link to="/kb">Knowledge Base</Link>
         </nav>
         <div className="app-header-user">
           <span>{user.name} ({user.role})</span>

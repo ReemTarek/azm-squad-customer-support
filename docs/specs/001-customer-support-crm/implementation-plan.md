@@ -114,7 +114,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `/kb` routes per api-contract.md.
 **Frontend:** KB list/search (all roles), article detail, create/edit form (Agent/Admin).
 **Verification:** Create unpublished article → not visible to Customer; publish → visible.
-**Status:** Not Started
+**Status:** Done — verified via curl (unpublished hidden from list + direct GET 404 for Customer) and Playwright (Agent creates draft → publishes → Customer sees it in KB list, no "New Article" button for Customer).
 
 ### TASK-013
 **Requirement:** CRM-AI-001

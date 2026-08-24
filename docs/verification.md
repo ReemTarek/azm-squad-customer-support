@@ -19,7 +19,7 @@ written after a real check, not because code exists.
 | SLA breach | Backdated ticket shows breached | PASS |
 | Unassigned agent blocked | Non-assigned agent PATCHes a ticket → 403 | PASS |
 | Customer cannot manage ticket | Customer PATCHes a ticket → 403 | PASS |
-| KB visibility | Unpublished hidden from Customer | Pending |
+| KB visibility | Unpublished hidden from Customer | PASS — curl (list + direct 404) and Playwright |
 | Gemini suggest-reply | Real suggestion returned on live ticket | Pending |
 | Gemini disabled | No API key → 503, server stays up | Pending |
 | Reporting accuracy | Report numbers match manual DB count | Pending |
