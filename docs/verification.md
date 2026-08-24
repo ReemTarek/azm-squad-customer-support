@@ -6,10 +6,10 @@ written after a real check, not because code exists.
 | Feature | Verification | Result |
 |---|---|---|
 | DB connectivity (Windows Auth) | Prisma migrate against real SQL Server | BLOCKED — TCP/IP disabled on local instance, see debugging-notes.md. Using SQLite temporarily; must revisit before submission |
-| Registration/Login | Register + login via UI for each role | Pending |
-| Invalid credentials | Wrong password → 401, no token | Pending |
-| Missing/expired JWT | Protected route without/with expired token → 401 | Pending |
-| RBAC | Agent hits Admin-only route → 403 | Pending |
+| Registration/Login | Register + login via UI (Customer); Admin login via seed | PASS — Playwright screenshots + curl |
+| Invalid credentials | Wrong password → 401, no token; UI shows inline error | PASS |
+| Missing/expired JWT | Protected route without/malformed token → 401 | PASS |
+| RBAC | Customer token hits Admin-only /api/users → 403; Admin succeeds | PASS |
 | Customer creation | UI → API → SQL Server row | Pending |
 | Ticket creation | UI → API → DB → visible in agent list | Pending |
 | Cross-customer ticket access | Customer requests another customer's ticket → 403 | Pending |

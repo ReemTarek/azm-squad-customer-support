@@ -33,7 +33,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `POST /auth/register`, `/login`, `/refresh`; bcrypt hashing; JWT sign/verify helpers.
 **Frontend:** Login page, register page (or seed-only for staff — Customer self-registers), token storage, axios/fetch wrapper attaching bearer token and refreshing on 401.
 **Verification:** Register a customer via UI → login → see authenticated dashboard shell. Invalid credentials → clear error, no token issued.
-**Status:** Not Started
+**Status:** Done — verified via Playwright against the live dev servers: unauthenticated visit redirects to /login; register → lands on dashboard shell with correct name/role; logout → login with same credentials → dashboard again; wrong password → inline "Invalid email or password" error, stays on /login. Also curl-verified: duplicate email → 409, missing fields → 400 with field details, refresh token rotation works, garbage refresh token → 401.
 
 ### TASK-004
 **Requirement:** CRM-AUTHZ-001
@@ -42,7 +42,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `requireAuth` + `requireRole([...])` middleware; apply across all route files as they're built (this task establishes the pattern + a couple of test routes).
 **Frontend:** route guards redirect unauthenticated/wrong-role users.
 **Verification:** Agent token hitting an Admin-only route → 403. No token → 401. Expired token → 401.
-**Status:** Not Started
+**Status:** Done — `requireAuth`/`requireRole` established and proven on `/api/users` routes: no token → 401, garbage token → 401, Customer token on Admin-only `GET /users` → 403, Customer token on own `/users/me` → 200, Admin token can list users and create an Agent account. Pattern will be reused as-is on tickets/KB/reports routes.
 
 ### TASK-005
 **Requirement:** CRM-CUSTOMER-001
