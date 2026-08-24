@@ -63,13 +63,13 @@ coverage of every field combination, load/performance testing.
 
 ## Acceptance criteria
 
-- [ ] `npm test` in `backend/` runs the suite against `test.db`
+- [x] `npm test` in `backend/` runs the suite against `test.db`
       without touching `dev.db`.
-- [ ] Every case above passes.
-- [ ] Deleting/breaking the department-scoping fix from TASK-042 makes
+- [x] Every case above passes.
+- [x] Deleting/breaking the department-scoping fix from TASK-042 makes
       the org-scoping test fail (proves the test is real, not a
       tautology) — checked once during development, not left in place.
-- [ ] Suite runs standalone (`npm install && npx prisma migrate deploy
+- [x] Suite runs standalone (`npm install && npx prisma migrate deploy
       --schema ... && npm test` from a clean clone) without depending
       on any state from manual dev-server usage.
 
@@ -86,4 +86,4 @@ TASK-042 fix and confirm the org-scoping test fails, then re-apply and
 confirm it passes again (proves the test actually exercises the
 boundary, not just that the endpoint returns 200).
 
-## Status: Not Started
+## Status: Done

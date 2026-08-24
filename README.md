@@ -39,6 +39,17 @@ cp .env.example .env
 npm run dev              # http://localhost:5173
 ```
 
+## Running tests
+
+```bash
+cd backend
+npm test   # runs the Vitest+Supertest integration suite against an isolated test.db
+```
+
+Covers auth, RBAC/ownership boundaries (customer, agent, department
+scoping), SLA due-date computation, and the shared validation error
+contract — see `docs/specs/001-customer-support-crm/features/19-backend-integration-tests.md`.
+
 ## Seeded login
 
 | Role  | Email                | Password    |

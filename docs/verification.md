@@ -31,6 +31,7 @@ written after a real check, not because code exists.
 | Duplicate uniqueness | Duplicate email on register/create → 409 | PASS |
 | Invalid role assignment | Assign ticket to a Customer (not Agent) → 400 | PASS |
 | Full demo path | End-to-end run per demo-walkthrough.md | PASS — all 15 steps via Playwright, 0 console errors |
+| Automated test suite | npm test in backend/ — 23 tests | PASS |
 
 ## P1
 
