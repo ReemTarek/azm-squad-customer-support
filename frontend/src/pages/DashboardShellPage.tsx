@@ -1,20 +1,12 @@
 import { useAuth } from "../auth/AuthContext";
 
 export function DashboardShellPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div className="dashboard-shell">
-      <header>
-        <h1>AZM Support CRM</h1>
-        <div>
-          <span>{user?.name} ({user?.role})</span>
-          <button onClick={logout}>Log out</button>
-        </div>
-      </header>
-      <main>
-        <p>Authenticated dashboard shell — role-specific views land here in later tasks.</p>
-      </main>
+    <div className="page">
+      <h1>Welcome, {user?.name}</h1>
+      <p>Role-specific dashboard views land here in later tasks.</p>
     </div>
   );
 }

@@ -10,9 +10,9 @@ written after a real check, not because code exists.
 | Invalid credentials | Wrong password → 401, no token; UI shows inline error | PASS |
 | Missing/expired JWT | Protected route without/malformed token → 401 | PASS |
 | RBAC | Customer token hits Admin-only /api/users → 403; Admin succeeds | PASS |
-| Customer creation | UI → API → SQL Server row | Pending |
+| Customer creation | UI → API → DB row (SQLite for now, see decisions.md) | PASS — Playwright screenshots |
 | Ticket creation | UI → API → DB → visible in agent list | Pending |
-| Cross-customer ticket access | Customer requests another customer's ticket → 403 | Pending |
+| Cross-customer record access | Customer requests another customer's record → 403 | PASS (customers endpoint; ticket case pending TASK-006) |
 | Internal note isolation | Agent's internal note hidden from Customer | Pending |
 | Status history | Status change recorded and displayed | Pending |
 | Manual assignment | Assign → appears on agent dashboard | Pending |

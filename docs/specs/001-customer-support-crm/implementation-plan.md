@@ -51,7 +51,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `/customers` CRUD per api-contract.md.
 **Frontend:** Customer list page, create/edit form, customer detail page.
 **Verification:** Create a customer via UI → confirm row in SQL Server → appears in list.
-**Status:** Not Started
+**Status:** Done — verified via Playwright: Admin creates a customer through the UI → lands on detail page → edits company field → saved, persists on reload; new customer appears in the list. Backend cross-customer ownership check also curl-verified (Customer viewing another customer's record → 403, own record → 200).
 
 ### TASK-006
 **Requirement:** CRM-TICKET-001
