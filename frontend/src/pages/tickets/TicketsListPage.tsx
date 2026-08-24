@@ -41,6 +41,7 @@ export function TicketsListPage() {
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load tickets.</p>}
       {tickets && (
+        <div className="table-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -64,6 +65,7 @@ export function TicketsListPage() {
             )}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

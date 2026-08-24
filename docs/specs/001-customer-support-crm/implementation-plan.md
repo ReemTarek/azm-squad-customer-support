@@ -158,7 +158,7 @@ work proceeds — this file is the live source of truth for progress.
 **Dependencies:** TASK-011, TASK-014, TASK-015
 **Frontend:** Responsive layout check/fixes (mobile/tablet/desktop) on dashboard, ticket detail, portal, reports.
 **Verification:** Manual check at 3 breakpoints per screen; no horizontal scroll/overlap.
-**Status:** Not Started
+**Status:** Done — Playwright checked scrollWidth vs clientWidth at 375px/768px/1440px across dashboard, tickets, customers, reports. Found and fixed one real issue: the header didn't wrap on narrow screens, pushing nav off-canvas (375px page scrollWidth was 657px). Added flex-wrap to header/nav/user-menu and an overflow-x:auto wrapper around data tables (min-width 480px) so wide tables scroll internally instead of the page. Re-checked: 0px horizontal overflow on all 12 combinations.
 
 ### TASK-018
 **Requirement:** CRM-VALID-001

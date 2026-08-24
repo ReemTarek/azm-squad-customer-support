@@ -55,3 +55,27 @@ available ... use models/gemini-3.6-flash`.
 — got a real, contextually relevant draft reply back (correctly
 referencing the internal escalation note as context for tone, without
 leaking it).
+
+## Page overflowed horizontally at mobile width (TASK-017)
+
+**Symptom:** at a 375px viewport, `document.documentElement.scrollWidth`
+was 657px on every authenticated page (dashboard, tickets, customers,
+reports) — a horizontal scrollbar on the whole page.
+
+**Reproduction:** Playwright script comparing `scrollWidth` vs
+`clientWidth` at 375/768/1440px across the 4 main routes; same 657px
+overflow on all 4 pointed at something shared across all of them.
+
+**Root cause:** `.app-header` was a non-wrapping flex row (brand + nav
+links + language switcher + user info + logout button); at narrow
+widths those items don't fit on one line but had no `flex-wrap`, so
+they overflowed instead of wrapping.
+
+**Fix:** added `flex-wrap: wrap` to `.app-header`, `.app-header nav`,
+and `.app-header-user`, plus a narrower gap/padding under a 640px media
+query. Also wrapped both data tables in an `overflow-x: auto`
+container (`min-width: 480px` on the table itself) so a wide table
+scrolls internally rather than widening the page.
+
+**How verified:** re-ran the same Playwright check — 0px overflow on
+all 12 combinations (4 pages × 3 breakpoints).

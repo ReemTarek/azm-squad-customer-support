@@ -24,5 +24,6 @@ written after a real check, not because code exists.
 | Gemini disabled | No API key → 503, server stays up | PASS |
 | Reporting accuracy | Report numbers match manual DB count | PASS — manual Prisma groupBy matched exactly; Agent role blocked (403) |
 | Arabic/RTL | Locale switch flips layout + strings | PASS — Playwright, dir flips ltr↔rtl, nav/auth/dashboard/tickets translated |
+| Responsive layout | No horizontal overflow at 375/768/1440px | PASS — 12/12 combinations (4 pages × 3 widths), 1 bug found+fixed (header wrap) |
 | Validation errors | Bad input on write endpoints → 400 w/ details | Pending |
 | Full demo path | End-to-end run per demo-walkthrough.md | Pending |

@@ -26,6 +26,7 @@ export function CustomersListPage() {
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load customers.</p>}
       {customers && (
+        <div className="table-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -49,6 +50,7 @@ export function CustomersListPage() {
             )}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
