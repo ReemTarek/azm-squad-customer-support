@@ -401,6 +401,24 @@
   font-weight: 600;
 }
 
+.ai-assist-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-assist-result {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f0f4ff;
+  border-radius: 6px;
+  max-width: 600px;
+  list-style: none;
+}
+
+.ai-assist-result li {
+  margin-bottom: 0.25rem;
+}
+
 .reply-toolbar {
   display: flex;
   gap: 0.5rem;

@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeSlaDueDates, computeSlaState } from "../services/sla";
-import { suggestReply } from "../services/gemini";
+import { suggestReply, summarizeTicket, suggestRelevantArticleIds } from "../services/gemini";
 import {
   assignTicketSchema,
   createMessageSchema,
@@ -239,6 +239,61 @@ router.post("/:id/suggest-reply", requireAuth, requireRole("Admin", "Manager", "
     res.json({ reply });
   } catch (err) {
     console.error("Gemini suggest-reply failed:", err);
+    throw Errors.aiUnavailable();
+  }
+});
+
+router.get("/:id/summary", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const id = String(req.params.id);
+  const ticket = await prisma.ticket.findUnique({ where: { id } });
+  if (!ticket) throw Errors.notFound("Ticket not found");
+
+  const messages = await prisma.ticketMessage.findMany({
+    where: { ticketId: id },
+    orderBy: { createdAt: "asc" },
+    include: { author: { select: { role: true } } },
+  });
+
+  try {
+    const summary = await summarizeTicket(
+      ticket.subject,
+      ticket.priority,
+      messages.map((m) => ({ authorRole: m.author.role, body: m.body, isInternalNote: m.isInternalNote }))
+    );
+    res.json({ summary });
+  } catch (err) {
+    console.error("Gemini summarize failed:", err);
+    throw Errors.aiUnavailable();
+  }
+});
+
+router.get("/:id/suggested-articles", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const id = String(req.params.id);
+  const ticket = await prisma.ticket.findUnique({ where: { id } });
+  if (!ticket) throw Errors.notFound("Ticket not found");
+
+  const [messages, articles] = await Promise.all([
+    prisma.ticketMessage.findMany({
+      where: { ticketId: id },
+      orderBy: { createdAt: "asc" },
+      include: { author: { select: { role: true } } },
+    }),
+    prisma.knowledgeBaseArticle.findMany({
+      where: { published: true },
+      select: { id: true, title: true, category: true },
+    }),
+  ]);
+
+  try {
+    const ids = await suggestRelevantArticleIds(
+      ticket.subject,
+      messages.map((m) => ({ authorRole: m.author.role, body: m.body, isInternalNote: m.isInternalNote })),
+      articles
+    );
+    const suggested = articles.filter((a) => ids.includes(a.id));
+    res.json({ articles: suggested });
+  } catch (err) {
+    console.error("Gemini suggested-articles failed:", err);
     throw Errors.aiUnavailable();
   }
 });

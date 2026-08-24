@@ -1,12 +1,14 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignTicket,
   autoAssignTicket,
   getFeedback,
+  getSuggestedArticles,
   getTicket,
+  getTicketSummary,
   listHistory,
   listMessages,
   postMessage,
@@ -68,6 +70,16 @@ export function TicketDetailPage() {
   const suggestMutation = useMutation({
     mutationFn: () => suggestReply(id!),
     onSuccess: (reply) => setReplyBody(reply),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  const summaryMutation = useMutation({
+    mutationFn: () => getTicketSummary(id!),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  const suggestedArticlesMutation = useMutation({
+    mutationFn: () => getSuggestedArticles(id!),
     onError: (err) => setActionError(extractApiErrorMessage(err)),
   });
 
@@ -180,6 +192,39 @@ export function TicketDetailPage() {
             </button>
           )}
         </div>
+      )}
+
+      {canManage && (
+        <section>
+          <h2>AI Assist</h2>
+          <div className="ai-assist-row">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => summaryMutation.mutate()}
+              disabled={summaryMutation.isPending}
+            >
+              {summaryMutation.isPending ? "Summarizing…" : "Summarize Ticket"}
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => suggestedArticlesMutation.mutate()}
+              disabled={suggestedArticlesMutation.isPending}
+            >
+              {suggestedArticlesMutation.isPending ? "Searching…" : "Suggest Articles"}
+            </button>
+          </div>
+          {summaryMutation.data && <p className="ai-assist-result">{summaryMutation.data}</p>}
+          {suggestedArticlesMutation.data && (
+            <ul className="ai-assist-result">
+              {suggestedArticlesMutation.data.map((a) => (
+                <li key={a.id}><Link to={`/kb/${a.id}`}>{a.title}</Link> ({a.category})</li>
+              ))}
+              {suggestedArticlesMutation.data.length === 0 && <li>No relevant articles found.</li>}
+            </ul>
+          )}
+        </section>
       )}
 
       <section>

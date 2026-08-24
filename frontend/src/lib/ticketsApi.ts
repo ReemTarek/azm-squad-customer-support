@@ -80,6 +80,22 @@ export async function suggestReply(ticketId: string) {
   return data.reply;
 }
 
+export async function getTicketSummary(ticketId: string) {
+  const { data } = await apiClient.get<{ summary: string }>(`/tickets/${ticketId}/summary`);
+  return data.summary;
+}
+
+export interface SuggestedArticle {
+  id: string;
+  title: string;
+  category: string;
+}
+
+export async function getSuggestedArticles(ticketId: string) {
+  const { data } = await apiClient.get<{ articles: SuggestedArticle[] }>(`/tickets/${ticketId}/suggested-articles`);
+  return data.articles;
+}
+
 export async function postMessage(ticketId: string, input: { body: string; isInternalNote?: boolean }) {
   const { data } = await apiClient.post<{ message: TicketMessage }>(`/tickets/${ticketId}/messages`, input);
   return data.message;

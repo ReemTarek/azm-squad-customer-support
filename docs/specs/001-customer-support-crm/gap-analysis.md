@@ -89,6 +89,13 @@ Small high-value fixes: **Done**, all verified via curl + Playwright:
 - Aggregate CSAT + agent-performance report cards (`GET
   /reports/trends` extended, cross-checked against manual DB queries)
 
+AI extensions: **Done**, verified against the real Gemini API:
+- Ticket summary (`GET /tickets/:id/summary`, "Summarize Ticket" button)
+- AI-suggested KB articles (`GET /tickets/:id/suggested-articles`,
+  "Suggest Articles" button) — correctly returns the password-reset
+  article for a login-related ticket, and correctly returns none for
+  an unrelated ticket (verified both directions)
+
 ## Recommendation
 
 Small, high-value, low-risk additions (fit the existing architecture,
