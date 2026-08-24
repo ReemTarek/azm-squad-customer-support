@@ -19,6 +19,7 @@ complement (not replace) the project-level `spec.md`,
 | [10](10-i18n.md) | Arabic/English i18n | CRM-I18N-001 |
 | [11](11-responsive-ui.md) | Responsive UI | CRM-UI-001 |
 | [12](12-validation-error-handling.md) | Validation & error handling | CRM-VALID-001 |
+| [13](13-integration-adapters.md) | External integration adapters (P2) | none numbered — see gap-analysis.md |
 
 All 12 are Done as of this writing. 01-database.md records one
 deliberate deviation from the original wording of CRM-DB-001: the app

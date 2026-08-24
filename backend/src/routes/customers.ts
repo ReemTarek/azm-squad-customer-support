@@ -5,6 +5,7 @@ import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { createCustomerSchema, updateCustomerSchema } from "../validation/customers.schema";
 import { writeAuditLog } from "../lib/audit";
+import { erpClient } from "../integrations/erpClient";
 
 const router = Router();
 
@@ -61,6 +62,12 @@ router.post("/", requireAuth, requireRole("Admin", "Agent"), async (req, res) =>
   });
 
   await writeAuditLog(req.user!.id, "customer.create", "User", user.id, { email: user.email });
+
+  // Demonstrates the ERP integration boundary (mock client — see integrations/erpClient.ts).
+  await erpClient.syncCustomer({ id: user.id, email: user.email, name: user.name }).catch((err) =>
+    console.error("ERP sync failed (non-fatal):", err)
+  );
+
   res.status(201).json({ customer: toPublicCustomer(user) });
 });
 

@@ -14,6 +14,7 @@ import {
 import { createTaskSchema, updateTaskSchema } from "../validation/tasks.schema";
 import { createFeedbackSchema } from "../validation/feedback.schema";
 import { writeAuditLog } from "../lib/audit";
+import { notifyCustomer } from "../integrations/notificationDispatcher";
 import type { Ticket } from "@prisma/client";
 
 const router = Router();
@@ -142,6 +143,20 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Manager", "Agent"), asyn
         changedById: req.user!.id,
       },
     });
+
+    if (body.status === "Resolved" || body.status === "Closed") {
+      const customer = await prisma.user.findUnique({ where: { id: ticket.customerId } });
+      if (customer) {
+        // Demonstrates the notification integration boundary (mock channel — see integrations/).
+        await notifyCustomer(
+          "email",
+          customer.email,
+          "Your ticket has been resolved",
+          `Your ticket "${ticket.subject}" is now ${body.status}.`,
+          req.user!.id
+        ).catch((err) => console.error("Notification dispatch failed (non-fatal):", err));
+      }
+    }
   }
 
   res.json({ ticket: toTicketDto(ticket) });

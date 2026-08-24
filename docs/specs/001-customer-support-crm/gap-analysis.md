@@ -107,6 +107,14 @@ SLA escalation + alerts: **Done**, verified via curl + Playwright:
   Header badge next to "Tickets" nav, refetches every 30s.
 - "Escalate Overdue Tickets" button on the Reports page.
 
+P2 adapter interfaces: **Done** (architecture only, per the brief's
+own P2 guidance) — see
+`features/13-integration-adapters.md` for full detail. Email/SMS/
+WhatsApp `NotificationChannel` interface + mock implementations, ERP
+`ErpClient` interface + mock; two real demonstrated call sites (ticket
+resolution → mock email + audit log entry, customer creation → mock
+ERP sync). No real provider credentials, as instructed.
+
 ## Recommendation
 
 Small, high-value, low-risk additions (fit the existing architecture,
