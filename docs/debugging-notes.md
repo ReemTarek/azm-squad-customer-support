@@ -105,6 +105,38 @@ not-null filter when there isn't one (Admin/unscoped case).
 `byDepartment` now shows only Department A; Admin's still shows both
 departments (no regression to the unscoped case).
 
+## Real SMTP credentials added, but ticket-resolved emails still didn't send (2026-08-24)
+
+**Symptom:** after the user filled in `SMTP_USER`/`SMTP_PASS` in
+`backend/.env`, resolving a ticket still produced no email, with no
+error visible anywhere.
+
+**Reproduction:** a standalone script (`import "dotenv/config"` +
+`nodemailer.createTransport(...).verify()`) confirmed the credentials
+themselves were valid (`VERIFY OK: true`). Separately, PATCHing a real
+ticket to `Resolved` through the **running** backend returned in ~64ms
+— far too fast for a real SMTP handshake, and consistent with
+`smtpEmailChannel.ts`'s `[email:unconfigured]` fallback branch, which
+is synchronous and near-instant.
+
+**Root cause:** `SmtpEmailChannel`'s `nodemailer` transporter is built
+once, from `env.smtpUser`/`env.smtpPass`, at module load — i.e. once,
+when the backend process starts. `dotenv` only loads `.env` at process
+startup, and `tsx watch` (the `npm run dev` script) restarts on
+source-file changes, not on `.env` changes. The backend process that
+was running when the credentials were added had never restarted, so it
+was still holding the old (blank) `smtpUser`/`smtpPass` in memory —
+silently taking the "unconfigured" no-op branch on every send, with no
+error at all.
+
+**Fix:** none needed in code — stopping and restarting `npm run dev`
+picks up the new `.env` values, since the transporter is (correctly)
+rebuilt from scratch on the next process start.
+
+**How verified:** re-ran the same near-zero-latency PATCH check after
+restarting; a real send now takes a normal SMTP round-trip and a real
+email arrives at the customer's address.
+
 ## Agent got 403 updating "their" ticket during the demo dry run (TASK-020)
 
 **Symptom:** during the full guaranteed-demo-path run, the agent's

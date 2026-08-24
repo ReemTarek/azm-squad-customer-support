@@ -296,15 +296,72 @@ See `features/18-ai-chatbot.md` for full verification detail — both
 the grounded-answer and honest-fallback cases confirmed against the
 real Gemini API, no hallucination observed.
 
-## Decided, Not Building
+## Decided, Not Building — superseded 2026-08-24
 
-- **Custom branding** — user decision to skip (was the lowest-risk
-  discussion item). `features/discussion-custom-branding.md`.
+- ~~**Custom branding** — user decision to skip (was the lowest-risk
+  discussion item). `features/discussion-custom-branding.md`.~~
+  **Reversed 2026-08-24:** the user asked to revisit this. Now
+  scoped and spec'd as `features/28-custom-branding.md` (Round 2,
+  TASK-057). `discussion-custom-branding.md` stays as the honest
+  record of the original decision, not rewritten.
 
 ## Real Communication Providers — credentials pending
 
 Architecture already built (TASK-035/036). Email → Gmail/Google SMTP
-(user to provide an app password); SMS → Twilio; WhatsApp → Meta Cloud
+(user to provide an app password, done 2026-08-24 — real emails now
+send, see `docs/debugging-notes.md` for the stale-dev-server issue
+found and fixed along the way); SMS → Twilio; WhatsApp → Meta Cloud
 API. Directions for obtaining each credential are in
-`features/discussion-real-communication-providers.md`. No code changes
+`features/discussion-real-communication-providers.md`. Formal spec for
+the SMS/WhatsApp implementation: `features/24-real-sms-whatsapp-channels.md`
+(Round 2, TASK-053) — blocked on credentials. No code changes
 until credentials arrive.
+
+## Round 2 — Post-Test-Suite Enhancements
+
+**Date:** 2026-08-24
+**Context:** after the backend integration test suite (TASK-048) shipped,
+the user asked for a fresh review against the full original feature
+catalog. That review found the standing `gap-analysis.md` had gone
+stale (several items it once listed as "not built" were completed in
+later rounds without the doc being updated), one real gap it never
+flagged at all (no staff/user-management UI, no account-deactivation
+capability whatsoever), and two new asks (a Bootstrap-based responsive
+redesign, an AI usage dashboard) plus one reversed decision (custom
+branding, previously declined, now approved). Each item below has its
+own spec, written and reviewed before this plan, per this project's
+spec-first discipline.
+
+**Build order** (user-confirmed 2026-08-24): Bootstrap redesign first
+(foundation everything else's UI builds on), then the smaller/highest-
+value items, then the two largest lifts (live chat, custom branding)
+last. SMS/WhatsApp stays blocked on credentials regardless of order.
+
+| ID | Item | Spec | Status |
+|---|---|---|---|
+| TASK-048 | Backend integration test suite | `features/19-backend-integration-tests.md` | Done |
+| TASK-049 | Bootstrap responsive redesign | `features/20-bootstrap-responsive-redesign.md` | Not Started |
+| TASK-050 | Staff & user management UI (+ deactivation) | `features/21-staff-user-management.md` | Not Started |
+| TASK-051 | Customer/ticket attachments | `features/22-attachments.md` | Not Started |
+| TASK-052 | New-message customer notifications | `features/23-new-message-notifications.md` | Not Started |
+| TASK-053 | Real SMS (Twilio) + WhatsApp (Meta) channels | `features/24-real-sms-whatsapp-channels.md` | Not Started — blocked on credentials |
+| TASK-054 | Live chat (agent ↔ customer) | `features/25-live-chat.md` | Not Started |
+| TASK-055 | AI automatic ticket categorization | `features/26-ai-auto-categorization.md` | Not Started |
+| TASK-056 | AI usage dashboard | `features/27-ai-usage-dashboard.md` | Not Started |
+| TASK-057 | Custom branding (reverses the earlier decline) | `features/28-custom-branding.md` | Not Started |
+
+**Explicitly out of this round, per user decision (2026-08-24):**
+- **ERP integration** — no target system named; stays a documented,
+  unimplemented adapter interface (`features/13-integration-adapters.md`)
+  until one is.
+- **Web forms** (Communication Channels catalog item) — the user
+  considers the existing in-portal ticket-creation form (already built,
+  `04-ticket-management.md`) to satisfy this; no separate public/
+  anonymous form is being built.
+
+Each item above gets its own `writing-plans`-style step-by-step
+implementation plan (with exact code, immediately before that item is
+executed via `subagent-driven-development`, matching how TASK-048 was
+run) rather than all nine being fully detailed up front — plans are
+more accurate when written against the codebase state at the moment
+of execution, not weeks ahead of it.

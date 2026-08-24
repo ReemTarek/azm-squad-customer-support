@@ -40,13 +40,30 @@ process-gap entry.
 | [16](16-customer-notes.md) | Customer notes | CRM-CUSTOMER-004 | **Before** |
 | [17](17-multi-department-branch.md) | Multi-department/branch (full RBAC) | CRM-ORG-001 | **Before** (design options presented, user chose one, then spec written, then code) |
 | [18](18-ai-chatbot.md) | AI chatbot (full, non-streaming) | CRM-AI-005 | **Before** (same as 17) |
+| [19](19-backend-integration-tests.md) | Backend integration test suite | CRM-TEST-001 | **Before** (spec + `writing-plans` implementation plan written and self-reviewed before any test code, then executed via `subagent-driven-development`) |
+| [20](20-bootstrap-responsive-redesign.md) | Bootstrap responsive redesign | CRM-UI-002 | **Before** |
+| [21](21-staff-user-management.md) | Staff & user management UI | CRM-ADMIN-003 | **Before** |
+| [22](22-attachments.md) | Customer/ticket attachments | CRM-ATTACH-001 | **Before** |
+| [23](23-new-message-notifications.md) | New-message customer notifications | CRM-NOTIFY-002 | **Before** |
+| [24](24-real-sms-whatsapp-channels.md) | Real SMS/WhatsApp channels | CRM-INTEGRATION-003 | **Before** — blocked on credentials |
+| [25](25-live-chat.md) | Live chat (agent ↔ customer) | CRM-LIVECHAT-001 | **Before** |
+| [26](26-ai-auto-categorization.md) | AI automatic ticket categorization | CRM-AI-006 | **Before** |
+| [27](27-ai-usage-dashboard.md) | AI usage dashboard | CRM-AI-007 | **Before** |
+| [28](28-custom-branding.md) | Custom branding | CRM-BRAND-001 | **Before** — reverses the earlier decline below |
 
-All of the above are Done, except 01-database.md which records one
-deliberate deviation from the original wording of CRM-DB-001 (SQLite
-instead of SQL Server, by final user decision — not a pending item).
+01-18 are Done, except 01-database.md which records one deliberate
+deviation from the original wording of CRM-DB-001 (SQLite instead of
+SQL Server, by final user decision — not a pending item). 19 is Done.
+20-28 ("Round 2", see `implementation-plan.md`) are Not Started as of
+2026-08-24 — each is spec'd ahead of any code, following this
+project's spec-first discipline throughout.
 
-[Custom branding](discussion-custom-branding.md) was discussed and
-**decided against** — user chose to skip it.
+[Custom branding](discussion-custom-branding.md) was originally
+discussed and **decided against** — see that file for the original
+reasoning. **Reversed 2026-08-24:** the user asked to revisit it; now
+spec'd as [28](28-custom-branding.md).
 [Real communication providers](discussion-real-communication-providers.md)
 are approved (email/SMS/WhatsApp) pending credentials — see that file
-for how to obtain each one; the email channel is code-complete.
+for how to obtain each one; the email channel is code-complete and
+sending real email as of 2026-08-24. SMS/WhatsApp are formally spec'd
+as [24](24-real-sms-whatsapp-channels.md), still blocked on credentials.

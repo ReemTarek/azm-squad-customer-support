@@ -11,6 +11,16 @@ Full specs, architecture, decisions, and verification records live in
 [`docs/specs/001-customer-support-crm/spec.md`](docs/specs/001-customer-support-crm/spec.md)
 and [`docs/demo-walkthrough.md`](docs/demo-walkthrough.md).
 
+## AI-assisted development
+
+Built with Claude Code, using the [Superpowers](https://github.com/obra/superpowers)
+skill framework for spec-driven development: brainstorming → written
+spec → implementation plan → subagent-driven execution → task-level
+and whole-branch code review before merge. See
+[`docs/ai-usage.md`](docs/ai-usage.md) for the decision-by-decision
+record and [`docs/rubric-evidence.md`](docs/rubric-evidence.md) for
+how this process maps to specific artifacts in this repo.
+
 ## Stack
 
 - **Backend:** Node.js + TypeScript + Express, Prisma ORM → SQLite
