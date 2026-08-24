@@ -264,11 +264,16 @@ traceability.
 
 | ID | Goal | Status |
 |---|---|---|
-| TASK-039 | Department/Branch schema + nullable FKs on User/Ticket | Not Started |
-| TASK-040 | Backend RBAC scoping (Agent/Manager scoped to own dept/branch) + admin CRUD | Not Started |
-| TASK-041 | Frontend pickers/filters + admin management page | Not Started |
-| TASK-042 | Reports breakdown by department/branch | Not Started |
-| TASK-043 | **Required** regression re-verification of the full P0 security suite | Not Started |
+| TASK-039 | Department/Branch schema + nullable FKs on User/Ticket | Done |
+| TASK-040 | Backend RBAC scoping (Manager scoped to own dept/branch) + admin CRUD | Done |
+| TASK-041 | Frontend pickers/filters + admin management page | Done |
+| TASK-042 | Reports breakdown by department/branch | Done |
+| TASK-043 | **Required** regression re-verification of the full P0 security suite | Done — no regressions |
+
+See `features/17-multi-department-branch.md` for full verification
+detail, the scope note on why Agent/customers weren't dept-scoped, and
+a real bug found+fixed (reports department breakdown leaking data for
+a scoped Manager — `docs/debugging-notes.md`).
 
 ### AI Chatbot (full, non-streaming — see spec for the scoping decision)
 **Requirement:** CRM-AI-005 · **Spec:** `features/18-ai-chatbot.md`

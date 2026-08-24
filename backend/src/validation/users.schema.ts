@@ -5,11 +5,15 @@ export const createStaffUserSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1),
   role: z.enum(["Admin", "Manager", "Agent"]),
+  departmentId: z.string().uuid().optional(),
+  branchId: z.string().uuid().optional(),
 });
 
 export const updateUserSchema = z.object({
   name: z.string().min(1).optional(),
   role: z.enum(["Admin", "Manager", "Agent", "Customer"]).optional(),
+  departmentId: z.string().uuid().nullable().optional(),
+  branchId: z.string().uuid().nullable().optional(),
 });
 
 export const listUsersQuerySchema = z.object({

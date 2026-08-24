@@ -40,6 +40,10 @@ model User {
   role         Role
   name         String
   locale       Locale   @default(en)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -70,6 +74,10 @@ model Ticket {
   customer         User     @relation("TicketCustomer", fields: [customerId], references: [id])
   assignedAgentId  String?
   assignedAgent    User?    @relation("TicketAgent", fields: [assignedAgentId], references: [id])
+  departmentId     String?
+  department       Department? @relation(fields: [departmentId], references: [id])
+  branchId         String?
+  branch           Branch?  @relation(fields: [branchId], references: [id])
   subject          String
   category         String   @default("General")
   priority         Priority
@@ -88,6 +96,26 @@ model Ticket {
   @@index([customerId])
   @@index([assignedAgentId])
   @@index([status])
+  @@index([departmentId])
+  @@index([branchId])
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users   User[]
+  tickets Ticket[]
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users   User[]
+  tickets Ticket[]
 }
 
 model TicketMessage {

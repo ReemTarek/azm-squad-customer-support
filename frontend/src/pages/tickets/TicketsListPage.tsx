@@ -4,17 +4,33 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { listTickets } from "../../lib/ticketsApi";
 import type { Priority, TicketStatus } from "../../lib/ticketsApi";
+import { listDepartments, listBranches } from "../../lib/orgApi";
 import { SlaBadge } from "../../components/SlaBadge";
+import { useAuth } from "../../auth/AuthContext";
 
 export function TicketsListPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canFilterOrg = user?.role === "Admin" || user?.role === "Manager";
   const [status, setStatus] = useState<TicketStatus | "">("");
   const [priority, setPriority] = useState<Priority | "">("");
   const [category, setCategory] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [branchId, setBranchId] = useState("");
+
+  const { data: departments } = useQuery({ queryKey: ["departments"], queryFn: listDepartments, enabled: canFilterOrg });
+  const { data: branches } = useQuery({ queryKey: ["branches"], queryFn: listBranches, enabled: canFilterOrg });
 
   const { data: tickets, isLoading, error } = useQuery({
-    queryKey: ["tickets", status, priority, category],
-    queryFn: () => listTickets({ status: status || undefined, priority: priority || undefined, category: category || undefined }),
+    queryKey: ["tickets", status, priority, category, departmentId, branchId],
+    queryFn: () =>
+      listTickets({
+        status: status || undefined,
+        priority: priority || undefined,
+        category: category || undefined,
+        departmentId: departmentId || undefined,
+        branchId: branchId || undefined,
+      }),
   });
 
   return (
@@ -44,6 +60,18 @@ export function TicketsListPage() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
+        {canFilterOrg && (
+          <>
+            <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
+              <option value="">All departments</option>
+              {departments?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+            <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
+              <option value="">All branches</option>
+              {branches?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </>
+        )}
       </div>
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load tickets.</p>}

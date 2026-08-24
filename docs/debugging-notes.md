@@ -80,6 +80,31 @@ scrolls internally rather than widening the page.
 **How verified:** re-ran the same Playwright check — 0px overflow on
 all 12 combinations (4 pages × 3 breakpoints).
 
+## Reports "by department" breakdown leaked cross-department data for a scoped Manager (TASK-042)
+
+**Symptom:** a Manager scoped to Department A correctly saw only 1
+ticket in `byStatus`, but `byDepartment` showed counts for *both*
+departments — a real data leak (department names + counts a scoped
+Manager shouldn't see).
+
+**Reproduction:** curl as the Dept-A-scoped Manager against
+`GET /reports/summary`, compared `byStatus` (correct, scoped) against
+`byDepartment` (wrong, unscoped) in the same response.
+
+**Root cause:** `{ ...orgWhere, departmentId: { not: null } }` — when
+`orgWhere` already contained `{ departmentId: DEPT_A_ID }` for a
+scoped Manager, spreading it first and then setting `departmentId: {
+not: null }` **overwrote** the Manager's own scoping value, silently
+reverting to "any non-null department" for that one query only.
+
+**Fix:** `departmentId: orgWhere.departmentId ?? { not: null }` — a
+Manager's own department id wins if set; only fall back to the
+not-null filter when there isn't one (Admin/unscoped case).
+
+**How verified:** re-ran the same curl check — the Dept-A Manager's
+`byDepartment` now shows only Department A; Admin's still shows both
+departments (no regression to the unscoped case).
+
 ## Agent got 403 updating "their" ticket during the demo dry run (TASK-020)
 
 **Symptom:** during the full guaranteed-demo-path run, the agent's

@@ -3,6 +3,7 @@ import { apiClient } from "./apiClient";
 export interface ReportsSummary {
   byStatus: { status: string; count: number }[];
   byPriority: { priority: string; count: number }[];
+  byDepartment: { departmentId: string; departmentName: string; count: number }[];
   avgResolutionMinutes: number | null;
   ticketsPerAgent: { agentId: string; agentName: string; count: number }[];
 }

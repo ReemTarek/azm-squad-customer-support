@@ -15,6 +15,7 @@ import { ReportsPage } from "./pages/ReportsPage";
 import { QuickRepliesPage } from "./pages/QuickRepliesPage";
 import { AuditLogPage } from "./pages/AuditLogPage";
 import { AdminSlaSettingsPage } from "./pages/AdminSlaSettingsPage";
+import { AdminOrgSettingsPage } from "./pages/AdminOrgSettingsPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -99,6 +100,14 @@ function App() {
             element={
               <RequireAuth roles={["Admin"]}>
                 <AdminSlaSettingsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/org-settings"
+            element={
+              <RequireAuth roles={["Admin"]}>
+                <AdminOrgSettingsPage />
               </RequireAuth>
             }
           />

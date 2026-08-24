@@ -8,6 +8,8 @@ export const createTicketSchema = z.object({
   category: z.string().min(1).optional(),
   priority: priorityEnum,
   customerId: z.string().uuid().optional(),
+  departmentId: z.string().uuid().optional(),
+  branchId: z.string().uuid().optional(),
 });
 
 export const listTicketsQuerySchema = z.object({
@@ -16,6 +18,8 @@ export const listTicketsQuerySchema = z.object({
   category: z.string().optional(),
   assignedAgentId: z.string().optional(),
   customerId: z.string().optional(),
+  departmentId: z.string().optional(),
+  branchId: z.string().optional(),
 });
 
 export const updateTicketSchema = z.object({
@@ -23,6 +27,8 @@ export const updateTicketSchema = z.object({
   priority: priorityEnum.optional(),
   subject: z.string().min(1).optional(),
   category: z.string().min(1).optional(),
+  departmentId: z.string().uuid().nullable().optional(),
+  branchId: z.string().uuid().nullable().optional(),
 });
 
 export const assignTicketSchema = z.object({

@@ -11,6 +11,7 @@ import quickRepliesRouter from "./routes/quickReplies";
 import auditLogsRouter from "./routes/auditLogs";
 import notificationsRouter from "./routes/notifications";
 import adminSlaConfigRouter from "./routes/adminSlaConfig";
+import adminOrgRouter from "./routes/adminOrg";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/quick-replies", quickRepliesRouter);
 app.use("/api/audit-logs", auditLogsRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/admin/sla-config", adminSlaConfigRouter);
+app.use("/api/admin", adminOrgRouter);
 
 app.use(errorHandler);
 

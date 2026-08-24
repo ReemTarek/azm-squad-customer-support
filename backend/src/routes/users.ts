@@ -8,8 +8,24 @@ import { writeAuditLog } from "../lib/audit";
 
 const router = Router();
 
-function toPublicUser(user: { id: string; email: string; role: string; name: string; locale: string }) {
-  return { id: user.id, email: user.email, role: user.role, name: user.name, locale: user.locale };
+function toPublicUser(user: {
+  id: string;
+  email: string;
+  role: string;
+  name: string;
+  locale: string;
+  departmentId: string | null;
+  branchId: string | null;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    name: user.name,
+    locale: user.locale,
+    departmentId: user.departmentId,
+    branchId: user.branchId,
+  };
 }
 
 router.get("/me", requireAuth, async (req, res) => {
@@ -32,7 +48,14 @@ router.post("/", requireAuth, requireRole("Admin"), async (req, res) => {
 
   const passwordHash = await bcrypt.hash(body.password, 10);
   const user = await prisma.user.create({
-    data: { email: body.email, passwordHash, name: body.name, role: body.role },
+    data: {
+      email: body.email,
+      passwordHash,
+      name: body.name,
+      role: body.role,
+      departmentId: body.departmentId,
+      branchId: body.branchId,
+    },
   });
   await writeAuditLog(req.user!.id, "user.create", "User", user.id, { role: user.role, email: user.email });
   res.status(201).json({ user: toPublicUser(user) });

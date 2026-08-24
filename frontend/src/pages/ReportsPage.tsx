@@ -59,6 +59,14 @@ export function ReportsPage() {
             {data.avgResolutionMinutes === null ? "No resolved tickets yet" : `${data.avgResolutionMinutes} min`}
           </p>
         </section>
+        {data.byDepartment.length > 0 && (
+          <section className="report-card">
+            <h2>Tickets by department</h2>
+            <ul>
+              {data.byDepartment.map((d) => <li key={d.departmentId}>{d.departmentName}: {d.count}</li>)}
+            </ul>
+          </section>
+        )}
         <section className="report-card">
           <h2>Tickets per agent</h2>
           <ul>

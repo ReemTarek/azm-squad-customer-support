@@ -10,6 +10,8 @@ export interface Ticket {
   assignedAgentId: string | null;
   subject: string;
   category: string;
+  departmentId: string | null;
+  branchId: string | null;
   priority: Priority;
   status: TicketStatus;
   responseDueAt: string;
@@ -38,7 +40,14 @@ export interface TicketStatusHistoryEntry {
   changedAt: string;
 }
 
-export async function listTickets(filters?: { status?: TicketStatus; priority?: Priority; category?: string; customerId?: string }) {
+export async function listTickets(filters?: {
+  status?: TicketStatus;
+  priority?: Priority;
+  category?: string;
+  customerId?: string;
+  departmentId?: string;
+  branchId?: string;
+}) {
   const { data } = await apiClient.get<{ tickets: Ticket[] }>("/tickets", { params: filters });
   return data.tickets;
 }
@@ -48,7 +57,14 @@ export async function getTicket(id: string) {
   return data.ticket;
 }
 
-export async function createTicket(input: { subject: string; category?: string; priority: Priority; customerId?: string }) {
+export async function createTicket(input: {
+  subject: string;
+  category?: string;
+  priority: Priority;
+  customerId?: string;
+  departmentId?: string;
+  branchId?: string;
+}) {
   const { data } = await apiClient.post<{ ticket: Ticket }>("/tickets", input);
   return data.ticket;
 }

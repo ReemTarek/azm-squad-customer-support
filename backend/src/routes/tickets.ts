@@ -26,6 +26,8 @@ function toTicketDto(ticket: Ticket) {
     assignedAgentId: ticket.assignedAgentId,
     subject: ticket.subject,
     category: ticket.category,
+    departmentId: ticket.departmentId,
+    branchId: ticket.branchId,
     priority: ticket.priority,
     status: ticket.status,
     responseDueAt: ticket.responseDueAt,
@@ -43,6 +45,22 @@ async function assertTicketAccess(ticketId: string, user: { id: string; role: st
   if (user.role === "Customer" && ticket.customerId !== user.id) {
     throw Errors.forbidden("Cannot access another customer's ticket");
   }
+
+  // Same department/branch scoping as the list view (TASK-040) — enforced
+  // here too so a Manager can't bypass the list filter via a direct ticket ID.
+  if (user.role === "Manager") {
+    const managerRecord = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { departmentId: true, branchId: true },
+    });
+    if (managerRecord?.departmentId && ticket.departmentId !== managerRecord.departmentId) {
+      throw Errors.forbidden("Cannot access a ticket outside your department");
+    }
+    if (managerRecord?.branchId && ticket.branchId !== managerRecord.branchId) {
+      throw Errors.forbidden("Cannot access a ticket outside your branch");
+    }
+  }
+
   return ticket;
 }
 
@@ -66,6 +84,8 @@ router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (
       category: body.category ?? "General",
       priority: body.priority,
       customerId,
+      departmentId: body.departmentId,
+      branchId: body.branchId,
       responseDueAt,
       resolutionDueAt,
     },
@@ -85,14 +105,33 @@ router.get("/", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"
   if (query.status) where.status = query.status;
   if (query.priority) where.priority = query.priority;
   if (query.category) where.category = query.category;
+  if (query.departmentId) where.departmentId = query.departmentId;
+  if (query.branchId) where.branchId = query.branchId;
 
   if (user.role === "Customer") {
     where.customerId = user.id;
   } else if (user.role === "Agent") {
     // Agents only ever see their own assigned tickets, regardless of query params.
+    // (Not additionally department/branch-scoped: assignment is the authoritative
+    // scope for an Agent — see decisions.md for why department scoping is layered
+    // onto Manager only, not Agent.)
     where.assignedAgentId = user.id;
     if (query.customerId) where.customerId = query.customerId;
+  } else if (user.role === "Manager") {
+    if (query.assignedAgentId) where.assignedAgentId = query.assignedAgentId === "me" ? user.id : query.assignedAgentId;
+    if (query.customerId) where.customerId = query.customerId;
+
+    // Managers are scoped to their own department/branch, if assigned one.
+    // An unassigned Manager (departmentId/branchId both null) keeps seeing
+    // everything, preserving prior behavior for existing/unconfigured users.
+    const managerRecord = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { departmentId: true, branchId: true },
+    });
+    if (managerRecord?.departmentId) where.departmentId = managerRecord.departmentId;
+    if (managerRecord?.branchId) where.branchId = managerRecord.branchId;
   } else {
+    // Admin: unrestricted.
     if (query.assignedAgentId) where.assignedAgentId = query.assignedAgentId === "me" ? user.id : query.assignedAgentId;
     if (query.customerId) where.customerId = query.customerId;
   }
@@ -116,9 +155,24 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Manager", "Agent"), asyn
     throw Errors.forbidden("Only the assigned agent can update this ticket");
   }
 
+  if (req.user!.role === "Manager") {
+    const managerRecord = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { departmentId: true, branchId: true },
+    });
+    if (managerRecord?.departmentId && existing.departmentId !== managerRecord.departmentId) {
+      throw Errors.forbidden("Cannot update a ticket outside your department");
+    }
+    if (managerRecord?.branchId && existing.branchId !== managerRecord.branchId) {
+      throw Errors.forbidden("Cannot update a ticket outside your branch");
+    }
+  }
+
   const data: Record<string, unknown> = {};
   if (body.subject) data.subject = body.subject;
   if (body.category) data.category = body.category;
+  if (body.departmentId !== undefined) data.departmentId = body.departmentId;
+  if (body.branchId !== undefined) data.branchId = body.branchId;
 
   if (body.priority && body.priority !== existing.priority) {
     data.priority = body.priority;
@@ -168,6 +222,19 @@ router.post("/:id/assign", requireAuth, requireRole("Admin", "Manager"), async (
 
   const ticket = await prisma.ticket.findUnique({ where: { id } });
   if (!ticket) throw Errors.notFound("Ticket not found");
+
+  if (req.user!.role === "Manager") {
+    const managerRecord = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { departmentId: true, branchId: true },
+    });
+    if (managerRecord?.departmentId && ticket.departmentId !== managerRecord.departmentId) {
+      throw Errors.forbidden("Cannot assign a ticket outside your department");
+    }
+    if (managerRecord?.branchId && ticket.branchId !== managerRecord.branchId) {
+      throw Errors.forbidden("Cannot assign a ticket outside your branch");
+    }
+  }
 
   const agent = await prisma.user.findUnique({ where: { id: body.agentId } });
   if (!agent || agent.role !== "Agent") throw Errors.validation("agentId must reference an existing Agent");

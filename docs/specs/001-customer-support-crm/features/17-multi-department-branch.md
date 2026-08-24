@@ -78,4 +78,27 @@ silently broke.
 **Verification:** every row in the original P0 security section of
 `docs/verification.md` re-checked and still PASS.
 
-## Status: Not Started
+## Status: Done
+
+**Scope note:** department/branch scoping applied to Manager only
+(list, detail, PATCH, assign) — not layered onto Agent, since Agent's
+existing "assigned to me" scope is already the authoritative, stricter
+boundary; adding department filtering on top could hide a ticket from
+the very agent it's assigned to in a cross-department data scenario.
+Not applied to `customers.ts` — customers aren't meaningfully
+"in" a department in this data model (their tickets might be, but the
+customer record itself isn't). Frontend stops at ticket pickers/
+filters + admin department/branch management; no dedicated staff
+department-assignment UI page was built (none existed for staff
+management generally — done via `PATCH /users/:id`, already
+functional and tested).
+
+Verified via curl: a Manager scoped to Department A sees only
+Department A's ticket in the list, gets 403 on direct GET/PATCH/assign
+of a Department B ticket by ID, and their reports are scoped
+identically; Admin remains fully unrestricted throughout. One real bug
+found and fixed along the way (`byDepartment` report breakdown leaked
+cross-department counts for a scoped Manager) — see
+`docs/debugging-notes.md`. TASK-043 regression re-run: the full-system
+audit (15 checks) shows the same result as the pre-change baseline —
+no regressions.
