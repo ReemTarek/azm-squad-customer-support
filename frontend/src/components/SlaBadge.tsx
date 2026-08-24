@@ -6,6 +6,12 @@ const LABELS: Record<SlaState, string> = {
   breached: "Breached",
 };
 
+const STATE_CLASSES: Record<SlaState, string> = {
+  on_track: "bg-success",
+  at_risk: "bg-warning text-dark",
+  breached: "bg-danger",
+};
+
 export function SlaBadge({ state }: { state: SlaState }) {
-  return <span className={`sla-badge sla-badge--${state}`}>{LABELS[state]}</span>;
+  return <span className={`badge ${STATE_CLASSES[state]}`}>{LABELS[state]}</span>;
 }

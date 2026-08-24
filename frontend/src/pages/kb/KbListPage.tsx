@@ -15,16 +15,17 @@ export function KbListPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-header d-flex justify-content-between align-items-center mb-3">
         <h1>Knowledge Base</h1>
-        {canAuthor && <Link to="/kb/new" className="button-link">New Article</Link>}
+        {canAuthor && <Link to="/kb/new" className="btn btn-primary">New Article</Link>}
       </div>
       <input
         type="search"
         placeholder="Search articles…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
+        className="form-control mb-3"
+        style={{ maxWidth: 280 }}
       />
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load articles.</p>}

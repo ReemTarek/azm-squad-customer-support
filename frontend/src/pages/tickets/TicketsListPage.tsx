@@ -35,19 +35,29 @@ export function TicketsListPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-header d-flex justify-content-between align-items-center mb-3">
         <h1>{t("tickets.title")}</h1>
-        <Link to="/tickets/new" className="button-link">{t("tickets.newTicket")}</Link>
+        <Link to="/tickets/new" className="btn btn-primary">{t("tickets.newTicket")}</Link>
       </div>
-      <div className="filters">
-        <select value={status} onChange={(e) => setStatus(e.target.value as TicketStatus | "")}>
+      <div className="filters d-flex flex-wrap gap-2 mb-3">
+        <select
+          className="form-select form-select-sm"
+          style={{ width: "auto" }}
+          value={status}
+          onChange={(e) => setStatus(e.target.value as TicketStatus | "")}
+        >
           <option value="">{t("tickets.allStatuses")}</option>
           <option value="Open">Open</option>
           <option value="InProgress">In Progress</option>
           <option value="Resolved">Resolved</option>
           <option value="Closed">Closed</option>
         </select>
-        <select value={priority} onChange={(e) => setPriority(e.target.value as Priority | "")}>
+        <select
+          className="form-select form-select-sm"
+          style={{ width: "auto" }}
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as Priority | "")}
+        >
           <option value="">{t("tickets.allPriorities")}</option>
           <option value="Low">Low</option>
           <option value="Medium">Medium</option>
@@ -57,16 +67,28 @@ export function TicketsListPage() {
         <input
           type="text"
           placeholder="Filter by category…"
+          className="form-control form-control-sm"
+          style={{ width: "auto" }}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
         {canFilterOrg && (
           <>
-            <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
+            <select
+              className="form-select form-select-sm"
+              style={{ width: "auto" }}
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+            >
               <option value="">All departments</option>
               {departments?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
-            <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
+            <select
+              className="form-select form-select-sm"
+              style={{ width: "auto" }}
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+            >
               <option value="">All branches</option>
               {branches?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
@@ -76,8 +98,8 @@ export function TicketsListPage() {
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load tickets.</p>}
       {tickets && (
-        <div className="table-scroll">
-        <table className="data-table">
+        <div className="table-responsive">
+        <table className="table table-striped table-hover align-middle">
           <thead>
             <tr>
               <th>{t("tickets.subject")}</th>

@@ -12,22 +12,23 @@ export function CustomersListPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-header d-flex justify-content-between align-items-center mb-3">
         <h1>Customers</h1>
-        <Link to="/customers/new" className="button-link">New Customer</Link>
+        <Link to="/customers/new" className="btn btn-primary">New Customer</Link>
       </div>
       <input
         type="search"
         placeholder="Search by name or email…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="search-input"
+        className="form-control mb-3"
+        style={{ maxWidth: 280 }}
       />
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load customers.</p>}
       {customers && (
-        <div className="table-scroll">
-        <table className="data-table">
+        <div className="table-responsive">
+        <table className="table table-striped table-hover align-middle">
           <thead>
             <tr>
               <th>Name</th>

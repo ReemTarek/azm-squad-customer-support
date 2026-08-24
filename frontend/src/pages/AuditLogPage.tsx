@@ -14,8 +14,13 @@ export function AuditLogPage() {
   return (
     <div className="page">
       <h1>Audit Log</h1>
-      <div className="filters">
-        <select value={entityType} onChange={(e) => setEntityType(e.target.value)}>
+      <div className="filters d-flex flex-wrap gap-2 mb-3">
+        <select
+          className="form-select form-select-sm"
+          style={{ width: "auto" }}
+          value={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+        >
           <option value="">All entity types</option>
           {ENTITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
@@ -23,8 +28,8 @@ export function AuditLogPage() {
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load audit log.</p>}
       {logs && (
-        <div className="table-scroll">
-          <table className="data-table">
+        <div className="table-responsive">
+          <table className="table table-striped table-hover align-middle">
             <thead>
               <tr>
                 <th>When</th>
