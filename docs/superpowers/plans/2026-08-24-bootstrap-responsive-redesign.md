@@ -425,9 +425,16 @@ git commit -m "feat: migrate auth pages to Bootstrap"
 - Modify: `frontend/src/pages/tickets/TicketsListPage.tsx`
 - Modify: `frontend/src/pages/kb/KbListPage.tsx`
 - Modify: `frontend/src/pages/AuditLogPage.tsx`
+- Do NOT remove `.page-header` from `frontend/src/App.css` in this
+  task even though this task's own files use it — `KbDetailPage.tsx`
+  (Task 5), `TicketDetailPage.tsx` (Task 5), and `ReportsPage.tsx`
+  (Task 6) still reference it until their own tasks migrate them.
+  Removing it here would visually break those pages' headers in the
+  interim. Its removal is handled once, in Task 7's final sweep.
 - Modify: `frontend/src/App.css` (remove `.table-scroll`, `.data-table`,
-  `.filters`, `.search-input`, `.page-header`, `.button-link` rules
-  once nothing references them)
+  `.filters`, `.search-input`, `.button-link` rules — these four are
+  confirmed used only by this task's files; grep `frontend/src` first
+  to double check before deleting any of them)
 
 **Interfaces:**
 - Consumes: Bootstrap CSS from Task 1; the Style Guide's
@@ -611,12 +618,27 @@ git commit -m "feat: migrate remaining pages to Bootstrap, remove dead dashboard
 ### Task 7: Full-suite verification and spec closeout
 
 **Files:**
+- Modify: `frontend/src/App.css` (final cleanup sweep — see Step 1)
 - Modify: `docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md` (Status → Done, check acceptance criteria)
 - Modify: `docs/verification.md` (add a row)
 
 **Interfaces:** none — this task only verifies and documents.
 
-- [ ] **Step 1: Full guaranteed-demo-path click-through**
+- [ ] **Step 1: Final CSS cleanup sweep**
+
+By this point every page has been migrated, so any custom class that
+was deferred by an earlier task's "once nothing references it" caveat
+(most notably `.page-header`, deferred by Task 4 because Task 5/6
+files still used it at the time) can now be safely removed. Grep
+`frontend/src` for every remaining rule in `frontend/src/App.css` —
+for each one, if zero matches remain outside `App.css` itself, delete
+the rule. **Keep these regardless of reference count** (per the Style
+Guide, they have no Bootstrap equivalent or are deliberately-kept
+overrides): `.auth-form`'s width rule, `.trend-bars`/`.trend-bar-col`/
+`.trend-bar`/`.trend-bar-label`/`.trend-bar-count`, `.kb-body`'s
+`white-space: pre-wrap` rule.
+
+- [ ] **Step 2: Full guaranteed-demo-path click-through**
 
 Follow `docs/demo-walkthrough.md` end-to-end in the browser: Admin
 login → create agent → create customer → customer creates ticket →
@@ -624,7 +646,7 @@ admin assigns → agent uses Gemini suggested reply → resolves →
 customer sees resolution + submits feedback → manager views reports.
 Confirm every step still works with the new Bootstrap UI.
 
-- [ ] **Step 2: Responsive + RTL sweep**
+- [ ] **Step 3: Responsive + RTL sweep**
 
 At 375px and desktop width, in both English and Arabic, visit every
 migrated page and confirm: no horizontal scroll on the page itself,
@@ -632,21 +654,21 @@ nav collapses/expands correctly on mobile, RTL mirroring looks correct
 (check at least the nav, a form page, and `TicketDetailPage.tsx`),
 zero console errors on any page.
 
-- [ ] **Step 3: `npm run build` (frontend) succeeds**
+- [ ] **Step 4: `npm run build` (frontend) succeeds**
 
 Run: `cd frontend && npm run build` — confirm it completes without
 errors (this also typechecks via `tsc -b`).
 
-- [ ] **Step 4: Update the spec and verification doc**
+- [ ] **Step 5: Update the spec and verification doc**
 
 In `20-bootstrap-responsive-redesign.md`, change `## Status: Not Started`
 to `## Status: Done` and check every acceptance-criteria box that's
-genuinely true based on Step 1-3's results. Add a row to
+genuinely true based on Steps 1-4's results. Add a row to
 `docs/verification.md`: `| Bootstrap responsive redesign | Full demo path + 375px/RTL sweep across all pages | PASS |`.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md docs/verification.md
-git commit -m "docs: mark Bootstrap responsive redesign done, record verification"
+git add frontend/src/App.css docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md docs/verification.md
+git commit -m "docs: mark Bootstrap responsive redesign done, record verification, final App.css cleanup"
 ```
