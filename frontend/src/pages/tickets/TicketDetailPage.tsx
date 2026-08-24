@@ -5,10 +5,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignTicket,
   autoAssignTicket,
+  getFeedback,
   getTicket,
   listHistory,
   listMessages,
   postMessage,
+  submitFeedback,
   suggestReply,
   updateTicket,
 } from "../../lib/ticketsApi";
@@ -35,6 +37,7 @@ export function TicketDetailPage() {
   const agentsQuery = useQuery({ queryKey: ["agents"], queryFn: () => listUsersByRole("Agent"), enabled: canAssign });
   const tasksQuery = useQuery({ queryKey: ["ticket", id, "tasks"], queryFn: () => listTasks(id!), enabled: Boolean(id) && canManage });
   const quickRepliesQuery = useQuery({ queryKey: ["quick-replies"], queryFn: listQuickReplies, enabled: canManage });
+  const feedbackQuery = useQuery({ queryKey: ["ticket", id, "feedback"], queryFn: () => getFeedback(id!), enabled: Boolean(id) });
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
@@ -104,6 +107,20 @@ export function TicketDetailPage() {
     e.preventDefault();
     setActionError(null);
     addTaskMutation.mutate();
+  }
+
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const feedbackMutation = useMutation({
+    mutationFn: () => submitFeedback(id!, { rating: feedbackRating, comment: feedbackComment || undefined }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ticket", id, "feedback"] }),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  function handleFeedbackSubmit(e: FormEvent) {
+    e.preventDefault();
+    setActionError(null);
+    feedbackMutation.mutate();
   }
 
   if (ticketQuery.isLoading) return <p>Loading…</p>;
@@ -258,6 +275,36 @@ export function TicketDetailPage() {
           ))}
         </ul>
       </section>
+
+      {(ticket.status === "Resolved" || ticket.status === "Closed") && (
+        <section>
+          <h2>Customer Satisfaction</h2>
+          {feedbackQuery.data ? (
+            <p>
+              Rating: {"★".repeat(feedbackQuery.data.rating)}{"☆".repeat(5 - feedbackQuery.data.rating)}
+              {feedbackQuery.data.comment && <> — "{feedbackQuery.data.comment}"</>}
+            </p>
+          ) : user?.role === "Customer" ? (
+            <form onSubmit={handleFeedbackSubmit} className="entity-form">
+              <label>
+                Rating (1-5)
+                <select value={feedbackRating} onChange={(e) => setFeedbackRating(Number(e.target.value))}>
+                  {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+              <label>
+                Comment (optional)
+                <textarea rows={2} value={feedbackComment} onChange={(e) => setFeedbackComment(e.target.value)} />
+              </label>
+              <button type="submit" disabled={feedbackMutation.isPending}>
+                {feedbackMutation.isPending ? "Submitting…" : "Submit feedback"}
+              </button>
+            </form>
+          ) : (
+            <p className="form-hint">No feedback submitted yet.</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

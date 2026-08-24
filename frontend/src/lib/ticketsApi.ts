@@ -84,6 +84,24 @@ export async function postMessage(ticketId: string, input: { body: string; isInt
   return data.message;
 }
 
+export interface Feedback {
+  id: string;
+  ticketId: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export async function getFeedback(ticketId: string) {
+  const { data } = await apiClient.get<{ feedback: Feedback | null }>(`/tickets/${ticketId}/feedback`);
+  return data.feedback;
+}
+
+export async function submitFeedback(ticketId: string, input: { rating: number; comment?: string }) {
+  const { data } = await apiClient.post<{ feedback: Feedback }>(`/tickets/${ticketId}/feedback`, input);
+  return data.feedback;
+}
+
 export async function listHistory(ticketId: string) {
   const { data } = await apiClient.get<{ history: TicketStatusHistoryEntry[] }>(`/tickets/${ticketId}/history`);
   return data.history;

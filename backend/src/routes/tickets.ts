@@ -12,6 +12,7 @@ import {
   updateTicketSchema,
 } from "../validation/tickets.schema";
 import { createTaskSchema, updateTaskSchema } from "../validation/tasks.schema";
+import { createFeedbackSchema } from "../validation/feedback.schema";
 import type { Ticket } from "@prisma/client";
 
 const router = Router();
@@ -284,6 +285,30 @@ router.patch("/:id/tasks/:taskId", requireAuth, requireRole("Admin", "Manager", 
     },
   });
   res.json({ task });
+});
+
+router.get("/:id/feedback", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {
+  await assertTicketAccess(String(req.params.id), req.user!);
+  const feedback = await prisma.customerFeedback.findUnique({ where: { ticketId: String(req.params.id) } });
+  res.json({ feedback });
+});
+
+router.post("/:id/feedback", requireAuth, requireRole("Customer"), async (req, res) => {
+  const id = String(req.params.id);
+  const ticket = await assertTicketAccess(id, req.user!);
+
+  if (ticket.status !== "Resolved" && ticket.status !== "Closed") {
+    throw Errors.validation("Feedback can only be submitted once the ticket is Resolved or Closed");
+  }
+
+  const existing = await prisma.customerFeedback.findUnique({ where: { ticketId: id } });
+  if (existing) throw Errors.conflict("Feedback has already been submitted for this ticket");
+
+  const body = createFeedbackSchema.parse(req.body);
+  const feedback = await prisma.customerFeedback.create({
+    data: { ticketId: id, rating: body.rating, comment: body.comment },
+  });
+  res.status(201).json({ feedback });
 });
 
 router.get("/:id/history", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {
