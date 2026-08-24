@@ -11,6 +11,7 @@ import {
   listTicketsQuerySchema,
   updateTicketSchema,
 } from "../validation/tickets.schema";
+import { createTaskSchema, updateTaskSchema } from "../validation/tasks.schema";
 import type { Ticket } from "@prisma/client";
 
 const router = Router();
@@ -202,6 +203,59 @@ router.post("/:id/suggest-reply", requireAuth, requireRole("Admin", "Manager", "
     console.error("Gemini suggest-reply failed:", err);
     throw Errors.aiUnavailable();
   }
+});
+
+router.get("/:id/tasks", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const id = String(req.params.id);
+  const exists = await prisma.ticket.findUnique({ where: { id } });
+  if (!exists) throw Errors.notFound("Ticket not found");
+
+  const tasks = await prisma.ticketTask.findMany({ where: { ticketId: id }, orderBy: { createdAt: "asc" } });
+  res.json({ tasks });
+});
+
+router.post("/:id/tasks", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const id = String(req.params.id);
+  const exists = await prisma.ticket.findUnique({ where: { id } });
+  if (!exists) throw Errors.notFound("Ticket not found");
+
+  const body = createTaskSchema.parse(req.body);
+  const assignedToId = body.assignedToId ?? req.user!.id;
+  if (body.assignedToId) {
+    const assignee = await prisma.user.findUnique({ where: { id: assignedToId } });
+    if (!assignee || assignee.role === "Customer") throw Errors.validation("assignedToId must reference a staff user");
+  }
+
+  const task = await prisma.ticketTask.create({
+    data: {
+      ticketId: id,
+      assignedToId,
+      title: body.title,
+      dueAt: body.dueAt ? new Date(body.dueAt) : null,
+    },
+  });
+  res.status(201).json({ task });
+});
+
+router.patch("/:id/tasks/:taskId", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const taskId = String(req.params.taskId);
+  const existing = await prisma.ticketTask.findUnique({ where: { id: taskId } });
+  if (!existing || existing.ticketId !== String(req.params.id)) throw Errors.notFound("Task not found");
+
+  if (req.user!.role === "Agent" && existing.assignedToId !== req.user!.id) {
+    throw Errors.forbidden("Only the assigned staff member can update this task");
+  }
+
+  const body = updateTaskSchema.parse(req.body);
+  const task = await prisma.ticketTask.update({
+    where: { id: taskId },
+    data: {
+      title: body.title,
+      completed: body.completed,
+      ...(body.dueAt !== undefined ? { dueAt: body.dueAt ? new Date(body.dueAt) : null } : {}),
+    },
+  });
+  res.json({ task });
 });
 
 router.get("/:id/history", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {

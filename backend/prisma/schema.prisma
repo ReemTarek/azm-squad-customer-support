@@ -50,6 +50,8 @@ model User {
   statusChanges        TicketStatusHistory[]
   knowledgeBaseAuthors KnowledgeBaseArticle[]
   auditLogs            AuditLog[]
+  ticketTasks          TicketTask[]
+  quickReplies         QuickReply[]
 }
 
 model CustomerProfile {
@@ -78,6 +80,7 @@ model Ticket {
   messages       TicketMessage[]
   statusHistory  TicketStatusHistory[]
   feedback       CustomerFeedback?
+  tasks          TicketTask[]
 
   @@index([customerId])
   @@index([assignedAgentId])
@@ -130,6 +133,30 @@ model CustomerFeedback {
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   rating    Int
   comment   String?
+  createdAt DateTime @default(now())
+}
+
+model TicketTask {
+  id             String    @id @default(uuid())
+  ticketId       String
+  ticket         Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  assignedToId   String
+  assignedTo     User      @relation(fields: [assignedToId], references: [id])
+  title          String
+  dueAt          DateTime?
+  completed      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  @@index([ticketId])
+  @@index([assignedToId])
+}
+
+model QuickReply {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
 }
 

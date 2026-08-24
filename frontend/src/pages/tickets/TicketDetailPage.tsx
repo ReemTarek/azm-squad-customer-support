@@ -13,6 +13,7 @@ import {
 } from "../../lib/ticketsApi";
 import type { TicketStatus } from "../../lib/ticketsApi";
 import { listUsersByRole } from "../../lib/usersApi";
+import { createTask, listTasks, updateTask } from "../../lib/tasksApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
 import { useAuth } from "../../auth/AuthContext";
 import { SlaBadge } from "../../components/SlaBadge";
@@ -30,10 +31,12 @@ export function TicketDetailPage() {
   const messagesQuery = useQuery({ queryKey: ["ticket", id, "messages"], queryFn: () => listMessages(id!), enabled: Boolean(id) });
   const historyQuery = useQuery({ queryKey: ["ticket", id, "history"], queryFn: () => listHistory(id!), enabled: Boolean(id) });
   const agentsQuery = useQuery({ queryKey: ["agents"], queryFn: () => listUsersByRole("Agent"), enabled: canAssign });
+  const tasksQuery = useQuery({ queryKey: ["ticket", id, "tasks"], queryFn: () => listTasks(id!), enabled: Boolean(id) && canManage });
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
   const [isInternalNote, setIsInternalNote] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const statusMutation = useMutation({
     mutationFn: (status: TicketStatus) => updateTicket(id!, { status }),
@@ -70,6 +73,28 @@ export function TicketDetailPage() {
     e.preventDefault();
     setActionError(null);
     messageMutation.mutate();
+  }
+
+  const addTaskMutation = useMutation({
+    mutationFn: () => createTask(id!, { title: newTaskTitle }),
+    onSuccess: () => {
+      setNewTaskTitle("");
+      queryClient.invalidateQueries({ queryKey: ["ticket", id, "tasks"] });
+    },
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  const toggleTaskMutation = useMutation({
+    mutationFn: ({ taskId, completed }: { taskId: string; completed: boolean }) =>
+      updateTask(id!, taskId, { completed }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ticket", id, "tasks"] }),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  function handleAddTask(e: FormEvent) {
+    e.preventDefault();
+    setActionError(null);
+    addTaskMutation.mutate();
   }
 
   if (ticketQuery.isLoading) return <p>Loading…</p>;
@@ -156,6 +181,40 @@ export function TicketDetailPage() {
           </button>
         </form>
       </section>
+
+      {canManage && (
+        <section>
+          <h2>Tasks / Reminders</h2>
+          <ul className="task-list">
+            {tasksQuery.data?.map((task) => (
+              <li key={task.id} className={task.completed ? "task-item task-item--done" : "task-item"}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={(e) => toggleTaskMutation.mutate({ taskId: task.id, completed: e.target.checked })}
+                  />
+                  {task.title}
+                </label>
+                {task.dueAt && <span className="task-due">Due {new Date(task.dueAt).toLocaleDateString()}</span>}
+              </li>
+            ))}
+            {tasksQuery.data?.length === 0 && <li>No tasks yet.</li>}
+          </ul>
+          <form onSubmit={handleAddTask} className="entity-form entity-form--inline">
+            <input
+              type="text"
+              placeholder="New task or reminder…"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={addTaskMutation.isPending}>
+              {addTaskMutation.isPending ? "Adding…" : "Add"}
+            </button>
+          </form>
+        </section>
+      )}
 
       <section>
         <h2>History</h2>
