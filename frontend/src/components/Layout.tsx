@@ -15,6 +15,7 @@ export function Layout() {
           )}
           <Link to="/tickets">Tickets</Link>
           <Link to="/kb">Knowledge Base</Link>
+          {(user.role === "Admin" || user.role === "Manager") && <Link to="/reports">Reports</Link>}
         </nav>
         <div className="app-header-user">
           <span>{user.name} ({user.role})</span>

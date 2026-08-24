@@ -132,7 +132,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** none new (reuses existing endpoints).
 **Frontend:** Customer portal shell — my tickets, new ticket, ticket detail+reply, KB browse.
 **Verification:** As a Customer: submit ticket → reply → browse KB, all working, cannot see other customers' tickets (403) or internal notes.
-**Status:** Not Started
+**Status:** Done — no new code needed, existing role-scoped screens compose into the full portal already. Verified via Playwright: self-register → nav shows only Tickets/KB (no Customers link) → submit own ticket → reply on it → browse KB, zero console errors end to end.
 
 ### TASK-015
 **Requirement:** CRM-REPORT-001
@@ -141,7 +141,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `GET /reports/summary` (aggregate Prisma queries).
 **Frontend:** Manager report page — counts by status/priority, avg resolution time, tickets per agent (simple table/cards, no charting library required).
 **Verification:** Numbers on the report page match a manual count from the DB for a small seeded dataset.
-**Status:** Not Started
+**Status:** Done — verified via a manual Prisma groupBy script matching the API's byStatus counts exactly (InProgress:1, Open:3, Resolved:1 against 5 total tickets), and Playwright (admin sees the report cards; Agent has no Reports nav link and gets 403 hitting the endpoint directly).
 
 ### TASK-016
 **Requirement:** CRM-I18N-001

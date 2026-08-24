@@ -11,6 +11,7 @@ import { TicketDetailPage } from "./pages/tickets/TicketDetailPage";
 import { KbListPage } from "./pages/kb/KbListPage";
 import { KbFormPage } from "./pages/kb/KbFormPage";
 import { KbDetailPage } from "./pages/kb/KbDetailPage";
+import { ReportsPage } from "./pages/ReportsPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -66,6 +67,14 @@ function App() {
             }
           />
           <Route path="/kb/:id" element={<KbDetailPage />} />
+          <Route
+            path="/reports"
+            element={
+              <RequireAuth roles={["Admin", "Manager"]}>
+                <ReportsPage />
+              </RequireAuth>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
