@@ -209,18 +209,25 @@ DB queries where numeric). Full detail in
 `docs/specs/001-customer-support-crm/gap-analysis.md` and
 `docs/verification.md`.
 
-| ID | Requirement | Goal | Status |
-|---|---|---|---|
-| TASK-027 | CRM-KB-002 | KB search (title/body/category) | Done |
-| TASK-028 | CRM-TICKET-003 | Ticket category field (create/filter/display) | Done |
-| TASK-029 | CRM-CUSTOMER-003 | Customer interaction-history view (staff-only) | Done |
-| TASK-030 | CRM-REPORT-003 | Aggregate CSAT + agent-performance report cards | Done |
-| TASK-031 | CRM-AI-003 | AI ticket summary | Done |
-| TASK-032 | CRM-AI-004 | AI-suggested KB articles | Done |
-| TASK-033 | CRM-SLA-ESCALATE-001 | SLA escalation sweep (bump priority to Urgent on breach) | Done |
-| TASK-034 | CRM-NOTIFY-001 | In-app notification badge (breached/at-risk counts) | Done |
-| TASK-035 | CRM-INTEGRATION-001 | P2 notification adapter (email/SMS/WhatsApp interface + mocks) | Done |
-| TASK-036 | CRM-INTEGRATION-002 | P2 ERP adapter (interface + mock) | Done |
+**Process note:** these 10 items (TASK-027 through TASK-036) were
+built directly from the gap-analysis recommendation list once the
+user approved the bucket as a whole, then spec'd individually
+afterward — not spec'd-and-approved per item before code, unlike every
+P0/P1 task and TASK-037 onward. See `docs/decisions.md` for the full
+account and `docs/rubric-evidence.md` for how this is scored honestly.
+
+| ID | Requirement | Goal | Spec | Status |
+|---|---|---|---|---|
+| TASK-027 | CRM-KB-002 | KB search (title/body/category) | `features/14a-kb-search.md` | Done |
+| TASK-028 | CRM-TICKET-003 | Ticket category field (create/filter/display) | `features/14b-ticket-category.md` | Done |
+| TASK-029 | CRM-CUSTOMER-003 | Customer interaction-history view (staff-only) | `features/14c-customer-interaction-history.md` | Done |
+| TASK-030 | CRM-REPORT-003 | Aggregate CSAT + agent-performance report cards | `features/14d-csat-agent-performance-reports.md` | Done |
+| TASK-031 | CRM-AI-003 | AI ticket summary | `features/14e-ai-ticket-summary.md` | Done |
+| TASK-032 | CRM-AI-004 | AI-suggested KB articles | `features/14f-ai-suggested-kb-articles.md` | Done |
+| TASK-033 | CRM-SLA-ESCALATE-001 | SLA escalation sweep (bump priority to Urgent on breach) | `features/14g-sla-escalation-sweep.md` | Done |
+| TASK-034 | CRM-NOTIFY-001 | In-app notification badge (breached/at-risk counts) | `features/14h-in-app-notifications.md` | Done |
+| TASK-035 | CRM-INTEGRATION-001 | P2 notification adapter (email/SMS/WhatsApp interface + mocks) | `features/13-integration-adapters.md` | Done |
+| TASK-036 | CRM-INTEGRATION-002 | P2 ERP adapter (interface + mock) | `features/13-integration-adapters.md` | Done |
 
 ---
 

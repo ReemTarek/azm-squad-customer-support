@@ -6,6 +6,15 @@ guidance ("implement clean interfaces/adapters and demonstrate the
 architectural integration point where appropriate" for WhatsApp/SMS/
 ERP, without real credentials).
 
+> **Process note:** the interface design and implementation were done
+> in the same pass as writing this spec, rather than the spec being
+> reviewed and approved by the user first (unlike every P0/P1 feature
+> and TASK-037 onward). The general shape (adapter interfaces, no real
+> providers) was already explicitly approved in the original P2
+> section of `spec.md`, so this is a lighter gap than the `14*` specs
+> — but it's still documentation-after-code rather than
+> spec-then-code. See `docs/decisions.md` for the full account.
+
 ## Goal
 Show where and how a real notification provider (email/SMS/WhatsApp)
 and a real ERP would plug in, without building or paying for one.

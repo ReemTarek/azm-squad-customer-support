@@ -11,6 +11,48 @@ come up (e.g. how a tricky migration was handled, a library swap, an
 auth edge case). Entries follow: Context / Options considered / Chosen
 approach / Why / Trade-offs.
 
+## Process gap: 10 post-P1 items were built before being individually spec'd
+
+**Context:** every P0/P1 requirement, and TASK-037 onward (SLA config,
+customer notes, multi-department/branch, AI chatbot), followed strict
+spec-first discipline: a spec was written, the user reviewed/approved
+it (directly, or via an explicit design-option question), and only
+then was code written. The 10 "post-P1 enhancement" items (TASK-027
+through TASK-036 — KB search, ticket category, customer interaction
+history, aggregate CSAT/agent reports, AI ticket summary, AI-suggested
+KB articles, SLA escalation sweep, in-app notifications, and the P2
+notification/ERP adapters) did not follow this — they were built
+directly from a gap-analysis recommendation list once the user
+approved the bucket as a whole ("small high-value fixes", "AI
+extensions", etc.), and individual spec documents were written
+*after* the code existed.
+
+**Why it happened:** these were framed (by me) as small, low-risk,
+pattern-matching extensions of already-verified features (e.g. KB
+search mirrors the customer list's existing search; ticket category
+mirrors the KB's existing category field) — a judgment call that
+heavier upfront spec ceremony wasn't needed for each one individually,
+given the user had already approved the bucket. In hindsight this
+broke the project's own SDD discipline and is inconsistent with how
+every other requirement was handled.
+
+**What changed:** when this was flagged, each of the 10 items got its
+own individual spec (`features/14a` through `14h`, plus the pre-
+existing `features/13`), explicitly labeled with a process note
+stating they were written after implementation and why, rather than
+silently back-dating them to look spec-first. Every subsequent feature
+(the two big items, multi-department/branch and the AI chatbot, plus
+SLA config and customer notes) went back to strict spec-first,
+including presenting design *options* to the user before writing the
+spec for the two larger ones.
+
+**Trade-off:** the retroactive specs are honest documentation of what
+was built and why, and still show clear acceptance criteria and
+verification — but they cannot claim the same "requirements review
+before implementation" evidence that spec-first work can. See
+`docs/rubric-evidence.md` for how this is scored against the
+assessment rubric without overstating what happened.
+
 ## SQLite as the permanent database, replacing the originally-planned SQL Server
 
 **Context:** CRM-DB-001 (P0) originally specified SQL Server
