@@ -7,6 +7,10 @@ tickets, agents resolve them within an SLA, managers see reporting, and
 admins manage users/config. Gemini assists agents with suggested
 replies. UI supports Arabic/English.
 
+Each P0 feature area also has its own focused spec (goal, scope,
+acceptance criteria, implementation pointers, verification status) in
+[`features/`](features/README.md).
+
 ## Actors
 
 | Role     | Can do |

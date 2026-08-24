@@ -166,14 +166,14 @@ work proceeds — this file is the live source of truth for progress.
 **Dependencies:** all backend tasks above
 **Backend:** zod schemas per endpoint, central error middleware, standard error shape (api-contract.md).
 **Verification:** Missing required field / bad enum value on each write endpoint → 400 with field-level detail, not a 500.
-**Status:** Not Started
+**Status:** Done — every write endpoint (auth, users, customers, tickets incl. assign/messages, kb) tested with bad/missing input, all return 400 VALIDATION_ERROR with field-level details via the shared zod+error-middleware pattern, never a 500. Also confirmed: nonexistent resource → 404, duplicate email → 409, assigning a non-Agent user to a ticket → 400 with a clear message.
 
 ### TASK-019
 **Requirement:** all P0
 **Goal:** Security/edge-case verification pass (docs/verification.md).
 **Dependencies:** TASK-001..018
 **Verification:** Execute the full negative-case list in `docs/verification.md`; fix anything that fails.
-**Status:** Not Started
+**Status:** Done — full negative-case list executed (see `docs/verification.md`): invalid credentials, missing/expired/malformed JWT, wrong-role access, cross-customer/cross-agent access, invalid priority/status/role references, nonexistent resources, duplicate email, empty search, Gemini disabled. All PASS. Attachments (invalid/oversized) are not in P0 scope — no attachment feature was specced or built, so this generic case doesn't apply here.
 
 ### TASK-020
 **Requirement:** all P0

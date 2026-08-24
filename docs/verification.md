@@ -8,7 +8,8 @@ written after a real check, not because code exists.
 | DB connectivity (Windows Auth) | Prisma migrate against real SQL Server | BLOCKED — TCP/IP disabled on local instance, see debugging-notes.md. Using SQLite temporarily; must revisit before submission |
 | Registration/Login | Register + login via UI (Customer); Admin login via seed | PASS — Playwright screenshots + curl |
 | Invalid credentials | Wrong password → 401, no token; UI shows inline error | PASS |
-| Missing/expired JWT | Protected route without/malformed token → 401 | PASS |
+| Missing/expired JWT | Protected route without/malformed/expired token → 401 | PASS — incl. a token signed with expiresIn:-10s |
+| Empty search result | Customer search with no matches → empty list, not error | PASS |
 | RBAC | Customer token hits Admin-only /api/users → 403; Admin succeeds | PASS |
 | Customer creation | UI → API → DB row (SQLite for now, see decisions.md) | PASS — Playwright screenshots |
 | Ticket creation | UI → API → DB → visible in agent list | PASS — curl + Playwright |
@@ -25,5 +26,8 @@ written after a real check, not because code exists.
 | Reporting accuracy | Report numbers match manual DB count | PASS — manual Prisma groupBy matched exactly; Agent role blocked (403) |
 | Arabic/RTL | Locale switch flips layout + strings | PASS — Playwright, dir flips ltr↔rtl, nav/auth/dashboard/tickets translated |
 | Responsive layout | No horizontal overflow at 375/768/1440px | PASS — 12/12 combinations (4 pages × 3 widths), 1 bug found+fixed (header wrap) |
-| Validation errors | Bad input on write endpoints → 400 w/ details | Pending |
+| Validation errors | Bad input on write endpoints → 400 w/ details | PASS — every write endpoint checked, none return 500 |
+| Nonexistent resource | GET on a random UUID → 404 | PASS — customers and tickets |
+| Duplicate uniqueness | Duplicate email on register/create → 409 | PASS |
+| Invalid role assignment | Assign ticket to a Customer (not Agent) → 400 | PASS |
 | Full demo path | End-to-end run per demo-walkthrough.md | Pending |
