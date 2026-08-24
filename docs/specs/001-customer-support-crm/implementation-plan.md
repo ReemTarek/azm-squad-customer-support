@@ -180,7 +180,7 @@ work proceeds — this file is the live source of truth for progress.
 **Goal:** Demo walkthrough dry run.
 **Dependencies:** TASK-019
 **Verification:** Run the full path in `docs/demo-walkthrough.md` start to finish without manual DB edits (except the SLA backdating case, which is an explicit test step).
-**Status:** Not Started
+**Status:** Done — full guaranteed demo path executed via Playwright: admin login → create agent → create customer → create ticket → assign → agent login → view ticket → Gemini suggested reply → send reply → status→InProgress→Resolved → SLA badge visible throughout → customer sees Resolved status and the agent's reply → admin views report. Zero console errors. Customer feedback (P1) explicitly skipped as out of P0 scope. One real (minor) UX bug found and fixed along the way — see debugging-notes.md.
 
 ---
 

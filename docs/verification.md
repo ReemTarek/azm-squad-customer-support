@@ -30,4 +30,4 @@ written after a real check, not because code exists.
 | Nonexistent resource | GET on a random UUID → 404 | PASS — customers and tickets |
 | Duplicate uniqueness | Duplicate email on register/create → 409 | PASS |
 | Invalid role assignment | Assign ticket to a Customer (not Agent) → 400 | PASS |
-| Full demo path | End-to-end run per demo-walkthrough.md | Pending |
+| Full demo path | End-to-end run per demo-walkthrough.md | PASS — all 15 steps via Playwright, 0 console errors |

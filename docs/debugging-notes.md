@@ -79,3 +79,35 @@ scrolls internally rather than widening the page.
 
 **How verified:** re-ran the same Playwright check — 0px overflow on
 all 12 combinations (4 pages × 3 breakpoints).
+
+## Agent got 403 updating "their" ticket during the demo dry run (TASK-020)
+
+**Symptom:** during the full guaranteed-demo-path run, the agent's
+status-update calls silently didn't persist (ticket stayed "Open" in
+the DB), and two 403s appeared in the console.
+
+**Reproduction:** replayed the exact PATCH the frontend sent, as the
+agent, directly with curl → `403 FORBIDDEN: Only the assigned agent
+can update this ticket`.
+
+**Root cause:** not an app bug — a test-data collision. Two agents
+both named "Demo Agent" existed (one from an earlier aborted run of
+the same script, one from the successful re-run). The assign dropdown
+renders `{name}` only, so Playwright's label-based `selectOption`
+picked the *first* "Demo Agent" in the DOM — a different user than the
+one the script then logged in as. The 403 is the ownership check
+working correctly: an agent who isn't actually assigned can't update
+the ticket.
+
+**Fix:**
+1. Test: select the assign dropdown by agent **id** (from the create
+   response) instead of by display name, which isn't guaranteed
+   unique.
+2. App: the assign dropdown itself had a real latent UX gap — two
+   same-named agents would be indistinguishable to a real Admin/Manager
+   too. Changed it to render `{name} ({email})`, matching the pattern
+   already used in the customer picker.
+
+**How verified:** re-ran the full demo path end-to-end — all 15 steps
+passed, ticket status correctly reached "Resolved" and was visible to
+the customer, zero console errors.
