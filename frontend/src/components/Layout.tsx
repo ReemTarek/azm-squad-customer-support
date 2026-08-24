@@ -20,41 +20,68 @@ export function Layout() {
   const alertCount = (notificationsQuery.data?.breachedCount ?? 0) + (notificationsQuery.data?.atRiskCount ?? 0);
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <Link to="/" className="brand">{t("nav.brand")}</Link>
-        <nav>
-          {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
-            <Link to="/customers">{t("nav.customers")}</Link>
-          )}
-          <Link to="/tickets" className="nav-link-with-badge">
-            {t("nav.tickets")}
-            {alertCount > 0 && (
-              <span
-                className="notification-badge"
-                title={`${notificationsQuery.data?.breachedCount ?? 0} breached, ${notificationsQuery.data?.atRiskCount ?? 0} at risk`}
-              >
-                {alertCount}
-              </span>
-            )}
-          </Link>
-          <Link to="/kb">{t("nav.kb")}</Link>
-          {user.role === "Customer" && <Link to="/chat">Ask a Question</Link>}
-          {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
-            <Link to="/quick-replies">Quick Replies</Link>
-          )}
-          {(user.role === "Admin" || user.role === "Manager") && <Link to="/reports">{t("nav.reports")}</Link>}
-          {user.role === "Admin" && <Link to="/audit-log">Audit Log</Link>}
-          {user.role === "Admin" && <Link to="/admin/sla-settings">SLA Settings</Link>}
-          {user.role === "Admin" && <Link to="/admin/org-settings">Departments &amp; Branches</Link>}
-        </nav>
-        <div className="app-header-user">
-          <LanguageSwitcher />
-          <span>{user.name} ({user.role})</span>
-          <button onClick={logout}>{t("nav.logout")}</button>
+    <div className="d-flex flex-column min-vh-100">
+      <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3">
+        <div className="container-fluid">
+          <Link to="/" className="navbar-brand fw-bold">{t("nav.brand")}</Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#main-nav-collapse"
+            aria-controls="main-nav-collapse"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon" />
+          </button>
+          <div className="collapse navbar-collapse" id="main-nav-collapse">
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
+              {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
+                <li className="nav-item"><Link to="/customers" className="nav-link">{t("nav.customers")}</Link></li>
+              )}
+              <li className="nav-item">
+                <Link to="/tickets" className="nav-link">
+                  {t("nav.tickets")}
+                  {alertCount > 0 && (
+                    <span
+                      className="badge bg-danger rounded-pill ms-1"
+                      title={`${notificationsQuery.data?.breachedCount ?? 0} breached, ${notificationsQuery.data?.atRiskCount ?? 0} at risk`}
+                    >
+                      {alertCount}
+                    </span>
+                  )}
+                </Link>
+              </li>
+              <li className="nav-item"><Link to="/kb" className="nav-link">{t("nav.kb")}</Link></li>
+              {user.role === "Customer" && (
+                <li className="nav-item"><Link to="/chat" className="nav-link">Ask a Question</Link></li>
+              )}
+              {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
+                <li className="nav-item"><Link to="/quick-replies" className="nav-link">Quick Replies</Link></li>
+              )}
+              {(user.role === "Admin" || user.role === "Manager") && (
+                <li className="nav-item"><Link to="/reports" className="nav-link">{t("nav.reports")}</Link></li>
+              )}
+              {user.role === "Admin" && (
+                <li className="nav-item"><Link to="/audit-log" className="nav-link">Audit Log</Link></li>
+              )}
+              {user.role === "Admin" && (
+                <li className="nav-item"><Link to="/admin/sla-settings" className="nav-link">SLA Settings</Link></li>
+              )}
+              {user.role === "Admin" && (
+                <li className="nav-item"><Link to="/admin/org-settings" className="nav-link">Departments &amp; Branches</Link></li>
+              )}
+            </ul>
+            <div className="d-flex align-items-center gap-2">
+              <LanguageSwitcher />
+              <span className="text-secondary small text-nowrap">{user.name} ({user.role})</span>
+              <button className="btn btn-outline-secondary btn-sm" onClick={logout}>{t("nav.logout")}</button>
+            </div>
+          </div>
         </div>
-      </header>
-      <main className="app-main">
+      </nav>
+      <main className="flex-grow-1 container-fluid px-3 px-md-4 py-4">
         <Outlet />
       </main>
     </div>

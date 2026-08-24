@@ -8,7 +8,7 @@ export function LanguageSwitcher() {
   return (
     <select
       aria-label={t("language.label")}
-      className="language-switcher"
+      className="form-select form-select-sm"
       defaultValue={getStoredLocale()}
       onChange={(e) => setLocale(e.target.value as SupportedLocale)}
     >
