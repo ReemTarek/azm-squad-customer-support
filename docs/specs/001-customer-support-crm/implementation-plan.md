@@ -123,7 +123,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `services/gemini.ts` + `POST /tickets/:id/suggest-reply`; 503 `AI_UNAVAILABLE` if key missing/errors.
 **Frontend:** "Suggest Reply" button on ticket detail → populates reply box (editable before send).
 **Verification:** Click button on a real ticket → get a real Gemini-generated draft; unset `GEMINI_API_KEY` and confirm graceful 503, not a crash.
-**Status:** Not Started
+**Status:** Done — verified with the real Gemini API: clicking "Suggest Reply" in the UI populates the reply textarea with a contextually relevant draft (references the actual ticket subject and internal note context). Blanking `GEMINI_API_KEY` and restarting returns 503 `AI_UNAVAILABLE` with the server staying healthy (see debugging-notes.md for the model-name issue hit and fixed along the way).
 
 ### TASK-014
 **Requirement:** CRM-PORTAL-001

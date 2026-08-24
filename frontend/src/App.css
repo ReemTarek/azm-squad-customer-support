@@ -314,6 +314,22 @@
   font-weight: 600;
 }
 
+.secondary-button {
+  padding: 0.5rem 0.9rem;
+  background: white;
+  color: #2f6fed;
+  border: 1px solid #2f6fed;
+  border-radius: 4px;
+  cursor: pointer;
+  width: fit-content;
+  font-size: 0.85rem;
+}
+
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .kb-body {
   max-width: 650px;
   white-space: pre-wrap;

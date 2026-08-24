@@ -71,5 +71,39 @@ A wrong assumption here would silently block every other backend task;
 cheaper to find out on day 1, task 1.
 
 ### Verification
-Pending TASK-001 execution; result (works / needed SQL-auth fallback)
-will be recorded in `docs/debugging-notes.md` if it fails as designed.
+TASK-001 executed: local SQL Server had TCP/IP disabled at the
+protocol level (not an auth issue as originally guessed). Documented
+in `docs/debugging-notes.md`; SQLite substituted temporarily per
+`docs/decisions.md`.
+
+## Gemini suggested-reply integration
+
+### AI suggestion
+Implement `services/gemini.ts` calling `@google/generative-ai` with a
+prompt built from the ticket subject, priority, and full message
+thread (including internal notes, since the draft is agent-facing and
+editable before send — internal notes give the model useful context
+without ever being shown to the customer).
+
+### Review
+Checked: the endpoint is Agent/Manager/Admin only (not Customer), the
+internal-note content never leaves the server response as anything
+other than input to the model, and failures are caught and surfaced as
+503 `AI_UNAVAILABLE` rather than a raw 500.
+
+### Decision
+Accepted, then corrected once: the first real API call returned a 404
+because the assumed model name (`gemini-2.0-flash`) had been retired.
+The API's own error message named the current replacement
+(`gemini-3.6-flash`), which was substituted in.
+
+### Reason
+Server-side logging of the caught error (instead of only swallowing it
+into a generic 503) was what surfaced the real cause quickly — see
+`docs/debugging-notes.md`.
+
+### Verification
+Re-tested against the live API after the model-name fix: got a real,
+contextually relevant draft reply referencing the actual ticket
+content. Also verified the failure path by temporarily blanking
+`GEMINI_API_KEY` — clean 503, server stayed healthy.

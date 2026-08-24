@@ -8,6 +8,7 @@ import {
   listHistory,
   listMessages,
   postMessage,
+  suggestReply,
   updateTicket,
 } from "../../lib/ticketsApi";
 import type { TicketStatus } from "../../lib/ticketsApi";
@@ -46,6 +47,12 @@ export function TicketDetailPage() {
   const assignMutation = useMutation({
     mutationFn: (agentId: string) => assignTicket(id!, agentId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ticket", id] }),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  const suggestMutation = useMutation({
+    mutationFn: () => suggestReply(id!),
+    onSuccess: (reply) => setReplyBody(reply),
     onError: (err) => setActionError(extractApiErrorMessage(err)),
   });
 
@@ -128,6 +135,16 @@ export function TicketDetailPage() {
             Reply
             <textarea value={replyBody} onChange={(e) => setReplyBody(e.target.value)} required rows={3} />
           </label>
+          {canManage && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => suggestMutation.mutate()}
+              disabled={suggestMutation.isPending}
+            >
+              {suggestMutation.isPending ? "Asking Gemini…" : "Suggest Reply"}
+            </button>
+          )}
           {canManage && (
             <label className="checkbox-label">
               <input type="checkbox" checked={isInternalNote} onChange={(e) => setIsInternalNote(e.target.checked)} />

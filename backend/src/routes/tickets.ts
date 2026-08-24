@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeSlaDueDates, computeSlaState } from "../services/sla";
+import { suggestReply } from "../services/gemini";
 import {
   assignTicketSchema,
   createMessageSchema,
@@ -177,6 +178,30 @@ router.post("/:id/messages", requireAuth, requireRole("Admin", "Manager", "Agent
     data: { ticketId: id, authorId: user.id, body: body.body, isInternalNote },
   });
   res.status(201).json({ message });
+});
+
+router.post("/:id/suggest-reply", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const id = String(req.params.id);
+  const ticket = await prisma.ticket.findUnique({ where: { id } });
+  if (!ticket) throw Errors.notFound("Ticket not found");
+
+  const messages = await prisma.ticketMessage.findMany({
+    where: { ticketId: id },
+    orderBy: { createdAt: "asc" },
+    include: { author: { select: { role: true } } },
+  });
+
+  try {
+    const reply = await suggestReply(
+      ticket.subject,
+      ticket.priority,
+      messages.map((m) => ({ authorRole: m.author.role, body: m.body, isInternalNote: m.isInternalNote }))
+    );
+    res.json({ reply });
+  } catch (err) {
+    console.error("Gemini suggest-reply failed:", err);
+    throw Errors.aiUnavailable();
+  }
 });
 
 router.get("/:id/history", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {

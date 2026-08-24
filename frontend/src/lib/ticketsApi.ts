@@ -67,6 +67,11 @@ export async function listMessages(ticketId: string) {
   return data.messages;
 }
 
+export async function suggestReply(ticketId: string) {
+  const { data } = await apiClient.post<{ reply: string }>(`/tickets/${ticketId}/suggest-reply`);
+  return data.reply;
+}
+
 export async function postMessage(ticketId: string, input: { body: string; isInternalNote?: boolean }) {
   const { data } = await apiClient.post<{ message: TicketMessage }>(`/tickets/${ticketId}/messages`, input);
   return data.message;

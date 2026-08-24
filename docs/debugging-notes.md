@@ -34,3 +34,24 @@ before submission.
 
 **How verified:** `prisma migrate dev` succeeded against SQLite; a
 script created a row and read back a count of 1.
+
+## Gemini suggest-reply returned AI_UNAVAILABLE on every call (TASK-013)
+
+**Symptom:** `POST /tickets/:id/suggest-reply` always returned the
+generic 503 `AI_UNAVAILABLE`, even with a valid API key configured.
+
+**Reproduction:** temporarily logged the caught error in the route
+handler instead of swallowing it.
+
+**Root cause:** the model name `gemini-2.0-flash` (assumed at design
+time) is retired. Google's API returned a 404 with an explicit message
+naming the replacement: `models/gemini-2.0-flash is no longer
+available ... use models/gemini-3.6-flash`.
+
+**Fix:** updated `GEMINI_MODEL` default and `.env`/`.env.example` to
+`gemini-3.6-flash`.
+
+**How verified:** re-ran the same request after restarting the backend
+— got a real, contextually relevant draft reply back (correctly
+referencing the internal escalation note as context for tone, without
+leaking it).
