@@ -74,60 +74,61 @@ export function CustomerDetailPage() {
     <div className="page">
       <h1>{customer.name}</h1>
       <p className="form-hint">{customer.email}</p>
-      <form onSubmit={handleSubmit} className="entity-form">
+      <form onSubmit={handleSubmit} className="card card-body mb-3">
         {saveError && <p role="alert" className="form-error">{saveError}</p>}
-        <label>
-          Name
-          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        </label>
-        <label>
-          Phone
-          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-        </label>
-        <label>
-          Company
-          <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
-        </label>
-        <button type="submit" disabled={mutation.isPending}>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="customer-name">Name</label>
+          <input id="customer-name" className="form-control" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="customer-phone">Phone</label>
+          <input id="customer-phone" className="form-control" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="customer-company">Company</label>
+          <input id="customer-company" className="form-control" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
           {mutation.isPending ? "Saving…" : "Save changes"}
         </button>
         {mutation.isSuccess && <p className="form-success">Saved.</p>}
       </form>
 
       {isStaff && (
-        <section>
+        <section className="card card-body mb-3">
           <h2>Ticket History</h2>
-          <ul className="history-list">
+          <ul className="list-group list-group-flush">
             {ticketsQuery.data?.map((t) => (
-              <li key={t.id}>
+              <li key={t.id} className="list-group-item">
                 <Link to={`/tickets/${t.id}`}>{t.subject}</Link> — {t.status} <SlaBadge state={t.slaState} />
               </li>
             ))}
-            {ticketsQuery.data?.length === 0 && <li>No tickets yet.</li>}
+            {ticketsQuery.data?.length === 0 && <li className="list-group-item">No tickets yet.</li>}
           </ul>
         </section>
       )}
 
       {isStaff && (
-        <section>
+        <section className="card card-body mb-3">
           <h2>Notes</h2>
-          <ul className="history-list">
+          <ul className="list-group list-group-flush mb-3">
             {notesQuery.data?.map((n) => (
-              <li key={n.id}>
+              <li key={n.id} className="list-group-item">
                 {n.body} <span className="form-hint">— {n.authorName}, {new Date(n.createdAt).toLocaleString()}</span>
               </li>
             ))}
-            {notesQuery.data?.length === 0 && <li>No notes yet.</li>}
+            {notesQuery.data?.length === 0 && <li className="list-group-item">No notes yet.</li>}
           </ul>
-          <form onSubmit={handleAddNote} className="entity-form entity-form--inline">
+          <form onSubmit={handleAddNote} className="d-flex gap-2">
             <input
               type="text"
               placeholder="Add a note about this customer…"
+              className="form-control"
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               required
             />
-            <button type="submit" disabled={noteMutation.isPending}>
+            <button type="submit" className="btn btn-primary" disabled={noteMutation.isPending}>
               {noteMutation.isPending ? "Adding…" : "Add"}
             </button>
           </form>

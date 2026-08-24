@@ -142,34 +142,40 @@ export function TicketDetailPage() {
 
   return (
     <div className="page ticket-detail">
-      <div className="page-header">
+      <div className="page-header d-flex justify-content-between align-items-center mb-3">
         <h1>{ticket.subject}</h1>
         <SlaBadge state={ticket.slaState} />
       </div>
       {actionError && <p role="alert" className="form-error">{actionError}</p>}
 
-      <div className="ticket-meta">
+      <div className="d-flex flex-wrap gap-4 text-secondary mb-3">
         <span>Category: {ticket.category}</span>
         <span>Priority: {ticket.priority}</span>
         <span>Status: {ticket.status}</span>
       </div>
 
       {canManage && (
-        <div className="ticket-controls">
-          <label>
-            Status
+        <div className="d-flex flex-wrap gap-4 p-3 bg-light rounded mb-4">
+          <div>
+            <label className="form-label" htmlFor="ticket-status-select">Status</label>
             <select
+              id="ticket-status-select"
+              className="form-select form-select-sm"
+              style={{ width: "auto" }}
               value={ticket.status}
               onChange={(e) => statusMutation.mutate(e.target.value as TicketStatus)}
               disabled={statusMutation.isPending}
             >
               {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-          </label>
+          </div>
           {canAssign && (
-            <label>
-              Assign to
+            <div>
+              <label className="form-label" htmlFor="ticket-assign-select">Assign to</label>
               <select
+                id="ticket-assign-select"
+                className="form-select form-select-sm"
+                style={{ width: "auto", maxWidth: "12rem" }}
                 value={ticket.assignedAgentId ?? ""}
                 onChange={(e) => e.target.value && assignMutation.mutate(e.target.value)}
                 disabled={assignMutation.isPending}
@@ -179,12 +185,12 @@ export function TicketDetailPage() {
                   <option key={a.id} value={a.id}>{a.name} ({a.email})</option>
                 ))}
               </select>
-            </label>
+            </div>
           )}
           {canAssign && (
             <button
               type="button"
-              className="secondary-button"
+              className="btn btn-outline-primary align-self-end"
               onClick={() => autoAssignMutation.mutate()}
               disabled={autoAssignMutation.isPending}
             >
@@ -195,12 +201,12 @@ export function TicketDetailPage() {
       )}
 
       {canManage && (
-        <section>
+        <section className="card card-body mb-3">
           <h2>AI Assist</h2>
-          <div className="ai-assist-row">
+          <div className="d-flex flex-wrap gap-2 mb-2">
             <button
               type="button"
-              className="secondary-button"
+              className="btn btn-outline-primary"
               onClick={() => summaryMutation.mutate()}
               disabled={summaryMutation.isPending}
             >
@@ -208,16 +214,16 @@ export function TicketDetailPage() {
             </button>
             <button
               type="button"
-              className="secondary-button"
+              className="btn btn-outline-primary"
               onClick={() => suggestedArticlesMutation.mutate()}
               disabled={suggestedArticlesMutation.isPending}
             >
               {suggestedArticlesMutation.isPending ? "Searching…" : "Suggest Articles"}
             </button>
           </div>
-          {summaryMutation.data && <p className="ai-assist-result">{summaryMutation.data}</p>}
+          {summaryMutation.data && <p className="card card-body bg-light mb-3">{summaryMutation.data}</p>}
           {suggestedArticlesMutation.data && (
-            <ul className="ai-assist-result">
+            <ul className="list-unstyled card card-body bg-light mb-3">
               {suggestedArticlesMutation.data.map((a) => (
                 <li key={a.id}><Link to={`/kb/${a.id}`}>{a.title}</Link> ({a.category})</li>
               ))}
@@ -227,26 +233,26 @@ export function TicketDetailPage() {
         </section>
       )}
 
-      <section>
+      <section className="card card-body mb-3">
         <h2>Messages</h2>
-        <ul className="message-thread">
+        <ul className="list-group mb-3">
           {messagesQuery.data?.map((m) => (
-            <li key={m.id} className={m.isInternalNote ? "message message--internal" : "message"}>
-              {m.isInternalNote && <span className="internal-tag">Internal note</span>}
-              <p>{m.body}</p>
+            <li key={m.id} className={m.isInternalNote ? "list-group-item list-group-item-warning" : "list-group-item"}>
+              {m.isInternalNote && <span className="badge bg-warning text-dark mb-1">Internal note</span>}
+              <p className="mb-0">{m.body}</p>
             </li>
           ))}
         </ul>
-        <form onSubmit={handleReplySubmit} className="entity-form">
-          <label>
-            Reply
-            <textarea value={replyBody} onChange={(e) => setReplyBody(e.target.value)} required rows={3} />
-          </label>
+        <form onSubmit={handleReplySubmit}>
+          <div className="mb-3">
+            <label className="form-label" htmlFor="ticket-reply-body">Reply</label>
+            <textarea id="ticket-reply-body" className="form-control" value={replyBody} onChange={(e) => setReplyBody(e.target.value)} required rows={3} />
+          </div>
           {canManage && (
-            <div className="reply-toolbar">
+            <div className="d-flex align-items-center gap-2 mb-2">
               <button
                 type="button"
-                className="secondary-button"
+                className="btn btn-outline-primary"
                 onClick={() => suggestMutation.mutate()}
                 disabled={suggestMutation.isPending}
               >
@@ -254,6 +260,8 @@ export function TicketDetailPage() {
               </button>
               <select
                 aria-label="Insert quick reply"
+                className="form-select form-select-sm"
+                style={{ width: "auto", maxWidth: "12rem" }}
                 value=""
                 onChange={(e) => {
                   const qr = quickRepliesQuery.data?.find((q) => q.id === e.target.value);
@@ -268,62 +276,78 @@ export function TicketDetailPage() {
             </div>
           )}
           {canManage && (
-            <label className="checkbox-label">
-              <input type="checkbox" checked={isInternalNote} onChange={(e) => setIsInternalNote(e.target.checked)} />
-              Internal note (not visible to customer)
-            </label>
+            <div className="form-check mb-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="ticket-internal-note"
+                checked={isInternalNote}
+                onChange={(e) => setIsInternalNote(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="ticket-internal-note">
+                Internal note (not visible to customer)
+              </label>
+            </div>
           )}
-          <button type="submit" disabled={messageMutation.isPending}>
+          <button type="submit" className="btn btn-primary" disabled={messageMutation.isPending}>
             {messageMutation.isPending ? "Sending…" : "Send"}
           </button>
         </form>
       </section>
 
       {canManage && (
-        <section>
+        <section className="card card-body mb-3">
           <h2>Tasks / Reminders</h2>
-          <ul className="task-list">
+          <ul className="list-group mb-3">
             {tasksQuery.data?.map((task) => (
-              <li key={task.id} className={task.completed ? "task-item task-item--done" : "task-item"}>
-                <label>
+              <li key={task.id} className="list-group-item d-flex align-items-center gap-2">
+                <div className="form-check mb-0">
                   <input
                     type="checkbox"
+                    className="form-check-input"
+                    id={`task-${task.id}`}
                     checked={task.completed}
                     onChange={(e) => toggleTaskMutation.mutate({ taskId: task.id, completed: e.target.checked })}
                   />
-                  {task.title}
-                </label>
-                {task.dueAt && <span className="task-due">Due {new Date(task.dueAt).toLocaleDateString()}</span>}
+                  <label
+                    className={task.completed ? "form-check-label text-decoration-line-through text-muted" : "form-check-label"}
+                    htmlFor={`task-${task.id}`}
+                  >
+                    {task.title}
+                  </label>
+                </div>
+                {task.dueAt && <span className="badge text-bg-warning">Due {new Date(task.dueAt).toLocaleDateString()}</span>}
               </li>
             ))}
-            {tasksQuery.data?.length === 0 && <li>No tasks yet.</li>}
+            {tasksQuery.data?.length === 0 && <li className="list-group-item">No tasks yet.</li>}
           </ul>
-          <form onSubmit={handleAddTask} className="entity-form entity-form--inline">
+          <form onSubmit={handleAddTask} className="d-flex gap-2">
             <input
               type="text"
               placeholder="New task or reminder…"
+              className="form-control"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               required
             />
-            <button type="submit" disabled={addTaskMutation.isPending}>
+            <button type="submit" className="btn btn-primary" disabled={addTaskMutation.isPending}>
               {addTaskMutation.isPending ? "Adding…" : "Add"}
             </button>
           </form>
         </section>
       )}
 
-      <section>
+      <section className="card card-body mb-3">
         <h2>History</h2>
-        <ul className="history-list">
+        <ul className="list-group list-group-flush small text-secondary">
           {historyQuery.data?.map((h) => (
-            <li key={h.id}>{h.fromStatus ?? "—"} → {h.toStatus} ({new Date(h.changedAt).toLocaleString()})</li>
+            <li key={h.id} className="list-group-item">{h.fromStatus ?? "—"} → {h.toStatus} ({new Date(h.changedAt).toLocaleString()})</li>
           ))}
         </ul>
       </section>
 
       {(ticket.status === "Resolved" || ticket.status === "Closed") && (
-        <section>
+        <section className="card card-body mb-3">
           <h2>Customer Satisfaction</h2>
           {feedbackQuery.data ? (
             <p>
@@ -331,18 +355,18 @@ export function TicketDetailPage() {
               {feedbackQuery.data.comment && <> — "{feedbackQuery.data.comment}"</>}
             </p>
           ) : user?.role === "Customer" ? (
-            <form onSubmit={handleFeedbackSubmit} className="entity-form">
-              <label>
-                Rating (1-5)
-                <select value={feedbackRating} onChange={(e) => setFeedbackRating(Number(e.target.value))}>
+            <form onSubmit={handleFeedbackSubmit}>
+              <div className="mb-3">
+                <label className="form-label" htmlFor="feedback-rating">Rating (1-5)</label>
+                <select id="feedback-rating" className="form-select" style={{ width: "auto" }} value={feedbackRating} onChange={(e) => setFeedbackRating(Number(e.target.value))}>
                   {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
-              </label>
-              <label>
-                Comment (optional)
-                <textarea rows={2} value={feedbackComment} onChange={(e) => setFeedbackComment(e.target.value)} />
-              </label>
-              <button type="submit" disabled={feedbackMutation.isPending}>
+              </div>
+              <div className="mb-3">
+                <label className="form-label" htmlFor="feedback-comment">Comment (optional)</label>
+                <textarea id="feedback-comment" className="form-control" rows={2} value={feedbackComment} onChange={(e) => setFeedbackComment(e.target.value)} />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={feedbackMutation.isPending}>
                 {feedbackMutation.isPending ? "Submitting…" : "Submit feedback"}
               </button>
             </form>

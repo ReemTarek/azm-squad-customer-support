@@ -26,16 +26,18 @@ export function KbDetailPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-header d-flex justify-content-between align-items-center mb-3">
         <h1>{article.title}</h1>
         {canAuthor && (
-          <button onClick={() => togglePublish.mutate()} disabled={togglePublish.isPending}>
+          <button className="btn btn-primary" onClick={() => togglePublish.mutate()} disabled={togglePublish.isPending}>
             {article.published ? "Unpublish" : "Publish"}
           </button>
         )}
       </div>
       <p className="form-hint">{article.category} {!article.published && "· Draft"}</p>
-      <p className="kb-body">{article.body}</p>
+      <div className="card card-body">
+        <p className="kb-body mb-0">{article.body}</p>
+      </div>
     </div>
   );
 }

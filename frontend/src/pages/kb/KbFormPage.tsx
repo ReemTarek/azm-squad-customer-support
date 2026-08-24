@@ -27,21 +27,21 @@ export function KbFormPage() {
   return (
     <div className="page">
       <h1>New Article</h1>
-      <form onSubmit={handleSubmit} className="entity-form">
+      <form onSubmit={handleSubmit} className="card card-body mb-3">
         {error && <p role="alert" className="form-error">{error}</p>}
-        <label>
-          Title
-          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-        </label>
-        <label>
-          Category
-          <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
-        </label>
-        <label>
-          Body
-          <textarea rows={8} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
-        </label>
-        <button type="submit" disabled={isSubmitting}>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="kb-title">Title</label>
+          <input id="kb-title" className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="kb-category">Category</label>
+          <input id="kb-category" className="form-control" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="kb-body">Body</label>
+          <textarea id="kb-body" className="form-control" rows={8} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
           {isSubmitting ? "Creating…" : "Create article (draft)"}
         </button>
       </form>
