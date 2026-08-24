@@ -31,3 +31,14 @@ written after a real check, not because code exists.
 | Duplicate uniqueness | Duplicate email on register/create → 409 | PASS |
 | Invalid role assignment | Assign ticket to a Customer (not Agent) → 400 | PASS |
 | Full demo path | End-to-end run per demo-walkthrough.md | PASS — all 15 steps via Playwright, 0 console errors |
+
+## P1
+
+| Feature | Verification | Result |
+|---|---|---|
+| Ticket tasks/reminders | Create/complete a task, Agent scoping, Customer blocked | PASS — curl + Playwright |
+| Quick reply templates | Save, insert into a ticket's reply box, RBAC | PASS — curl + Playwright |
+| Automatic assignment | Least-loaded agent picked, cross-checked against manual load count | PASS — curl + Playwright |
+| Customer satisfaction | Only after Resolved/Closed, one per ticket, ownership enforced | PASS — curl + Playwright |
+| Audit log | Entries written on user/customer/assignment/KB-publish actions, Admin-only UI | PASS — curl + Playwright |
+| Richer reports | SLA breach rate + 7-day trend, cross-checked against manual DB query | PASS — curl + Playwright |

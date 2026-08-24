@@ -11,3 +11,15 @@ export async function getReportsSummary() {
   const { data } = await apiClient.get<ReportsSummary>("/reports/summary");
   return data;
 }
+
+export interface ReportsTrends {
+  slaBreachRatePercent: number;
+  totalResolved: number;
+  totalBreached: number;
+  ticketsCreatedPerDay: { date: string; count: number }[];
+}
+
+export async function getReportsTrends() {
+  const { data } = await apiClient.get<ReportsTrends>("/reports/trends");
+  return data;
+}

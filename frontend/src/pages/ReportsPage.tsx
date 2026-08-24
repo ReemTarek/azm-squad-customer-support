@@ -1,12 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { getReportsSummary } from "../lib/reportsApi";
+import { getReportsSummary, getReportsTrends } from "../lib/reportsApi";
 
 export function ReportsPage() {
-  const { data, isLoading, error } = useQuery({ queryKey: ["reports-summary"], queryFn: getReportsSummary });
+  const summaryQuery = useQuery({ queryKey: ["reports-summary"], queryFn: getReportsSummary });
+  const trendsQuery = useQuery({ queryKey: ["reports-trends"], queryFn: getReportsTrends });
 
-  if (isLoading) return <p>Loading…</p>;
-  if (error) return <p role="alert" className="form-error">Failed to load report.</p>;
+  if (summaryQuery.isLoading) return <p>Loading…</p>;
+  if (summaryQuery.error) return <p role="alert" className="form-error">Failed to load report.</p>;
+  const data = summaryQuery.data;
   if (!data) return null;
+
+  const trends = trendsQuery.data;
+  const maxDayCount = trends ? Math.max(1, ...trends.ticketsCreatedPerDay.map((d) => d.count)) : 1;
 
   return (
     <div className="page">
@@ -37,7 +42,29 @@ export function ReportsPage() {
             {data.ticketsPerAgent.length === 0 && <li>No assignments yet.</li>}
           </ul>
         </section>
+        {trends && (
+          <section className="report-card">
+            <h2>SLA breach rate</h2>
+            <p className="report-stat">{trends.slaBreachRatePercent}%</p>
+            <p className="form-hint">{trends.totalBreached} of {trends.totalResolved} resolved tickets breached SLA</p>
+          </section>
+        )}
       </div>
+
+      {trends && (
+        <section className="report-card trend-card">
+          <h2>Tickets created (last 7 days)</h2>
+          <div className="trend-bars">
+            {trends.ticketsCreatedPerDay.map((d) => (
+              <div key={d.date} className="trend-bar-col">
+                <div className="trend-bar" style={{ height: `${(d.count / maxDayCount) * 80 + 4}px` }} />
+                <span className="trend-bar-label">{d.date.slice(5)}</span>
+                <span className="trend-bar-count">{d.count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
