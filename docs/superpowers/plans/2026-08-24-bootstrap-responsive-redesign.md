@@ -507,7 +507,16 @@ since it touches the largest number of Style Guide rows.
 
 - [ ] **Step 2: Apply the Style Guide mapping to each file**
 
-Every label/input pair → the same `mb-3`/`form-label`/`form-control`
+`KbDetailPage.tsx` and `TicketDetailPage.tsx` each have a page-header
+element (title + optional action link) using the `.page-header` custom
+class, same as the pages Task 4 migrated — apply the same
+`page-header d-flex justify-content-between align-items-center mb-3`
+classes here too (keep the literal string `page-header` in the
+className alongside the new Bootstrap utilities, exactly as Task 4 did
+elsewhere — don't drop it, `.page-header`'s CSS rule is still in
+`App.css` until Task 7's sweep, and this is what lets Task 7's grep
+find zero *meaningful* remaining usages once Task 6 also does this for
+`ReportsPage.tsx`). Every label/input pair → the same `mb-3`/`form-label`/`form-control`
 restructure as Task 3, **including the `htmlFor`/`id` pairing added to
 the Style Guide after Task 3's review** — Task 3 shipped without it,
 this task must not repeat that gap. Every checkbox+label (e.g. the internal-note
@@ -581,7 +590,16 @@ git commit -m "feat: migrate ticket/customer/KB detail and form pages to Bootstr
 
 - [ ] **Step 2: Apply the Style Guide mapping to each file**
 
-`DashboardShellPage.tsx` needs no edits (see Files above). `ReportsPage.tsx`: replace `.report-grid`
+`DashboardShellPage.tsx` needs no edits (see Files above). `ReportsPage.tsx`
+also has a `.page-header` element (title) — apply the same
+`page-header d-flex justify-content-between align-items-center mb-3`
+classes Task 4/5 applied elsewhere (keep the literal `page-header`
+string in the className alongside the new utilities). This is the
+last of the three `.page-header` usages Task 4 didn't cover (the
+other two, `KbDetailPage.tsx`/`TicketDetailPage.tsx`, are handled in
+Task 5) — once this one's done too, Task 7's final sweep can safely
+delete `.page-header`'s `App.css` rule, since every usage will carry
+its own Bootstrap utilities. Then: replace `.report-grid`
 with Bootstrap's grid
 (`row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3`), each `.report-card`
 becomes `<div className="col"><div className="card h-100"><div className="card-body">`,
@@ -629,15 +647,32 @@ git commit -m "feat: migrate remaining pages to Bootstrap, remove dead dashboard
 - [ ] **Step 1: Final CSS cleanup sweep**
 
 By this point every page has been migrated, so any custom class that
-was deferred by an earlier task's "once nothing references it" caveat
-(most notably `.page-header`, deferred by Task 4 because Task 5/6
-files still used it at the time) can now be safely removed. Grep
-`frontend/src` for every remaining rule in `frontend/src/App.css` —
-for each one, if zero matches remain outside `App.css` itself, delete
-the rule. **Keep these regardless of reference count** (per the Style
-Guide, they have no Bootstrap equivalent or are deliberately-kept
-overrides): `.auth-form`'s width rule, `.trend-bars`/`.trend-bar-col`/
-`.trend-bar`/`.trend-bar-label`/`.trend-bar-count`, `.kb-body`'s
+was deferred by an earlier task's caveat can now be swept up. There
+are two distinct kinds of "still referenced" to tell apart here — use
+the right test for each:
+
+1. **Classes with zero remaining JSX references at all** — the normal
+   case: grep `frontend/src` for the class name; if nothing outside
+   `App.css` itself matches, delete the rule.
+2. **Classes deliberately kept as inert markers alongside full
+   Bootstrap replacement** — `.page-header` and `.filters` specifically
+   (Tasks 4/5/6 kept these literal strings in the `className` alongside
+   the new Bootstrap utility classes, e.g.
+   `className="page-header d-flex justify-content-between ..."`, so a
+   plain grep will always find matches — that does NOT mean the CSS
+   rule is still needed). For these, the real test is: does the
+   `App.css` rule's declarations still change anything visually, given
+   every page using that class now also carries the full replacement
+   Bootstrap utilities? If Task 4/5/6 all did their job, the answer is
+   no for both `.page-header` and `.filters` — delete their `App.css`
+   rules even though the bare class-name strings remain in JSX (the
+   strings are harmless leftover markers, not something this task
+   needs to strip from JSX).
+
+**Keep these regardless of reference count** (per the Style Guide,
+they have no Bootstrap equivalent or are deliberately-kept overrides):
+`.auth-form`'s width rule, `.trend-bars`/`.trend-bar-col`/`.trend-bar`/
+`.trend-bar-label`/`.trend-bar-count`, `.kb-body`'s
 `white-space: pre-wrap` rule.
 
 - [ ] **Step 2: Full guaranteed-demo-path click-through**
