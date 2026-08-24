@@ -31,9 +31,9 @@ describe("department/branch RBAC scoping", () => {
     await createTicketInDepartment(customer.id, deptB.id);
 
     const listRes = await request(app).get("/api/tickets").set("Authorization", `Bearer ${managerToken}`);
-    const subjects = listRes.body.tickets.map((t: { id: string }) => t.id);
-    expect(subjects).toContain(ticketA.id);
-    expect(subjects).toHaveLength(1);
+    const ids = listRes.body.tickets.map((t: { id: string }) => t.id);
+    expect(ids).toContain(ticketA.id);
+    expect(ids).toHaveLength(1);
   });
 
   it("a Manager scoped to Department A gets 403 fetching a Department B ticket directly", async () => {
