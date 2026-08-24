@@ -79,3 +79,18 @@ Straightforward to add whenever credentials are available — this is
 the lowest-risk of the four discussion items precisely because the
 integration boundary was already built and verified in TASK-035/036.
 Nothing left to decide except when each credential set arrives.
+
+## Progress (2026-08-24)
+
+**Email: code-complete, pending credentials.** `SmtpEmailChannel`
+(nodemailer) replaces the mock in `notificationDispatcher.ts`. Reads
+`SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS` from `.env`; falls back
+to console-logging (not throwing) when unconfigured, so the app works
+identically before and after credentials arrive. Verified: resolving a
+ticket with SMTP unconfigured still returns 200 and logs
+`[email:unconfigured] ... would send to=...`; the `notification.sent`
+audit-log entry is still written either way. Once a real Gmail address
++ app password are added to `backend/.env`, no code change is needed —
+real emails will start sending immediately.
+
+**SMS/WhatsApp: not yet started**, pending Twilio/Meta credentials.

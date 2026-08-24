@@ -1,11 +1,11 @@
 import type { NotificationChannel } from "./notificationChannel";
-import { ConsoleEmailChannel } from "./channels/emailChannel";
+import { SmtpEmailChannel } from "./channels/smtpEmailChannel";
 import { ConsoleSmsChannel } from "./channels/smsChannel";
 import { ConsoleWhatsAppChannel } from "./channels/whatsappChannel";
 import { writeAuditLog } from "../lib/audit";
 
 const channels: Record<string, NotificationChannel> = {
-  email: new ConsoleEmailChannel(),
+  email: new SmtpEmailChannel(),
   sms: new ConsoleSmsChannel(),
   whatsapp: new ConsoleWhatsAppChannel(),
 };
