@@ -62,6 +62,13 @@ export async function assignTicket(id: string, agentId: string) {
   return data.ticket;
 }
 
+export async function autoAssignTicket(id: string) {
+  const { data } = await apiClient.post<{ ticket: Ticket; assignedAgent: { id: string; name: string } }>(
+    `/tickets/${id}/auto-assign`
+  );
+  return data;
+}
+
 export async function listMessages(ticketId: string) {
   const { data } = await apiClient.get<{ messages: TicketMessage[] }>(`/tickets/${ticketId}/messages`);
   return data.messages;

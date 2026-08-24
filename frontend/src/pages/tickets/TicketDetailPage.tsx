@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignTicket,
+  autoAssignTicket,
   getTicket,
   listHistory,
   listMessages,
@@ -51,6 +52,12 @@ export function TicketDetailPage() {
 
   const assignMutation = useMutation({
     mutationFn: (agentId: string) => assignTicket(id!, agentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ticket", id] }),
+    onError: (err) => setActionError(extractApiErrorMessage(err)),
+  });
+
+  const autoAssignMutation = useMutation({
+    mutationFn: () => autoAssignTicket(id!),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ticket", id] }),
     onError: (err) => setActionError(extractApiErrorMessage(err)),
   });
@@ -143,6 +150,16 @@ export function TicketDetailPage() {
                 ))}
               </select>
             </label>
+          )}
+          {canAssign && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => autoAssignMutation.mutate()}
+              disabled={autoAssignMutation.isPending}
+            >
+              {autoAssignMutation.isPending ? "Auto-assigning…" : "Auto-assign (least loaded)"}
+            </button>
           )}
         </div>
       )}

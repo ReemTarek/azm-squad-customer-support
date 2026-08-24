@@ -153,6 +153,34 @@ router.post("/:id/assign", requireAuth, requireRole("Admin", "Manager"), async (
   res.json({ ticket: toTicketDto(updated) });
 });
 
+router.post("/:id/auto-assign", requireAuth, requireRole("Admin", "Manager"), async (req, res) => {
+  const id = String(req.params.id);
+  const ticket = await prisma.ticket.findUnique({ where: { id } });
+  if (!ticket) throw Errors.notFound("Ticket not found");
+
+  const agents = await prisma.user.findMany({ where: { role: "Agent" }, orderBy: { createdAt: "asc" } });
+  if (agents.length === 0) throw Errors.validation("No agents exist to assign to");
+
+  const openLoad = await prisma.ticket.groupBy({
+    by: ["assignedAgentId"],
+    _count: { _all: true },
+    where: { assignedAgentId: { not: null }, status: { in: ["Open", "InProgress"] } },
+  });
+  const loadByAgent = new Map(openLoad.map((row) => [row.assignedAgentId, row._count._all]));
+
+  const leastLoadedAgent = agents.reduce((best, candidate) => {
+    const bestLoad = loadByAgent.get(best.id) ?? 0;
+    const candidateLoad = loadByAgent.get(candidate.id) ?? 0;
+    return candidateLoad < bestLoad ? candidate : best;
+  });
+
+  const updated = await prisma.ticket.update({
+    where: { id },
+    data: { assignedAgentId: leastLoadedAgent.id },
+  });
+  res.json({ ticket: toTicketDto(updated), assignedAgent: { id: leastLoadedAgent.id, name: leastLoadedAgent.name } });
+});
+
 router.get("/:id/messages", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {
   const user = req.user!;
   await assertTicketAccess(String(req.params.id), user);
