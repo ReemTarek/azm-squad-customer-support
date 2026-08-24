@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { createStaffUserSchema, listUsersQuerySchema, updateUserSchema } from "../validation/users.schema";
+import { writeAuditLog } from "../lib/audit";
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.post("/", requireAuth, requireRole("Admin"), async (req, res) => {
   const user = await prisma.user.create({
     data: { email: body.email, passwordHash, name: body.name, role: body.role },
   });
+  await writeAuditLog(req.user!.id, "user.create", "User", user.id, { role: user.role, email: user.email });
   res.status(201).json({ user: toPublicUser(user) });
 });
 

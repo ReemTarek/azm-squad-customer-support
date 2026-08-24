@@ -192,7 +192,7 @@ work proceeds — this file is the live source of truth for progress.
 | TASK-022 | CRM-QUICKREPLY-002 | Saved quick-reply templates — **Done**, verified (curl + Playwright): create/list/delete quick replies, Customer blocked (403), inserted into a ticket's reply box from the detail page |
 | TASK-023 | CRM-ASSIGN-002 | Automatic assignment (least-loaded agent) — **Done**, verified (curl + Playwright): picks the Agent with fewest open/in-progress tickets, ties broken by earliest-created agent; Agent role blocked (403) |
 | TASK-024 | CRM-CSAT-002 | Customer feedback rating after resolution — **Done**, verified (curl + Playwright): only shown/allowed once Resolved/Closed, one submission per ticket (409 on repeat), cross-customer and Agent submission blocked (403/N/A) |
-| TASK-025 | CRM-AUDIT-002 | Audit log UI |
+| TASK-025 | CRM-AUDIT-002 | Audit log UI — **Done**, verified (curl + Playwright): user/customer creation, ticket assignment (manual+auto), and KB publish/unpublish all write entries; Admin-only page with entity-type filter; Agent blocked (403) |
 | TASK-026 | CRM-REPORT-002 | Richer reports (SLA breach trends) |
 
 ## P2 (interfaces only, do not implement the real integration)

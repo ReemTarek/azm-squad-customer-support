@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { createArticleSchema, updateArticleSchema } from "../validation/kb.schema";
+import { writeAuditLog } from "../lib/audit";
 
 const router = Router();
 
@@ -41,6 +42,11 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Agent"), async (req, res
 
   const body = updateArticleSchema.parse(req.body);
   const article = await prisma.knowledgeBaseArticle.update({ where: { id }, data: body });
+
+  if (body.published !== undefined && body.published !== existing.published) {
+    await writeAuditLog(req.user!.id, body.published ? "kb.publish" : "kb.unpublish", "KnowledgeBaseArticle", id);
+  }
+
   res.json({ article });
 });
 

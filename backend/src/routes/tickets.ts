@@ -13,6 +13,7 @@ import {
 } from "../validation/tickets.schema";
 import { createTaskSchema, updateTaskSchema } from "../validation/tasks.schema";
 import { createFeedbackSchema } from "../validation/feedback.schema";
+import { writeAuditLog } from "../lib/audit";
 import type { Ticket } from "@prisma/client";
 
 const router = Router();
@@ -151,6 +152,7 @@ router.post("/:id/assign", requireAuth, requireRole("Admin", "Manager"), async (
   if (!agent || agent.role !== "Agent") throw Errors.validation("agentId must reference an existing Agent");
 
   const updated = await prisma.ticket.update({ where: { id }, data: { assignedAgentId: body.agentId } });
+  await writeAuditLog(req.user!.id, "ticket.assign", "Ticket", id, { agentId: body.agentId, method: "manual" });
   res.json({ ticket: toTicketDto(updated) });
 });
 
@@ -179,6 +181,7 @@ router.post("/:id/auto-assign", requireAuth, requireRole("Admin", "Manager"), as
     where: { id },
     data: { assignedAgentId: leastLoadedAgent.id },
   });
+  await writeAuditLog(req.user!.id, "ticket.assign", "Ticket", id, { agentId: leastLoadedAgent.id, method: "auto" });
   res.json({ ticket: toTicketDto(updated), assignedAgent: { id: leastLoadedAgent.id, name: leastLoadedAgent.name } });
 });
 

@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { createCustomerSchema, updateCustomerSchema } from "../validation/customers.schema";
+import { writeAuditLog } from "../lib/audit";
 
 const router = Router();
 
@@ -59,6 +60,7 @@ router.post("/", requireAuth, requireRole("Admin", "Agent"), async (req, res) =>
     include: { customerProfile: true },
   });
 
+  await writeAuditLog(req.user!.id, "customer.create", "User", user.id, { email: user.email });
   res.status(201).json({ customer: toPublicCustomer(user) });
 });
 

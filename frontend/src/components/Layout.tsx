@@ -22,6 +22,7 @@ export function Layout() {
             <Link to="/quick-replies">Quick Replies</Link>
           )}
           {(user.role === "Admin" || user.role === "Manager") && <Link to="/reports">{t("nav.reports")}</Link>}
+          {user.role === "Admin" && <Link to="/audit-log">Audit Log</Link>}
         </nav>
         <div className="app-header-user">
           <LanguageSwitcher />
