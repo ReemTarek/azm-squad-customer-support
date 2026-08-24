@@ -16,7 +16,8 @@ steps above with zero console errors (see
 ## Architecture overview
 
 React SPA (Vite) → Express REST API (routes → RBAC middleware →
-services → Prisma) → SQL Server (currently SQLite, see below). Gemini
+services → Prisma) → SQLite (see below for why, not SQL Server as
+originally planned). Gemini
 is called server-side only; the frontend never sees the API key. Full
 diagram in `docs/specs/001-customer-support-crm/architecture.md`.
 
@@ -45,12 +46,12 @@ Full record: `docs/specs/001-customer-support-crm/decisions.md`
 
 Prisma ORM, schema in
 `docs/specs/001-customer-support-crm/data-model.md`, migrations in
-`backend/prisma/migrations`. **Currently running on SQLite**, not SQL
-Server — the local SQL Server instance has TCP/IP disabled at the
-protocol level (see "difficult technical problem" below), and
-switching back is a one-line `datasource.provider` + `DATABASE_URL`
-change since Prisma's query API doesn't change between providers. This
-is the one requirement (CRM-DB-001) not fully satisfied as specified.
+`backend/prisma/migrations`. **Runs on SQLite**, a deliberate final
+decision rather than the originally-planned SQL Server — the local SQL
+Server instance has TCP/IP disabled at the protocol level (see
+"difficult technical problem" below). Prisma's query API is identical
+across providers, so nothing in the schema, routes, or business logic
+changed as a result.
 
 ## Backend request flow (example: posting a ticket reply)
 
@@ -112,16 +113,16 @@ using Shared Memory/Named Pipes, while Prisma's driver only speaks TCP
 (`SuperSocketNetLib\Tcp\Enabled = 0`), unrelated to the Windows
 Authentication setup that was the original suspect. Fixing it requires
 an admin-elevated registry change + service restart, which was outside
-what the assistant's tooling could do and the user chose not to do
-mid-session — so SQLite was substituted as a like-for-like stand-in
-via Prisma (same query API, same models), with the real root cause and
-fix path documented for later. Full account in
-`docs/debugging-notes.md`.
+what the assistant's tooling could do — so SQLite became the permanent
+database instead, a deliberate decision rather than a stopgap, since
+Prisma's query API is identical either way (same models, same routes).
+Full account in `docs/debugging-notes.md`.
 
 ## Trade-offs made because of the 3-day deadline
 
-- SQL Server deferred to SQLite (above) rather than spending session
-  time on an OS-level network config change.
+- SQL Server replaced with SQLite (above) rather than spending session
+  time on an OS-level network config change — a deliberate final call,
+  not a stopgap.
 - Automatic assignment, quick-reply templates, task/reminders, audit
   log UI, and customer satisfaction ratings (all P1) were not started —
   every P0 requirement was fully built and verified first, per the
@@ -135,8 +136,9 @@ fix path documented for later. Full account in
 
 ## What would be improved for production
 
-- Switch to SQL Server (the one open P0 item) and add integration
-  tests that run in CI against a real instance.
+- If a shared/production deployment ever required SQL Server (e.g. an
+  existing ops standard), it's a one-line datasource change; add
+  integration tests that run in CI against a real instance either way.
 - Server-side refresh-token revocation (currently stateless JWTs).
 - Automatic ticket assignment (least-loaded agent), SLA breach
   notifications (the compute-on-read model has no push mechanism),

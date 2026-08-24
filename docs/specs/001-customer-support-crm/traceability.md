@@ -17,5 +17,5 @@
 | CRM-REPORT-001 | Ticket (aggregate) | GET /reports/summary | Report page | TASK-015 checklist |
 | CRM-I18N-001 | User.locale | login response carries locale | i18next + RTL | TASK-016 checklist |
 | CRM-UI-001 | — | — | responsive layout pass | TASK-017 checklist |
-| CRM-DB-001 | all models | Prisma → SQL Server | — | TASK-001/002 checklist |
+| CRM-DB-001 | all models | Prisma → SQLite (final choice, see decisions.md) | — | TASK-001/002 checklist |
 | CRM-VALID-001 | — | zod schemas + error middleware | form validation errors | TASK-018 checklist |

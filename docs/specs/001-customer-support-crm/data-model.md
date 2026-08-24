@@ -1,8 +1,9 @@
 # Data Model
 
-Database: **AzmSupportCrm** (SQL Server). Modeled in Prisma; types below
-are the conceptual shape — see `backend/prisma/schema.prisma` for the
-authoritative source once implemented.
+Database: **SQLite** (`backend/dev.db`) — originally planned as SQL
+Server; see `docs/decisions.md` for why SQLite is the permanent choice.
+Modeled in Prisma; types below are the conceptual shape — see
+`backend/prisma/schema.prisma` for the authoritative source.
 
 ## User
 Unified login table for every role (Admin/Manager/Agent/Customer).

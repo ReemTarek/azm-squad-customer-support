@@ -7,7 +7,7 @@ just code existing. Mirrors `docs/verification.md` results.
 - [x] Wrong password / nonexistent email → clear 401, no token
 - [x] Expired/invalid JWT on a protected route → 401
 - [x] Agent hitting an Admin-only route → 403
-- [x] Admin creates a Customer → persisted, visible in list (**SQLite for now, not SQL Server — see decisions.md; must switch before final submission**)
+- [x] Admin creates a Customer → persisted, visible in list (SQLite — see decisions.md for why this replaced SQL Server)
 - [x] Customer creates a ticket → persisted, visible to Admin/Manager, NOT visible to other customers
 - [x] Ticket status change → history entry recorded, visible on detail page
 - [x] Admin/Manager assigns ticket to Agent → appears on that Agent's dashboard
@@ -23,6 +23,7 @@ just code existing. Mirrors `docs/verification.md` results.
 - [x] Every write endpoint returns 400 with field details on bad input, not 500
 - [x] Full demo path (`docs/demo-walkthrough.md`) runs start to finish
 
-All P0 acceptance criteria verified. One open item before final
-submission: switch the database provider back to SQL Server (see
-`docs/specs/001-customer-support-crm/features/01-database.md`).
+All P0 acceptance criteria verified. Database runs on SQLite by
+deliberate final decision (see
+`docs/specs/001-customer-support-crm/features/01-database.md`), not a
+pending item.

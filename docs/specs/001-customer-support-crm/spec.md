@@ -36,7 +36,7 @@ IDs are referenced from architecture/data-model/api-contract/plan/traceability d
 | CRM-STATUS-001 | Ticket status transitions (Open→In Progress→Resolved→Closed) recorded as history |
 | CRM-COMM-001 | Threaded ticket messages; agent-only internal notes vs customer-visible replies |
 | CRM-DASH-001 | Agent dashboard: tickets assigned to me, filterable by status/priority |
-| CRM-DB-001 | All persistence in SQL Server via Prisma |
+| CRM-DB-001 | All persistence via Prisma against a relational database (SQLite — see decisions.md for why this replaced the originally-planned SQL Server) |
 | CRM-VALID-001 | Input validation + structured error responses on all write endpoints |
 | CRM-SLA-001 | Ticket priority determines response/resolution due timestamps; SLA state (on_track/at_risk/breached) computed and shown |
 | CRM-KB-001 | Knowledge base articles: CRUD (agent/admin), browse/search (all roles) |
@@ -74,5 +74,5 @@ deployment/infra automation, SSO/OAuth login.
 ## Success criteria
 
 The end-to-end demo path in `docs/demo-walkthrough.md` runs start to
-finish against a real SQL Server database, with the negative/security
-cases in `docs/verification.md` passing.
+finish against a real database (SQLite — see decisions.md), with the
+negative/security cases in `docs/verification.md` passing.

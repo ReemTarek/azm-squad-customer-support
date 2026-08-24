@@ -20,6 +20,6 @@ complement (not replace) the project-level `spec.md`,
 | [11](11-responsive-ui.md) | Responsive UI | CRM-UI-001 |
 | [12](12-validation-error-handling.md) | Validation & error handling | CRM-VALID-001 |
 
-All 12 are Done as of this writing, except 01-database.md which flags
-a known deviation (SQLite substituted for SQL Server) that must be
-resolved before CRM-DB-001 is fully satisfied.
+All 12 are Done as of this writing. 01-database.md records one
+deliberate deviation from the original wording of CRM-DB-001: the app
+runs on SQLite, not SQL Server, by final decision — not a pending item.

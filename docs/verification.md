@@ -5,13 +5,13 @@ written after a real check, not because code exists.
 
 | Feature | Verification | Result |
 |---|---|---|
-| DB connectivity (Windows Auth) | Prisma migrate against real SQL Server | BLOCKED — TCP/IP disabled on local instance, see debugging-notes.md. Using SQLite temporarily; must revisit before submission |
+| DB connectivity | Prisma migrate against SQLite (final choice, was originally SQL Server — see decisions.md) | PASS |
 | Registration/Login | Register + login via UI (Customer); Admin login via seed | PASS — Playwright screenshots + curl |
 | Invalid credentials | Wrong password → 401, no token; UI shows inline error | PASS |
 | Missing/expired JWT | Protected route without/malformed/expired token → 401 | PASS — incl. a token signed with expiresIn:-10s |
 | Empty search result | Customer search with no matches → empty list, not error | PASS |
 | RBAC | Customer token hits Admin-only /api/users → 403; Admin succeeds | PASS |
-| Customer creation | UI → API → DB row (SQLite for now, see decisions.md) | PASS — Playwright screenshots |
+| Customer creation | UI → API → DB row (SQLite) | PASS — Playwright screenshots |
 | Ticket creation | UI → API → DB → visible in agent list | PASS — curl + Playwright |
 | Cross-customer record access | Customer requests another customer's ticket/record → 403 | PASS — both /customers and /tickets |
 | Internal note isolation | Agent's internal note hidden from Customer | PASS — API and UI, curl + Playwright |

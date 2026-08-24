@@ -14,7 +14,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `npm init` backend project, install Prisma, minimal `schema.prisma` with one throwaway model, run `prisma migrate dev`.
 **Frontend:** none
 **Verification:** migration succeeds against the real local SQL Server instance; if `integratedSecurity=true` fails, fall back to a SQL-auth login and update `.env`/`architecture.md` accordingly.
-**Status:** Done (with caveat) — local SQL Server has TCP/IP disabled at the protocol level (not an auth issue), needs an admin-elevated fix the user deferred. Substituted SQLite (`backend/prisma/schema.prisma` provider `sqlite`) to unblock all other P0 work; verified with a real create+read round trip. **Must switch back to `sqlserver` before final submission** — see `docs/decisions.md` and `docs/debugging-notes.md`.
+**Status:** Done — local SQL Server has TCP/IP disabled at the protocol level (not an auth issue), needing an admin-elevated fix. Switched to SQLite (`backend/prisma/schema.prisma` provider `sqlite`) as the **permanent** choice per user decision, not a stopgap — verified with a real create+read round trip. See `docs/decisions.md` and `docs/debugging-notes.md`.
 
 ### TASK-002
 **Requirement:** CRM-DB-001, CRM-CUSTOMER-001, CRM-TICKET-001, CRM-STATUS-001, CRM-COMM-001, CRM-KB-001
@@ -24,7 +24,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** Prisma client wired into an `db.ts` singleton.
 **Frontend:** none
 **Verification:** `prisma studio` or a query script shows tables created; seed script runs and creates the admin row.
-**Status:** Done — full P0 schema migrated (SQLite, see TASK-001 caveat); seed script creates `admin@azmcrm.local` / `Admin123!`; verified via query script (user/ticket/kb tables all queryable, admin role correct). SLA priority config implemented as an in-code constant map (`backend/src/services/sla.ts`) rather than a DB table, per data-model.md's "not user-editable in P0."
+**Status:** Done — full P0 schema migrated (SQLite, per TASK-001); seed script creates `admin@azmcrm.local` / `Admin123!`; verified via query script (user/ticket/kb tables all queryable, admin role correct). SLA priority config implemented as an in-code constant map (`backend/src/services/sla.ts`) rather than a DB table, per data-model.md's "not user-editable in P0."
 
 ### TASK-003
 **Requirement:** CRM-AUTH-001

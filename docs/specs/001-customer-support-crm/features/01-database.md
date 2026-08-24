@@ -4,7 +4,8 @@
 **Related tasks:** TASK-001, TASK-002
 
 ## Goal
-All application data persisted through Prisma against SQL Server.
+All application data persisted through Prisma against a real
+relational database.
 
 ## Scope
 - Prisma schema covering every P0 entity (User, CustomerProfile,
@@ -14,6 +15,8 @@ All application data persisted through Prisma against SQL Server.
 - Seed script creating a default Admin account.
 - SLA priority thresholds as an in-code constant map, not a DB table
   (data-model.md: "not user-editable in P0").
+- **Database engine: SQLite** (`backend/dev.db`), by deliberate final
+  decision — see below.
 
 Out of scope: user-editable SLA config, soft deletes, audit triggers.
 
@@ -29,16 +32,20 @@ Out of scope: user-editable SLA config, soft deletes, audit triggers.
 - No API/frontend surface of its own — every other feature depends on
   this layer.
 
-## Verification
-See `docs/verification.md` ("DB connectivity" row) and
-`docs/debugging-notes.md` for the SQL Server TCP/IP issue hit along the
-way.
+## Why SQLite instead of SQL Server
 
-## Status: Done, with a known deviation
-Running on **SQLite**, not SQL Server, because the local SQL Server
-instance has TCP/IP disabled and enabling it needs an admin-elevated
-change not made during this session (see `docs/decisions.md`). The
-Prisma layer is provider-agnostic for our usage, so switching back is a
-one-line `datasource.provider` + `DATABASE_URL` change — **this must
-happen before the requirement can be marked fully satisfied**, since
-CRM-DB-001 explicitly calls for SQL Server.
+CRM-DB-001 originally specified SQL Server. The local SQL Server
+instance turned out to have TCP/IP disabled at the protocol level
+(`sqlcmd` connected fine via Shared Memory; Prisma's driver only
+speaks TCP) — fixing it needs an admin-elevated registry change +
+service restart. Rather than pause on an OS-level config change, the
+user made a deliberate call: **standardize on SQLite going forward**,
+not as a stopgap. Prisma's query API is identical across providers, so
+this had zero effect on the schema, routes, or business logic — only
+`datasource.provider` and `DATABASE_URL` differ from the original plan.
+Full account in `docs/debugging-notes.md` and `docs/decisions.md`.
+
+## Verification
+See `docs/verification.md` ("DB connectivity" row, PASS).
+
+## Status: Done

@@ -11,33 +11,32 @@ come up (e.g. how a tricky migration was handled, a library swap, an
 auth edge case). Entries follow: Context / Options considered / Chosen
 approach / Why / Trade-offs.
 
-## Temporary SQLite substitute for SQL Server (TASK-001)
+## SQLite as the permanent database, replacing the originally-planned SQL Server
 
-**Context:** CRM-DB-001 (P0) requires SQL Server persistence. Local SQL
-Server has TCP/IP disabled (see `docs/debugging-notes.md`); enabling it
-needs an admin-elevated change the assistant's tooling can't perform,
-and the user chose not to do it during this session.
+**Context:** CRM-DB-001 (P0) originally specified SQL Server
+persistence. The local SQL Server instance has TCP/IP disabled at the
+protocol level (see `docs/debugging-notes.md`); enabling it needs an
+admin-elevated registry change + service restart, which the assistant's
+tooling can't perform.
 
 **Options considered:** (1) user runs the elevated fix themselves, (2)
-Dockerized SQL Server instance, (3) SQLite as a stand-in for now.
+a Dockerized SQL Server instance, (3) standardize on SQLite instead.
 
 **Chosen:** SQLite (`file:./dev.db`), Prisma `datasource` provider
-`sqlite` instead of `sqlserver`.
+`sqlite`. **This is a final decision, not a temporary stand-in** — the
+user explicitly chose to drop the SQL Server requirement and keep
+SQLite going forward (2026-08-24).
 
-**Why:** unblocks all P0 backend work immediately without touching the
-user's system config or requiring Docker Desktop.
+**Why:** unblocks all backend work without touching the user's system
+config or requiring Docker Desktop; Prisma's query API is identical
+across providers, so no schema/route/business-logic changes were
+needed either way.
 
-**Trade-off / risk:** this does **not** satisfy CRM-DB-001 as written —
-it's a stated P0 requirement that "All persistence in SQL Server via
-Prisma." SQLite and SQL Server both go through Prisma so the ORM layer
-and query code are unaffected, but the datasource itself needs to
-switch back before this can be called done. **Action before
-submission:** either enable TCP/IP (2 commands, see prior chat) and
-change `datasource.provider` back to `sqlserver` + restore the real
-`DATABASE_URL`, or move to a Dockerized SQL Server. Tracked in
-`docs/verification.md` (DB connectivity row) and
-`docs/specs/001-customer-support-crm/acceptance-checklist.md` — do not
-check those off against SQLite.
+**Trade-off:** CRM-DB-001 as originally worded said SQL Server
+specifically — this is a deliberate, recorded deviation from that
+wording, not an oversight. If SQL Server is ever required again, it's a
+one-line `datasource.provider` + `DATABASE_URL` change (see
+`docs/specs/001-customer-support-crm/features/01-database.md`).
 
 ## Pinned Prisma and TypeScript to their mature major versions
 
