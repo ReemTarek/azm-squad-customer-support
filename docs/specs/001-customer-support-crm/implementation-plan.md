@@ -252,14 +252,43 @@ per-department SLA policies (see discussion items below).
 
 ---
 
-## Under Discussion — Not Yet Approved
+## Approved Big-Scope Items (decided 2026-08-24)
 
-These are real scope expansions beyond the original P0/P1 plan, not
-small additions. Specs exist to support the discussion, not as a
-commitment to build. See each file for goal, draft scope, and why it's
-bigger than it looks:
+Both are genuinely large — comparable in size to a P0-era feature —
+and modify security-sensitive or previously-unbuilt subsystems. Full
+task breakdown lives in their feature spec files; summarized here for
+traceability.
 
-- `features/discussion-multi-department-branch.md`
-- `features/discussion-custom-branding.md`
-- `features/discussion-ai-chatbot.md`
-- `features/discussion-real-communication-providers.md`
+### Multi-Department / Multi-Branch (full RBAC)
+**Requirement:** CRM-ORG-001 · **Spec:** `features/17-multi-department-branch.md`
+
+| ID | Goal | Status |
+|---|---|---|
+| TASK-039 | Department/Branch schema + nullable FKs on User/Ticket | Not Started |
+| TASK-040 | Backend RBAC scoping (Agent/Manager scoped to own dept/branch) + admin CRUD | Not Started |
+| TASK-041 | Frontend pickers/filters + admin management page | Not Started |
+| TASK-042 | Reports breakdown by department/branch | Not Started |
+| TASK-043 | **Required** regression re-verification of the full P0 security suite | Not Started |
+
+### AI Chatbot (full, non-streaming — see spec for the scoping decision)
+**Requirement:** CRM-AI-005 · **Spec:** `features/18-ai-chatbot.md`
+
+| ID | Goal | Status |
+|---|---|---|
+| TASK-044 | ChatConversation/ChatMessage schema | Not Started |
+| TASK-045 | Backend endpoints + KB-grounded Gemini answering | Not Started |
+| TASK-046 | Customer portal chat widget + ticket hand-off | Not Started |
+| TASK-047 | Guardrails against fabricated answers | Not Started |
+
+## Decided, Not Building
+
+- **Custom branding** — user decision to skip (was the lowest-risk
+  discussion item). `features/discussion-custom-branding.md`.
+
+## Real Communication Providers — credentials pending
+
+Architecture already built (TASK-035/036). Email → Gmail/Google SMTP
+(user to provide an app password); SMS → Twilio; WhatsApp → Meta Cloud
+API. Directions for obtaining each credential are in
+`features/discussion-real-communication-providers.md`. No code changes
+until credentials arrive.

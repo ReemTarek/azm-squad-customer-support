@@ -1,6 +1,9 @@
 # Discussion Spec: Real Communication Providers
 
-**Status: not approved — blocked on credentials, not on design.**
+**Status: decided 2026-08-24.** Email → real (Gmail/Google SMTP),
+credentials pending from user. SMS (Twilio) and WhatsApp (Meta Cloud
+API) → approved to build, credentials pending — see "How to get each
+API key" below for what the user needs to go get.
 
 ## What was asked
 
@@ -35,9 +38,44 @@ no caller changes, no design work. This item is blocked purely on
 - WhatsApp: fetch call to the Cloud API's `/messages` endpoint —
   implements `NotificationChannel.send()`.
 
+## How to get each API key
+
+**Email (Gmail/Google):**
+1. Go to your Google Account → Security → 2-Step Verification (must be
+   ON — App Passwords require it).
+2. Security → "App passwords" (search "App passwords" in the account
+   settings search bar if it's not visible directly).
+3. Create one for "Mail" / "Other (custom name)" → name it e.g.
+   "AZM CRM" → Google gives you a 16-character password.
+4. Give me: the Gmail address + that 16-character app password (not
+   your normal Google password). Goes into `backend/.env` as
+   `SMTP_USER`/`SMTP_PASS`, never committed to git.
+
+**SMS (Twilio):**
+1. Sign up free at twilio.com (free trial credit is enough for
+   testing; trial accounts can only text verified numbers until you
+   upgrade).
+2. Console dashboard → copy your **Account SID** and **Auth Token**.
+3. Get a trial phone number: Phone Numbers → Manage → Buy a number
+   (free trial numbers are available).
+4. Give me: Account SID, Auth Token, the trial phone number.
+
+**WhatsApp (Meta Cloud API):**
+1. Create a Meta Developer account at developers.facebook.com.
+2. Create an app → add the "WhatsApp" product to it.
+3. The app dashboard gives you a **test phone number** and a
+   **temporary access token** (valid 24h — fine for dev/demo; a
+   permanent token needs business verification, not needed for this
+   project).
+4. Add your own phone as a test recipient (WhatsApp → API Setup → "To"
+   field → verify your number) — Meta's sandbox only sends to
+   pre-verified numbers.
+5. Give me: the temporary access token, the phone number ID (shown on
+   the same page).
+
 ## Recommendation
 
 Straightforward to add whenever credentials are available — this is
 the lowest-risk of the four discussion items precisely because the
 integration boundary was already built and verified in TASK-035/036.
-Nothing to decide here except whether/when you'll provide credentials.
+Nothing left to decide except when each credential set arrives.

@@ -1,7 +1,7 @@
 # Discussion Spec: Custom Branding
 
-**Status: not approved — this document exists to support a scoping
-decision, not as a commitment to build.**
+**Status: decided 2026-08-24 — Skip.** User decision, despite this
+being the lowest-risk of the four discussion items. Not building.
 
 ## What was asked
 

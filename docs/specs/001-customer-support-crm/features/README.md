@@ -24,14 +24,17 @@ complement (not replace) the project-level `spec.md`,
 | [15](15-sla-configuration.md) | Admin-editable SLA configuration | CRM-SLA-CONFIG-001 |
 | [16](16-customer-notes.md) | Customer notes | CRM-CUSTOMER-004 |
 
+| [17](17-multi-department-branch.md) | Multi-department/branch (full RBAC) | CRM-ORG-001 |
+| [18](18-ai-chatbot.md) | AI chatbot (full, non-streaming) | CRM-AI-005 |
+
 01-14 are Done. 01-database.md records one deliberate deviation from
 the original wording of CRM-DB-001: the app runs on SQLite, not SQL
-Server, by final decision — not a pending item. 15-16 are approved but
-**Not Started** (see `implementation-plan.md` TASK-037/038).
+Server, by final decision — not a pending item. 15-18 are approved but
+**Not Started** (see `implementation-plan.md` TASK-037/038 and the
+"Approved Big-Scope Items" section).
 
-Four further items were discussed but are **not approved** — specs
-exist only to support that decision, not as a build commitment:
-[multi-department/branch](discussion-multi-department-branch.md),
-[custom branding](discussion-custom-branding.md),
-[AI chatbot](discussion-ai-chatbot.md),
-[real communication providers](discussion-real-communication-providers.md).
+[Custom branding](discussion-custom-branding.md) was discussed and
+**decided against** — user chose to skip it.
+[Real communication providers](discussion-real-communication-providers.md)
+are approved (email/SMS/WhatsApp) pending credentials — see that file
+for how to obtain each one.
