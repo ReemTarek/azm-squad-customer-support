@@ -42,3 +42,31 @@ written after a real check, not because code exists.
 | Customer satisfaction | Only after Resolved/Closed, one per ticket, ownership enforced | PASS — curl + Playwright |
 | Audit log | Entries written on user/customer/assignment/KB-publish actions, Admin-only UI | PASS — curl + Playwright |
 | Richer reports | SLA breach rate + 7-day trend, cross-checked against manual DB query | PASS — curl + Playwright |
+
+## Additional Enhancements (post-P1, from full feature-catalog gap analysis)
+
+| Feature | Verification | Result |
+|---|---|---|
+| KB search | Filter by title/body/category, empty-state | PASS — curl + Playwright |
+| Ticket category | Create/filter/display, default "General" | PASS — curl + Playwright |
+| Customer interaction history | Staff-only ticket list on customer detail page | PASS — Playwright, real data |
+| Aggregate CSAT + agent performance | Cross-checked against manual DB query | PASS — exact match |
+| AI ticket summary | Real Gemini API, coherent contextual output | PASS — curl + Playwright |
+| AI-suggested KB articles | Correct match (login→password article) and correct non-match (unrelated ticket) | PASS — both directions verified |
+| SLA escalation sweep | Bumps priority to Urgent on breach, writes audit entry, Agent blocked | PASS — curl + Playwright |
+| In-app notifications | Breached/at-risk badge, role-scoped | PASS — Playwright |
+| P2 notification adapter | Mock email/SMS/WhatsApp behind one interface, real call site on ticket resolution | PASS — isolated script + live audit-log entry |
+| P2 ERP adapter | Mock client behind one interface, real call site on customer creation | PASS — isolated script + live 201 response |
+
+## Full-system re-verification (2026-08-24, post-enhancements)
+
+A single continuous Playwright run replaying auth, customer+ticket
+creation with category, assignment, messaging with internal-note
+isolation, AI summary, status transitions, customer feedback,
+cross-customer blocking, reports, escalation, KB search, and
+Arabic/RTL — **15/15 checks passed** against fresh data. One initial
+apparent failure (ticket category not yet visible at assertion time)
+was a test-timing artifact, not an app bug — confirmed by a direct
+re-check of the same ticket immediately after. The 4 console 403s
+logged during this run are the *expected* result of the cross-customer
+access-blocked test, not errors.
