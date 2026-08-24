@@ -280,10 +280,14 @@ a scoped Manager — `docs/debugging-notes.md`).
 
 | ID | Goal | Status |
 |---|---|---|
-| TASK-044 | ChatConversation/ChatMessage schema | Not Started |
-| TASK-045 | Backend endpoints + KB-grounded Gemini answering | Not Started |
-| TASK-046 | Customer portal chat widget + ticket hand-off | Not Started |
-| TASK-047 | Guardrails against fabricated answers | Not Started |
+| TASK-044 | ChatConversation/ChatMessage schema | Done |
+| TASK-045 | Backend endpoints + KB-grounded Gemini answering | Done |
+| TASK-046 | Customer portal chat widget + ticket hand-off | Done |
+| TASK-047 | Guardrails against fabricated answers | Done |
+
+See `features/18-ai-chatbot.md` for full verification detail — both
+the grounded-answer and honest-fallback cases confirmed against the
+real Gemini API, no hallucination observed.
 
 ## Decided, Not Building
 

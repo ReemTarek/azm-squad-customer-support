@@ -19,6 +19,11 @@ enum Locale {
   ar
 }
 
+enum ChatRole {
+  user
+  assistant
+}
+
 enum Priority {
   Low
   Medium
@@ -58,6 +63,7 @@ model User {
   quickReplies         QuickReply[]
   notesAboutMe         CustomerNote[] @relation("CustomerNoteSubject")
   notesAuthored        CustomerNote[] @relation("CustomerNoteAuthor")
+  chatConversations    ChatConversation[]
 }
 
 model CustomerProfile {
@@ -209,6 +215,28 @@ model CustomerNote {
   createdAt  DateTime @default(now())
 
   @@index([customerId])
+}
+
+model ChatConversation {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  messages ChatMessage[]
+
+  @@index([customerId])
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           ChatRole
+  body           String
+  createdAt      DateTime         @default(now())
+
+  @@index([conversationId])
 }
 
 model AuditLog {

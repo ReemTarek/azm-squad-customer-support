@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createTicket } from "../../lib/ticketsApi";
 import type { Priority } from "../../lib/ticketsApi";
@@ -12,6 +12,8 @@ import { useAuth } from "../../auth/AuthContext";
 export function TicketFormPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefillSubject = (location.state as { prefillSubject?: string } | null)?.prefillSubject ?? "";
   const needsCustomerPicker = user?.role === "Admin" || user?.role === "Agent";
   const canSetOrg = user?.role === "Admin" || user?.role === "Manager" || user?.role === "Agent";
 
@@ -23,7 +25,7 @@ export function TicketFormPage() {
   const { data: departments } = useQuery({ queryKey: ["departments"], queryFn: listDepartments, enabled: canSetOrg });
   const { data: branches } = useQuery({ queryKey: ["branches"], queryFn: listBranches, enabled: canSetOrg });
 
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(prefillSubject);
   const [category, setCategory] = useState("General");
   const [priority, setPriority] = useState<Priority>("Medium");
   const [customerId, setCustomerId] = useState("");

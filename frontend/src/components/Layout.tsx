@@ -39,6 +39,7 @@ export function Layout() {
             )}
           </Link>
           <Link to="/kb">{t("nav.kb")}</Link>
+          {user.role === "Customer" && <Link to="/chat">Ask a Question</Link>}
           {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
             <Link to="/quick-replies">Quick Replies</Link>
           )}

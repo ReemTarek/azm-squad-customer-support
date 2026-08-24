@@ -16,6 +16,7 @@ import { QuickRepliesPage } from "./pages/QuickRepliesPage";
 import { AuditLogPage } from "./pages/AuditLogPage";
 import { AdminSlaSettingsPage } from "./pages/AdminSlaSettingsPage";
 import { AdminOrgSettingsPage } from "./pages/AdminOrgSettingsPage";
+import { ChatPage } from "./pages/ChatPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -108,6 +109,14 @@ function App() {
             element={
               <RequireAuth roles={["Admin"]}>
                 <AdminOrgSettingsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <RequireAuth roles={["Customer"]}>
+                <ChatPage />
               </RequireAuth>
             }
           />

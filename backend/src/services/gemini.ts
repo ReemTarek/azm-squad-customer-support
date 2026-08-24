@@ -115,3 +115,63 @@ JSON array of relevant article ids:`;
     return [];
   }
 }
+
+export interface ChatHistoryMessage {
+  role: "user" | "assistant";
+  body: string;
+}
+
+export interface KbArticleForPrompt {
+  title: string;
+  category: string;
+  body: string;
+}
+
+const NO_ANSWER_SENTINEL = "NO_CONFIDENT_ANSWER";
+export const CHATBOT_FALLBACK_MESSAGE =
+  "I don't have a confident answer to that from our knowledge base. Would you like me to create a support ticket so an agent can help?";
+
+/**
+ * Answers a customer's chat question using ONLY the provided published
+ * KB article content — never outside knowledge, never invented
+ * account/ticket-specific details (the model is given none). Falls
+ * back to a fixed, non-hallucinated message when the model itself
+ * signals it doesn't have a confident answer (TASK-047 guardrail).
+ */
+export async function answerFromKnowledgeBase(
+  question: string,
+  history: ChatHistoryMessage[],
+  articles: KbArticleForPrompt[]
+): Promise<{ answer: string; confident: boolean }> {
+  const model = getModel();
+  const historyText = history.map((m) => `${m.role}: ${m.body}`).join("\n");
+  const articleList = articles.length
+    ? articles.map((a) => `### ${a.title} (${a.category})\n${a.body}`).join("\n\n")
+    : "(no published knowledge base articles available)";
+
+  const prompt = `You are a customer support assistant answering questions in a chat
+widget. Answer ONLY using the knowledge base articles below — never use
+outside knowledge, and never invent account-specific, order-specific,
+or ticket-specific details, since none were given to you.
+
+If the knowledge base does not contain a confident answer to the
+question, respond with EXACTLY this and nothing else: ${NO_ANSWER_SENTINEL}
+
+Knowledge base articles:
+${articleList}
+
+Conversation so far:
+${historyText || "(start of conversation)"}
+
+Customer's question: ${question}
+
+Your answer (or ${NO_ANSWER_SENTINEL}):`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+
+  if (text.includes(NO_ANSWER_SENTINEL)) {
+    return { answer: CHATBOT_FALLBACK_MESSAGE, confident: false };
+  }
+  return { answer: text, confident: true };
+}

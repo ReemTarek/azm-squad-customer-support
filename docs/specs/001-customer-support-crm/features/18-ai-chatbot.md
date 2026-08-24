@@ -78,4 +78,24 @@ wasn't given.
 (e.g. "what's my ticket status" without providing ticket context) and
 confirm it doesn't hallucinate an answer.
 
-## Status: Not Started
+## Status: Done
+
+Verified against the real Gemini API, both directions:
+- A KB-answerable question ("How do I reset my password?") returned
+  the exact grounded answer from the published article, `confident:
+  true`.
+- An out-of-scope question ("What is the status of my flight
+  booking?") correctly triggered the `NO_CONFIDENT_ANSWER` guardrail
+  sentinel rather than inventing an answer, mapped to a fixed fallback
+  message, `confident: false`.
+- The "Create a ticket about this" hand-off (shown only when
+  `confident: false`) correctly pre-fills the new-ticket form's
+  subject with the customer's original question.
+- Conversation history persists across turns (4 messages after 2
+  question/answer exchanges); cross-customer conversation access
+  blocked (403); non-Customer roles blocked entirely (403) — the
+  chatbot is a customer-portal-only surface.
+
+Confirms the scoping decision held: no streaming/websocket
+infrastructure was needed to deliver a genuine multi-turn, KB-grounded
+chatbot.
