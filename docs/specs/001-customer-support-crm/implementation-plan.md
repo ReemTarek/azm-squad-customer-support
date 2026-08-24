@@ -24,7 +24,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** Prisma client wired into an `db.ts` singleton.
 **Frontend:** none
 **Verification:** `prisma studio` or a query script shows tables created; seed script runs and creates the admin row.
-**Status:** Not Started
+**Status:** Done — full P0 schema migrated (SQLite, see TASK-001 caveat); seed script creates `admin@azmcrm.local` / `Admin123!`; verified via query script (user/ticket/kb tables all queryable, admin role correct). SLA priority config implemented as an in-code constant map (`backend/src/services/sla.ts`) rather than a DB table, per data-model.md's "not user-editable in P0."
 
 ### TASK-003
 **Requirement:** CRM-AUTH-001

@@ -7,8 +7,141 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model ConnectivityCheck {
+enum Role {
+  Admin
+  Manager
+  Agent
+  Customer
+}
+
+enum Locale {
+  en
+  ar
+}
+
+enum Priority {
+  Low
+  Medium
+  High
+  Urgent
+}
+
+enum TicketStatus {
+  Open
+  InProgress
+  Resolved
+  Closed
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  name         String
+  locale       Locale   @default(en)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customerProfile      CustomerProfile?
+  ticketsAsCustomer    Ticket[]              @relation("TicketCustomer")
+  ticketsAsAgent       Ticket[]              @relation("TicketAgent")
+  ticketMessages       TicketMessage[]
+  statusChanges        TicketStatusHistory[]
+  knowledgeBaseAuthors KnowledgeBaseArticle[]
+  auditLogs            AuditLog[]
+}
+
+model CustomerProfile {
+  id      String  @id @default(uuid())
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone   String?
+  company String?
+}
+
+model Ticket {
+  id               String   @id @default(uuid())
+  customerId       String
+  customer         User     @relation("TicketCustomer", fields: [customerId], references: [id])
+  assignedAgentId  String?
+  assignedAgent    User?    @relation("TicketAgent", fields: [assignedAgentId], references: [id])
+  subject          String
+  priority         Priority
+  status           TicketStatus @default(Open)
+  responseDueAt    DateTime
+  resolutionDueAt  DateTime
+  resolvedAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  messages       TicketMessage[]
+  statusHistory  TicketStatusHistory[]
+  feedback       CustomerFeedback?
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([status])
+}
+
+model TicketMessage {
+  id             String   @id @default(uuid())
+  ticketId       String
+  ticket         Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User     @relation(fields: [authorId], references: [id])
+  body           String
+  isInternalNote Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model TicketStatusHistory {
+  id          String        @id @default(uuid())
+  ticketId    String
+  ticket      Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fromStatus  TicketStatus?
+  toStatus    TicketStatus
+  changedById String
+  changedBy   User          @relation(fields: [changedById], references: [id])
+  changedAt   DateTime      @default(now())
+
+  @@index([ticketId])
+}
+
+model KnowledgeBaseArticle {
   id        String   @id @default(uuid())
-  note      String
+  title     String
+  body      String
+  category  String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  published Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+}
+
+model CustomerFeedback {
+  id        String   @id @default(uuid())
+  ticketId  String   @unique
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
 }

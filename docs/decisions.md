@@ -38,3 +38,23 @@ change `datasource.provider` back to `sqlserver` + restore the real
 `docs/verification.md` (DB connectivity row) and
 `docs/specs/001-customer-support-crm/acceptance-checklist.md` — do not
 check those off against SQLite.
+
+## Pinned Prisma and TypeScript to their mature major versions
+
+**Context:** `npm install` resolved `prisma`/`@prisma/client` to v7 and
+`typescript` to v7 by default (both very recent major releases — Prisma
+7 moved to a driver-adapter architecture with no mature SQL Server
+adapter yet found; TypeScript 7 is the new Go-based rewrite).
+
+**Chosen:** pinned to `prisma@6` / `@prisma/client@6` (6.19.3) and
+`typescript@5` (5.9.3), with `@types/node@22` to match the installed
+Node.js runtime (v22).
+
+**Why:** both v7s are new enough that ecosystem compatibility (SQL
+Server support in Prisma's case, tooling/type-decl compatibility in
+TypeScript's case) is unproven; the 3-day deadline doesn't afford time
+to debug bleeding-edge tooling issues. The 6.x/5.x lines are the
+established, widely-compatible choice.
+
+**Trade-off:** missing whatever new features shipped in the v7 lines;
+not a concern for this project's scope.
