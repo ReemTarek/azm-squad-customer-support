@@ -30,20 +30,20 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-language-switcher"><LanguageSwitcher /></div>
-      <form onSubmit={handleSubmit} className="auth-form">
+    <div className="auth-page min-vh-100 d-flex align-items-center justify-content-center bg-light position-relative">
+      <div className="position-absolute top-0 end-0 m-3"><LanguageSwitcher /></div>
+      <form onSubmit={handleSubmit} className="auth-form card p-4 shadow-sm">
         <h1>{t("auth.signIn")}</h1>
-        {error && <p role="alert" className="form-error">{error}</p>}
-        <label>
-          {t("auth.email")}
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          {t("auth.password")}
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
-        <button type="submit" disabled={isSubmitting}>
+        {error && <p role="alert" className="alert alert-danger">{error}</p>}
+        <div className="mb-3">
+          <label className="form-label">{t("auth.email")}</label>
+          <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">{t("auth.password")}</label>
+          <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
           {isSubmitting ? t("auth.signingIn") : t("auth.signIn")}
         </button>
         <p>
