@@ -24,6 +24,7 @@ function toTicketDto(ticket: Ticket) {
     customerId: ticket.customerId,
     assignedAgentId: ticket.assignedAgentId,
     subject: ticket.subject,
+    category: ticket.category,
     priority: ticket.priority,
     status: ticket.status,
     responseDueAt: ticket.responseDueAt,
@@ -61,6 +62,7 @@ router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (
   const ticket = await prisma.ticket.create({
     data: {
       subject: body.subject,
+      category: body.category ?? "General",
       priority: body.priority,
       customerId,
       responseDueAt,
@@ -81,14 +83,17 @@ router.get("/", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"
   const where: Record<string, unknown> = {};
   if (query.status) where.status = query.status;
   if (query.priority) where.priority = query.priority;
+  if (query.category) where.category = query.category;
 
   if (user.role === "Customer") {
     where.customerId = user.id;
   } else if (user.role === "Agent") {
     // Agents only ever see their own assigned tickets, regardless of query params.
     where.assignedAgentId = user.id;
-  } else if (query.assignedAgentId) {
-    where.assignedAgentId = query.assignedAgentId === "me" ? user.id : query.assignedAgentId;
+    if (query.customerId) where.customerId = query.customerId;
+  } else {
+    if (query.assignedAgentId) where.assignedAgentId = query.assignedAgentId === "me" ? user.id : query.assignedAgentId;
+    if (query.customerId) where.customerId = query.customerId;
   }
 
   const tickets = await prisma.ticket.findMany({ where, orderBy: { createdAt: "desc" } });
@@ -112,6 +117,7 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Manager", "Agent"), asyn
 
   const data: Record<string, unknown> = {};
   if (body.subject) data.subject = body.subject;
+  if (body.category) data.category = body.category;
 
   if (body.priority && body.priority !== existing.priority) {
     data.priority = body.priority;

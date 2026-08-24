@@ -9,8 +9,21 @@ const router = Router();
 
 router.get("/", requireAuth, async (req, res) => {
   const isStaff = req.user!.role !== "Customer";
+  const search = typeof req.query.search === "string" ? req.query.search : undefined;
+
   const articles = await prisma.knowledgeBaseArticle.findMany({
-    where: isStaff ? undefined : { published: true },
+    where: {
+      ...(isStaff ? {} : { published: true }),
+      ...(search
+        ? {
+            OR: [
+              { title: { contains: search } },
+              { body: { contains: search } },
+              { category: { contains: search } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
   });
   res.json({ articles });

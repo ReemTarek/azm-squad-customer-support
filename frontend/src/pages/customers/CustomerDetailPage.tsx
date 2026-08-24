@@ -2,16 +2,27 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { getCustomer, updateCustomer } from "../../lib/customersApi";
+import { listTickets } from "../../lib/ticketsApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
+import { useAuth } from "../../auth/AuthContext";
+import { SlaBadge } from "../../components/SlaBadge";
 
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const isStaff = user?.role === "Admin" || user?.role === "Manager" || user?.role === "Agent";
   const queryClient = useQueryClient();
   const { data: customer, isLoading, error } = useQuery({
     queryKey: ["customer", id],
     queryFn: () => getCustomer(id!),
     enabled: Boolean(id),
+  });
+  const ticketsQuery = useQuery({
+    queryKey: ["tickets", "byCustomer", id],
+    queryFn: () => listTickets({ customerId: id }),
+    enabled: Boolean(id) && isStaff,
   });
 
   const [form, setForm] = useState({ name: "", phone: "", company: "" });
@@ -62,6 +73,20 @@ export function CustomerDetailPage() {
         </button>
         {mutation.isSuccess && <p className="form-success">Saved.</p>}
       </form>
+
+      {isStaff && (
+        <section>
+          <h2>Ticket History</h2>
+          <ul className="history-list">
+            {ticketsQuery.data?.map((t) => (
+              <li key={t.id}>
+                <Link to={`/tickets/${t.id}`}>{t.subject}</Link> — {t.status} <SlaBadge state={t.slaState} />
+              </li>
+            ))}
+            {ticketsQuery.data?.length === 0 && <li>No tickets yet.</li>}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

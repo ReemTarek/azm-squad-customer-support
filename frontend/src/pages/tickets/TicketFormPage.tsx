@@ -20,6 +20,7 @@ export function TicketFormPage() {
   });
 
   const [subject, setSubject] = useState("");
+  const [category, setCategory] = useState("General");
   const [priority, setPriority] = useState<Priority>("Medium");
   const [customerId, setCustomerId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export function TicketFormPage() {
     try {
       const ticket = await createTicket({
         subject,
+        category,
         priority,
         customerId: needsCustomerPicker ? customerId : undefined,
       });
@@ -62,6 +64,16 @@ export function TicketFormPage() {
         <label>
           Subject
           <input value={subject} onChange={(e) => setSubject(e.target.value)} required />
+        </label>
+        <label>
+          Category
+          <input value={category} onChange={(e) => setCategory(e.target.value)} list="ticket-categories" required />
+          <datalist id="ticket-categories">
+            <option value="General" />
+            <option value="Billing" />
+            <option value="Technical" />
+            <option value="Account" />
+          </datalist>
         </label>
         <label>
           Priority

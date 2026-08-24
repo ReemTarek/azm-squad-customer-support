@@ -137,6 +137,7 @@ export function TicketDetailPage() {
       {actionError && <p role="alert" className="form-error">{actionError}</p>}
 
       <div className="ticket-meta">
+        <span>Category: {ticket.category}</span>
         <span>Priority: {ticket.priority}</span>
         <span>Status: {ticket.status}</span>
       </div>

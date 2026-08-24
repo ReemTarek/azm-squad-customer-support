@@ -11,8 +11,10 @@ export interface KbArticle {
   updatedAt: string;
 }
 
-export async function listArticles() {
-  const { data } = await apiClient.get<{ articles: KbArticle[] }>("/kb");
+export async function listArticles(search?: string) {
+  const { data } = await apiClient.get<{ articles: KbArticle[] }>("/kb", {
+    params: search ? { search } : undefined,
+  });
   return data.articles;
 }
 

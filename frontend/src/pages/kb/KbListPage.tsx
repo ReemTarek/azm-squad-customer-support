@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listArticles } from "../../lib/kbApi";
@@ -6,7 +7,11 @@ import { useAuth } from "../../auth/AuthContext";
 export function KbListPage() {
   const { user } = useAuth();
   const canAuthor = user?.role === "Admin" || user?.role === "Agent";
-  const { data: articles, isLoading, error } = useQuery({ queryKey: ["kb"], queryFn: listArticles });
+  const [search, setSearch] = useState("");
+  const { data: articles, isLoading, error } = useQuery({
+    queryKey: ["kb", search],
+    queryFn: () => listArticles(search || undefined),
+  });
 
   return (
     <div className="page">
@@ -14,6 +19,13 @@ export function KbListPage() {
         <h1>Knowledge Base</h1>
         {canAuthor && <Link to="/kb/new" className="button-link">New Article</Link>}
       </div>
+      <input
+        type="search"
+        placeholder="Search articles…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="search-input"
+      />
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load articles.</p>}
       <ul className="kb-list">
@@ -24,7 +36,7 @@ export function KbListPage() {
             {!a.published && canAuthor && <span className="kb-draft-tag">Draft</span>}
           </li>
         ))}
-        {articles?.length === 0 && <li>No articles yet.</li>}
+        {articles?.length === 0 && <li>No articles found.</li>}
       </ul>
     </div>
   );

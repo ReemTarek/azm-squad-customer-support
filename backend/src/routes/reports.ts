@@ -69,11 +69,46 @@ router.get("/trends", requireAuth, requireRole("Admin", "Manager"), async (_req,
     if (countsByDay.has(day)) countsByDay.set(day, countsByDay.get(day)! + 1);
   }
 
+  const feedback = await prisma.customerFeedback.findMany({ select: { rating: true } });
+  const avgCsatRating = feedback.length
+    ? Math.round((feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length) * 10) / 10
+    : null;
+
+  const resolvedByAgent = await prisma.ticket.findMany({
+    where: { resolvedAt: { not: null }, assignedAgentId: { not: null } },
+    select: { assignedAgentId: true, createdAt: true, resolvedAt: true },
+  });
+  const perAgent = new Map<string, { totalMinutes: number; count: number }>();
+  for (const t of resolvedByAgent) {
+    const agentId = t.assignedAgentId!;
+    const minutes = (t.resolvedAt!.getTime() - t.createdAt.getTime()) / 60_000;
+    const entry = perAgent.get(agentId) ?? { totalMinutes: 0, count: 0 };
+    entry.totalMinutes += minutes;
+    entry.count += 1;
+    perAgent.set(agentId, entry);
+  }
+  const perfAgents = await prisma.user.findMany({
+    where: { id: { in: Array.from(perAgent.keys()) } },
+    select: { id: true, name: true },
+  });
+  const agentPerformance = perfAgents.map((a) => {
+    const entry = perAgent.get(a.id)!;
+    return {
+      agentId: a.id,
+      agentName: a.name,
+      resolvedCount: entry.count,
+      avgResolutionMinutes: Math.round(entry.totalMinutes / entry.count),
+    };
+  });
+
   res.json({
     slaBreachRatePercent,
     totalResolved,
     totalBreached,
     ticketsCreatedPerDay: Array.from(countsByDay.entries()).map(([date, count]) => ({ date, count })),
+    avgCsatRating,
+    csatCount: feedback.length,
+    agentPerformance,
   });
 });
 

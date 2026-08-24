@@ -49,6 +49,24 @@ export function ReportsPage() {
             <p className="form-hint">{trends.totalBreached} of {trends.totalResolved} resolved tickets breached SLA</p>
           </section>
         )}
+        {trends && (
+          <section className="report-card">
+            <h2>Customer satisfaction</h2>
+            <p className="report-stat">{trends.avgCsatRating === null ? "No ratings yet" : `${trends.avgCsatRating} / 5`}</p>
+            <p className="form-hint">{trends.csatCount} rating{trends.csatCount === 1 ? "" : "s"} submitted</p>
+          </section>
+        )}
+        {trends && (
+          <section className="report-card">
+            <h2>Agent performance</h2>
+            <ul>
+              {trends.agentPerformance.map((a) => (
+                <li key={a.agentId}>{a.agentName}: {a.resolvedCount} resolved, avg {a.avgResolutionMinutes} min</li>
+              ))}
+              {trends.agentPerformance.length === 0 && <li>No resolved tickets yet.</li>}
+            </ul>
+          </section>
+        )}
       </div>
 
       {trends && (

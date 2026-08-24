@@ -10,10 +10,11 @@ export function TicketsListPage() {
   const { t } = useTranslation();
   const [status, setStatus] = useState<TicketStatus | "">("");
   const [priority, setPriority] = useState<Priority | "">("");
+  const [category, setCategory] = useState("");
 
   const { data: tickets, isLoading, error } = useQuery({
-    queryKey: ["tickets", status, priority],
-    queryFn: () => listTickets({ status: status || undefined, priority: priority || undefined }),
+    queryKey: ["tickets", status, priority, category],
+    queryFn: () => listTickets({ status: status || undefined, priority: priority || undefined, category: category || undefined }),
   });
 
   return (
@@ -37,6 +38,12 @@ export function TicketsListPage() {
           <option value="High">High</option>
           <option value="Urgent">Urgent</option>
         </select>
+        <input
+          type="text"
+          placeholder="Filter by category…"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
       </div>
       {isLoading && <p>Loading…</p>}
       {error && <p role="alert" className="form-error">Failed to load tickets.</p>}
@@ -46,6 +53,7 @@ export function TicketsListPage() {
           <thead>
             <tr>
               <th>{t("tickets.subject")}</th>
+              <th>Category</th>
               <th>{t("tickets.priority")}</th>
               <th>{t("tickets.status")}</th>
               <th>{t("tickets.sla")}</th>
@@ -55,13 +63,14 @@ export function TicketsListPage() {
             {tickets.map((ticket) => (
               <tr key={ticket.id}>
                 <td><Link to={`/tickets/${ticket.id}`}>{ticket.subject}</Link></td>
+                <td>{ticket.category}</td>
                 <td>{ticket.priority}</td>
                 <td>{ticket.status}</td>
                 <td><SlaBadge state={ticket.slaState} /></td>
               </tr>
             ))}
             {tickets.length === 0 && (
-              <tr><td colSpan={4}>{t("tickets.noneFound")}</td></tr>
+              <tr><td colSpan={5}>{t("tickets.noneFound")}</td></tr>
             )}
           </tbody>
         </table>

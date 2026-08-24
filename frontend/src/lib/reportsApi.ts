@@ -17,6 +17,9 @@ export interface ReportsTrends {
   totalResolved: number;
   totalBreached: number;
   ticketsCreatedPerDay: { date: string; count: number }[];
+  avgCsatRating: number | null;
+  csatCount: number;
+  agentPerformance: { agentId: string; agentName: string; resolvedCount: number; avgResolutionMinutes: number }[];
 }
 
 export async function getReportsTrends() {

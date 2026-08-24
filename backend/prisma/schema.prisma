@@ -69,6 +69,7 @@ model Ticket {
   assignedAgentId  String?
   assignedAgent    User?    @relation("TicketAgent", fields: [assignedAgentId], references: [id])
   subject          String
+  category         String   @default("General")
   priority         Priority
   status           TicketStatus @default(Open)
   responseDueAt    DateTime
