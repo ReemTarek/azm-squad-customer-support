@@ -23,6 +23,6 @@ written after a real check, not because code exists.
 | Gemini suggest-reply | Real suggestion returned on live ticket | PASS — real Gemini API, curl + Playwright |
 | Gemini disabled | No API key → 503, server stays up | PASS |
 | Reporting accuracy | Report numbers match manual DB count | PASS — manual Prisma groupBy matched exactly; Agent role blocked (403) |
-| Arabic/RTL | Locale switch flips layout + strings | Pending |
+| Arabic/RTL | Locale switch flips layout + strings | PASS — Playwright, dir flips ltr↔rtl, nav/auth/dashboard/tickets translated |
 | Validation errors | Bad input on write endpoints → 400 w/ details | Pending |
 | Full demo path | End-to-end run per demo-walkthrough.md | Pending |

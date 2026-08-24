@@ -1,12 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 
 export function DashboardShellPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="page">
-      <h1>Welcome, {user?.name}</h1>
-      <p>Role-specific dashboard views land here in later tasks.</p>
+      <h1>{t("dashboard.welcome", { name: user?.name })}</h1>
+      <p>{t("dashboard.subtitle")}</p>
     </div>
   );
 }

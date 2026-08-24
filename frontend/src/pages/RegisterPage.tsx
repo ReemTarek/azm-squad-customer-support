@@ -1,11 +1,14 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { extractApiErrorMessage } from "../lib/apiClient";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 export function RegisterPage() {
   const { register } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,27 +32,28 @@ export function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-language-switcher"><LanguageSwitcher /></div>
       <form onSubmit={handleSubmit} className="auth-form">
-        <h1>Create your account</h1>
-        <p className="form-hint">Customer accounts only — staff accounts are created by an Admin.</p>
+        <h1>{t("auth.createAccount")}</h1>
+        <p className="form-hint">{t("auth.customerHint")}</p>
         {error && <p role="alert" className="form-error">{error}</p>}
         <label>
-          Name
+          {t("auth.name")}
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
         </label>
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
-          Password
+          {t("auth.password")}
           <input type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account…" : "Create account"}
+          {isSubmitting ? t("auth.creatingAccount") : t("auth.createAccountButton")}
         </button>
         <p>
-          Already have an account? <Link to="/login">Sign in</Link>
+          {t("auth.alreadyHaveAccount")} <Link to="/login">{t("auth.signIn")}</Link>
         </p>
       </form>
     </div>

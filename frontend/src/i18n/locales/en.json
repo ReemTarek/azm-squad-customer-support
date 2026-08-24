@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "brand": "AZM Support CRM",
+    "customers": "Customers",
+    "tickets": "Tickets",
+    "kb": "Knowledge Base",
+    "reports": "Reports",
+    "logout": "Log out"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "email": "Email",
+    "password": "Password",
+    "noAccount": "No account?",
+    "register": "Register",
+    "createAccount": "Create your account",
+    "customerHint": "Customer accounts only — staff accounts are created by an Admin.",
+    "name": "Name",
+    "creatingAccount": "Creating account…",
+    "createAccountButton": "Create account",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{name}}",
+    "subtitle": "Role-specific dashboard views land here in later tasks."
+  },
+  "tickets": {
+    "title": "Tickets",
+    "newTicket": "New Ticket",
+    "subject": "Subject",
+    "priority": "Priority",
+    "status": "Status",
+    "sla": "SLA",
+    "allStatuses": "All statuses",
+    "allPriorities": "All priorities",
+    "noneFound": "No tickets found."
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "arabic": "العربية"
+  }
+}

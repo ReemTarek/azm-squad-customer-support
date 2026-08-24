@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "brand": "AZM Support CRM",
+    "customers": "العملاء",
+    "tickets": "التذاكر",
+    "kb": "قاعدة المعرفة",
+    "reports": "التقارير",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signingIn": "جارٍ تسجيل الدخول…",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "noAccount": "ليس لديك حساب؟",
+    "register": "إنشاء حساب",
+    "createAccount": "إنشاء حسابك",
+    "customerHint": "حسابات العملاء فقط — يقوم المسؤول بإنشاء حسابات الموظفين.",
+    "name": "الاسم",
+    "creatingAccount": "جارٍ إنشاء الحساب…",
+    "createAccountButton": "إنشاء الحساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟"
+  },
+  "dashboard": {
+    "welcome": "مرحبًا، {{name}}",
+    "subtitle": "ستظهر هنا لوحات التحكم الخاصة بكل دور في المهام القادمة."
+  },
+  "tickets": {
+    "title": "التذاكر",
+    "newTicket": "تذكرة جديدة",
+    "subject": "الموضوع",
+    "priority": "الأولوية",
+    "status": "الحالة",
+    "sla": "اتفاقية مستوى الخدمة",
+    "allStatuses": "كل الحالات",
+    "allPriorities": "كل الأولويات",
+    "noneFound": "لم يتم العثور على تذاكر."
+  },
+  "language": {
+    "label": "اللغة",
+    "english": "English",
+    "arabic": "العربية"
+  }
+}

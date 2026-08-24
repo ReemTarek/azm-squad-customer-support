@@ -1,11 +1,14 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { extractApiErrorMessage } from "../lib/apiClient";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 export function LoginPage() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,22 +31,23 @@ export function LoginPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-language-switcher"><LanguageSwitcher /></div>
       <form onSubmit={handleSubmit} className="auth-form">
-        <h1>Sign in</h1>
+        <h1>{t("auth.signIn")}</h1>
         {error && <p role="alert" className="form-error">{error}</p>}
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
-          Password
+          {t("auth.password")}
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in…" : "Sign in"}
+          {isSubmitting ? t("auth.signingIn") : t("auth.signIn")}
         </button>
         <p>
-          No account? <Link to="/register">Register</Link>
+          {t("auth.noAccount")} <Link to="/register">{t("auth.register")}</Link>
         </p>
       </form>
     </div>

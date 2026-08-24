@@ -150,7 +150,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** none (locale stored on User, returned in `/auth/login` response).
 **Frontend:** react-i18next setup, `en`/`ar` bundles for core screens, language switcher, RTL layout toggle.
 **Verification:** Switch to Arabic → layout mirrors to RTL, key strings translated, switch back to English works.
-**Status:** Not Started
+**Status:** Done — verified via Playwright: switching to Arabic flips `<html dir>` to rtl, mirrors the header layout, translates nav/login/register/dashboard/tickets screens (incl. interpolated "Welcome, {{name}}"), navigating via the translated nav link works, switching back to English restores ltr. Language choice persisted in localStorage.
 
 ### TASK-017
 **Requirement:** CRM-UI-001
