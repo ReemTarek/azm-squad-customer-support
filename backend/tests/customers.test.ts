@@ -38,4 +38,16 @@ describe("customers", () => {
       .set("Authorization", `Bearer ${tokenA}`);
     expect(res.status).toBe(403);
   });
+
+  it("a Customer cannot PATCH another customer's record", async () => {
+    const customerA = await createUser({ email: "patch-a@test.com", role: "Customer" });
+    const customerB = await createUser({ email: "patch-b@test.com", role: "Customer" });
+    const tokenA = tokenFor(customerA);
+
+    const res = await request(app)
+      .patch(`/api/customers/${customerB.id}`)
+      .set("Authorization", `Bearer ${tokenA}`)
+      .send({ name: "Hacked Name" });
+    expect(res.status).toBe(403);
+  });
 });

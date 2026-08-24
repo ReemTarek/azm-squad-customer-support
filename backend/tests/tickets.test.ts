@@ -106,6 +106,17 @@ describe("tickets", () => {
     const bodies = res.body.messages.map((m: { body: string }) => m.body);
     expect(bodies).toContain("visible reply");
     expect(bodies).not.toContain("internal escalation note");
+
+    // Confirm the agent's own view still includes both messages — otherwise a
+    // regression that stopped returning internal notes to staff entirely
+    // would still pass the customer-side assertions above.
+    const agentRes = await request(app)
+      .get(`/api/tickets/${ticketId}/messages`)
+      .set("Authorization", `Bearer ${agentToken}`);
+
+    const agentBodies = agentRes.body.messages.map((m: { body: string }) => m.body);
+    expect(agentBodies).toContain("visible reply");
+    expect(agentBodies).toContain("internal escalation note");
   });
 
   it("blocks a customer from viewing another customer's ticket", async () => {

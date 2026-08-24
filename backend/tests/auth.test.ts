@@ -72,6 +72,13 @@ describe("auth", () => {
     expect(res.status).toBe(401);
   });
 
+  it("rejects a protected route with a malformed/invalid Bearer token", async () => {
+    const res = await request(app)
+      .get("/api/users")
+      .set("Authorization", "Bearer not-a-valid-jwt.definitely-not.signed");
+    expect(res.status).toBe(401);
+  });
+
   it("rejects a Customer token on an Admin-only route", async () => {
     const customer = await createUser({ email: "cust@test.com", role: "Customer" });
     const token = tokenFor(customer);
