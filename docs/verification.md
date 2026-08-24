@@ -5,7 +5,7 @@ written after a real check, not because code exists.
 
 | Feature | Verification | Result |
 |---|---|---|
-| DB connectivity (Windows Auth) | Prisma migrate against real SQL Server | Pending |
+| DB connectivity (Windows Auth) | Prisma migrate against real SQL Server | BLOCKED — TCP/IP disabled on local instance, see debugging-notes.md. Using SQLite temporarily; must revisit before submission |
 | Registration/Login | Register + login via UI for each role | Pending |
 | Invalid credentials | Wrong password → 401, no token | Pending |
 | Missing/expired JWT | Protected route without/with expired token → 401 | Pending |

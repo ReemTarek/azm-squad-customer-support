@@ -14,7 +14,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `npm init` backend project, install Prisma, minimal `schema.prisma` with one throwaway model, run `prisma migrate dev`.
 **Frontend:** none
 **Verification:** migration succeeds against the real local SQL Server instance; if `integratedSecurity=true` fails, fall back to a SQL-auth login and update `.env`/`architecture.md` accordingly.
-**Status:** Not Started
+**Status:** Done (with caveat) — local SQL Server has TCP/IP disabled at the protocol level (not an auth issue), needs an admin-elevated fix the user deferred. Substituted SQLite (`backend/prisma/schema.prisma` provider `sqlite`) to unblock all other P0 work; verified with a real create+read round trip. **Must switch back to `sqlserver` before final submission** — see `docs/decisions.md` and `docs/debugging-notes.md`.
 
 ### TASK-002
 **Requirement:** CRM-DB-001, CRM-CUSTOMER-001, CRM-TICKET-001, CRM-STATUS-001, CRM-COMM-001, CRM-KB-001

@@ -3,7 +3,11 @@
 ## Stack
 
 - **Backend:** Node.js + TypeScript + Express, Prisma ORM → SQL Server
-  (local instance, Windows Authentication).
+  (local instance, Windows Authentication). **Currently running against
+  SQLite as a temporary substitute** (local SQL Server has TCP/IP
+  disabled — see `docs/debugging-notes.md` and `docs/decisions.md`);
+  switching back is a one-line `datasource.provider` + `DATABASE_URL`
+  change, no model/query changes needed.
 - **Frontend:** React + TypeScript + Vite, React Query (server state),
   React Router, react-i18next (Arabic/English + RTL).
 - **Auth:** JWT access token (15m) + refresh token (7d), bcrypt password
