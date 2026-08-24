@@ -96,6 +96,17 @@ AI extensions: **Done**, verified against the real Gemini API:
   article for a login-related ticket, and correctly returns none for
   an unrelated ticket (verified both directions)
 
+SLA escalation + alerts: **Done**, verified via curl + Playwright:
+- `POST /tickets/escalate-overdue` (Admin/Manager): bumps priority to
+  Urgent for breached Open/InProgress tickets not already Urgent, logs
+  an audit entry per ticket. Explicit action, not a background job —
+  consistent with the existing compute-on-read SLA architecture (no
+  cron/worker), see decisions.md.
+- `GET /notifications/summary`: breached/at-risk counts scoped per
+  role (Agent: own assigned; Admin/Manager: all; Customer: own).
+  Header badge next to "Tickets" nav, refetches every 30s.
+- "Escalate Overdue Tickets" button on the Reports page.
+
 ## Recommendation
 
 Small, high-value, low-risk additions (fit the existing architecture,

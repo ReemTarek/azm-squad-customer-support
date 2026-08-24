@@ -1,9 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getReportsSummary, getReportsTrends } from "../lib/reportsApi";
+import { escalateOverdueTickets } from "../lib/notificationsApi";
 
 export function ReportsPage() {
+  const queryClient = useQueryClient();
   const summaryQuery = useQuery({ queryKey: ["reports-summary"], queryFn: getReportsSummary });
   const trendsQuery = useQuery({ queryKey: ["reports-trends"], queryFn: getReportsTrends });
+  const [escalationResult, setEscalationResult] = useState<string | null>(null);
+
+  const escalateMutation = useMutation({
+    mutationFn: escalateOverdueTickets,
+    onSuccess: (result) => {
+      setEscalationResult(`Escalated ${result.escalatedCount} overdue ticket${result.escalatedCount === 1 ? "" : "s"} to Urgent.`);
+      queryClient.invalidateQueries({ queryKey: ["notifications-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["reports-trends"] });
+    },
+  });
 
   if (summaryQuery.isLoading) return <p>Loading…</p>;
   if (summaryQuery.error) return <p role="alert" className="form-error">Failed to load report.</p>;
@@ -15,7 +28,18 @@ export function ReportsPage() {
 
   return (
     <div className="page">
-      <h1>Reports</h1>
+      <div className="page-header">
+        <h1>Reports</h1>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => escalateMutation.mutate()}
+          disabled={escalateMutation.isPending}
+        >
+          {escalateMutation.isPending ? "Checking…" : "Escalate Overdue Tickets"}
+        </button>
+      </div>
+      {escalationResult && <p className="form-success">{escalationResult}</p>}
       <div className="report-grid">
         <section className="report-card">
           <h2>Tickets by status</h2>

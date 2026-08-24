@@ -162,6 +162,27 @@ router.post("/:id/assign", requireAuth, requireRole("Admin", "Manager"), async (
   res.json({ ticket: toTicketDto(updated) });
 });
 
+router.post("/escalate-overdue", requireAuth, requireRole("Admin", "Manager"), async (req, res) => {
+  const candidates = await prisma.ticket.findMany({
+    where: { status: { in: ["Open", "InProgress"] }, priority: { not: "Urgent" } },
+  });
+
+  const toEscalate = candidates.filter(
+    (t) => computeSlaState(t.createdAt, t.resolutionDueAt, t.resolvedAt) === "breached"
+  );
+
+  for (const ticket of toEscalate) {
+    await prisma.ticket.update({ where: { id: ticket.id }, data: { priority: "Urgent" } });
+    await writeAuditLog(req.user!.id, "ticket.escalate", "Ticket", ticket.id, {
+      fromPriority: ticket.priority,
+      toPriority: "Urgent",
+      reason: "SLA breached",
+    });
+  }
+
+  res.json({ escalatedCount: toEscalate.length, escalatedTicketIds: toEscalate.map((t) => t.id) });
+});
+
 router.post("/:id/auto-assign", requireAuth, requireRole("Admin", "Manager"), async (req, res) => {
   const id = String(req.params.id);
   const ticket = await prisma.ticket.findUnique({ where: { id } });
