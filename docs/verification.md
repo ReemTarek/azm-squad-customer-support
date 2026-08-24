@@ -11,12 +11,14 @@ written after a real check, not because code exists.
 | Missing/expired JWT | Protected route without/malformed token → 401 | PASS |
 | RBAC | Customer token hits Admin-only /api/users → 403; Admin succeeds | PASS |
 | Customer creation | UI → API → DB row (SQLite for now, see decisions.md) | PASS — Playwright screenshots |
-| Ticket creation | UI → API → DB → visible in agent list | Pending |
-| Cross-customer record access | Customer requests another customer's record → 403 | PASS (customers endpoint; ticket case pending TASK-006) |
-| Internal note isolation | Agent's internal note hidden from Customer | Pending |
-| Status history | Status change recorded and displayed | Pending |
-| Manual assignment | Assign → appears on agent dashboard | Pending |
-| SLA breach | Backdated ticket shows breached | Pending |
+| Ticket creation | UI → API → DB → visible in agent list | PASS — curl + Playwright |
+| Cross-customer record access | Customer requests another customer's ticket/record → 403 | PASS — both /customers and /tickets |
+| Internal note isolation | Agent's internal note hidden from Customer | PASS — API and UI, curl + Playwright |
+| Status history | Status change recorded and displayed | PASS |
+| Manual assignment | Assign → appears on agent dashboard | PASS |
+| SLA breach | Backdated ticket shows breached | PASS |
+| Unassigned agent blocked | Non-assigned agent PATCHes a ticket → 403 | PASS |
+| Customer cannot manage ticket | Customer PATCHes a ticket → 403 | PASS |
 | KB visibility | Unpublished hidden from Customer | Pending |
 | Gemini suggest-reply | Real suggestion returned on live ticket | Pending |
 | Gemini disabled | No API key → 503, server stays up | Pending |

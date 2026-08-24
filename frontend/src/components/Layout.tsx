@@ -13,6 +13,7 @@ export function Layout() {
           {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
             <Link to="/customers">Customers</Link>
           )}
+          <Link to="/tickets">Tickets</Link>
         </nav>
         <div className="app-header-user">
           <span>{user.name} ({user.role})</span>

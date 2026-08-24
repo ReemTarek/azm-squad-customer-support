@@ -5,6 +5,9 @@ import { DashboardShellPage } from "./pages/DashboardShellPage";
 import { CustomersListPage } from "./pages/customers/CustomersListPage";
 import { CustomerFormPage } from "./pages/customers/CustomerFormPage";
 import { CustomerDetailPage } from "./pages/customers/CustomerDetailPage";
+import { TicketsListPage } from "./pages/tickets/TicketsListPage";
+import { TicketFormPage } from "./pages/tickets/TicketFormPage";
+import { TicketDetailPage } from "./pages/tickets/TicketDetailPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -47,6 +50,9 @@ function App() {
               </RequireAuth>
             }
           />
+          <Route path="/tickets" element={<TicketsListPage />} />
+          <Route path="/tickets/new" element={<TicketFormPage />} />
+          <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

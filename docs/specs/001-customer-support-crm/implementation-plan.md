@@ -60,7 +60,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `POST /tickets`, `GET /tickets`, `GET /tickets/:id` with ownership scoping.
 **Frontend:** Ticket creation form, ticket list, ticket detail page (read-only for now).
 **Verification:** Create a ticket via UI as a customer → confirm persisted row → visible in agent's ticket list.
-**Status:** Not Started
+**Status:** Done — verified via curl (Admin creates on-behalf-of-customer, Customer creates for self, validation errors on bad priority/missing subject) and Playwright (Admin creates a ticket through the UI, lands on detail page).
 
 ### TASK-007
 **Requirement:** CRM-STATUS-001
@@ -69,7 +69,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `PATCH /tickets/:id` (status/priority), writes TicketStatusHistory row; recomputes SLA due timestamps on priority change.
 **Frontend:** Status dropdown/buttons on ticket detail; history timeline component.
 **Verification:** Change status via UI → history entry appears → status persists on reload.
-**Status:** Not Started
+**Status:** Done — verified via curl (Open→InProgress→Resolved, history shows all 3 entries with correct from/to/changedBy) and Playwright (agent changes status via UI, history list updates, customer sees the same history).
 
 ### TASK-008
 **Requirement:** CRM-ASSIGN-001
@@ -78,7 +78,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `POST /tickets/:id/assign`.
 **Frontend:** Assign-to-agent dropdown (Admin/Manager view).
 **Verification:** Assign via UI → ticket appears in that agent's dashboard.
-**Status:** Not Started
+**Status:** Done — verified via curl and Playwright: Admin assigns a ticket to an agent via the dropdown, ticket appears when that agent's account queries /tickets (server-side scoped to assignedAgentId=self for Agent role, regardless of query params — an unassigned agent gets 403 on PATCH attempts).
 
 ### TASK-009
 **Requirement:** CRM-COMM-001
@@ -87,7 +87,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `POST/GET /tickets/:id/messages`; Customer requests never return `isInternalNote=true` rows.
 **Frontend:** Message thread UI with a distinct visual style for internal notes; reply box (Customer cannot toggle internal note).
 **Verification:** Post an internal note as Agent → confirm it does NOT appear when fetching the same ticket as the owning Customer.
-**Status:** Not Started
+**Status:** Done — verified via curl and Playwright end-to-end: Agent posts one internal note + one customer-visible reply; the owning Customer's message list (API and UI) shows only the visible reply. Customer's reply box has no internal-note checkbox (frontend), and the backend forces isInternalNote=false for Customer regardless of payload (defense in depth).
 
 ### TASK-010
 **Requirement:** CRM-SLA-001
@@ -96,7 +96,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** SLA calc service (priority → due timestamps), derived state on read.
 **Frontend:** SLA badge (on_track/at_risk/breached) on ticket list + detail.
 **Verification:** Create Urgent ticket, manually backdate `createdAt` in DB, confirm state shows `breached`.
-**Status:** Not Started
+**Status:** Done — verified: a normal Urgent ticket reports `on_track`; a ticket created directly in the DB with `resolutionDueAt` 1 hour in the past reports `breached` via the API. SLA badge renders correctly in the UI (green/amber/red) on both list and detail views.
 
 ### TASK-011
 **Requirement:** CRM-DASH-001
@@ -105,7 +105,7 @@ work proceeds — this file is the live source of truth for progress.
 **Backend:** `GET /tickets?assignedAgentId=me&status=...` filtering (reuses TASK-006 endpoint).
 **Frontend:** Agent dashboard page — assigned tickets, status/priority filters, SLA badges.
 **Verification:** Login as agent with 2+ assigned tickets → dashboard lists exactly those, filterable.
-**Status:** Not Started
+**Status:** Done — the single `/tickets` list page doubles as the agent dashboard: backend always scopes an Agent's query to their own assignedAgentId, so no separate dashboard route was needed. Status/priority filters verified via UI (select dropdowns re-query).
 
 ### TASK-012
 **Requirement:** CRM-KB-001
