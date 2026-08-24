@@ -2,8 +2,11 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
+import bootstrapLtrUrl from "bootstrap/dist/css/bootstrap.min.css?url";
+import bootstrapRtlUrl from "bootstrap/dist/css/bootstrap.rtl.min.css?url";
 
 const STORAGE_KEY = "azm_crm_locale";
+const BOOTSTRAP_LINK_ID = "bootstrap-css";
 
 export type SupportedLocale = "en" | "ar";
 
@@ -12,9 +15,21 @@ export function getStoredLocale(): SupportedLocale {
   return stored === "ar" ? "ar" : "en";
 }
 
+function applyBootstrapBundle(locale: SupportedLocale) {
+  let link = document.getElementById(BOOTSTRAP_LINK_ID) as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement("link");
+    link.id = BOOTSTRAP_LINK_ID;
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }
+  link.href = locale === "ar" ? bootstrapRtlUrl : bootstrapLtrUrl;
+}
+
 export function applyDirection(locale: SupportedLocale) {
   document.documentElement.lang = locale;
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+  applyBootstrapBundle(locale);
 }
 
 export function setLocale(locale: SupportedLocale) {
