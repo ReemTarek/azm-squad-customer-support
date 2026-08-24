@@ -234,7 +234,7 @@ DB queries where numeric). Full detail in
 **Backend:** `GET /admin/sla-config` (Admin only, list all 4 rows), `PATCH /admin/sla-config/:priority` (Admin only, update one row's minutes). `computeSlaDueDates()` reads from the DB instead of the in-code constant map.
 **Frontend:** Admin-only "SLA Settings" page — one row per priority with editable response/resolution minute fields, save button.
 **Verification:** Change a threshold via UI → create a new ticket at that priority → confirm its due timestamps use the new value. Confirm existing tickets' due dates are unaffected (matches the compute-on-write architecture — no retroactive recompute). Non-admin blocked (403).
-**Status:** Not Started
+**Status:** Done — see `features/15-sla-configuration.md` for full verification detail.
 
 ### TASK-038
 **Requirement:** CRM-CUSTOMER-004
@@ -244,7 +244,7 @@ DB queries where numeric). Full detail in
 **Backend:** `GET /customers/:id/notes` (Admin/Manager/Agent), `POST /customers/:id/notes` (Admin/Manager/Agent).
 **Frontend:** "Notes" section on the customer detail page (staff-only), list in reverse-chronological order with author name, simple add form.
 **Verification:** Staff adds a note → visible to other staff on reload → Customer role cannot see it (403 or simply never rendered/never fetched, matching the internal-note pattern already used for tickets). Non-staff blocked.
-**Status:** Not Started
+**Status:** Done — see `features/16-customer-notes.md` for full verification detail.
 
 Explicitly out of scope for both: file attachments (materially more work
 — storage, size limits, type validation), note editing/deletion,

@@ -59,4 +59,12 @@ curl: PATCH a threshold → create a ticket at that priority → confirm
 an existing ticket's due dates didn't change. Playwright: edit via
 UI, reload, confirm persisted; Agent gets 403 hitting the page/API.
 
-## Status: Not Started
+## Status: Done
+
+Verified via curl: Admin lists/updates thresholds; a new Low-priority
+ticket created after editing Low to 60/120 minutes shows exactly those
+due-date deltas from `createdAt`; a pre-existing Low-priority ticket's
+`resolutionDueAt` remained 4320 minutes after its `createdAt` (the
+original default) after the edit and revert — confirming no
+retroactive recompute. Agent blocked (403). Negative minutes rejected
+(400). Playwright: Admin edits/saves via the SLA Settings page.

@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { createCustomerSchema, updateCustomerSchema } from "../validation/customers.schema";
+import { createCustomerNoteSchema } from "../validation/customerNotes.schema";
 import { writeAuditLog } from "../lib/audit";
 import { erpClient } from "../integrations/erpClient";
 
@@ -108,6 +109,30 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Agent", "Customer"), asy
   });
 
   res.json({ customer: toPublicCustomer(user) });
+});
+
+router.get("/:id/notes", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const customerId = String(req.params.id);
+  const notes = await prisma.customerNote.findMany({
+    where: { customerId },
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { name: true } } },
+  });
+  res.json({ notes: notes.map((n) => ({ id: n.id, body: n.body, authorName: n.author.name, createdAt: n.createdAt })) });
+});
+
+router.post("/:id/notes", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const customerId = String(req.params.id);
+  const customer = await prisma.user.findUnique({ where: { id: customerId } });
+  if (!customer || customer.role !== "Customer") throw Errors.notFound("Customer not found");
+
+  const body = createCustomerNoteSchema.parse(req.body);
+  const note = await prisma.customerNote.create({
+    data: { customerId, authorId: req.user!.id, body: body.body },
+    include: { author: { select: { name: true } } },
+  });
+
+  res.status(201).json({ note: { id: note.id, body: note.body, authorName: note.author.name, createdAt: note.createdAt } });
 });
 
 export default router;

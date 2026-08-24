@@ -52,6 +52,8 @@ model User {
   auditLogs            AuditLog[]
   ticketTasks          TicketTask[]
   quickReplies         QuickReply[]
+  notesAboutMe         CustomerNote[] @relation("CustomerNoteSubject")
+  notesAuthored        CustomerNote[] @relation("CustomerNoteAuthor")
 }
 
 model CustomerProfile {
@@ -159,6 +161,26 @@ model QuickReply {
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model SlaPolicy {
+  id               String   @id @default(uuid())
+  priority         Priority @unique
+  responseMinutes  Int
+  resolutionMinutes Int
+  updatedAt        DateTime @updatedAt
+}
+
+model CustomerNote {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   User     @relation("CustomerNoteSubject", fields: [customerId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User     @relation("CustomerNoteAuthor", fields: [authorId], references: [id])
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
 }
 
 model AuditLog {

@@ -59,7 +59,7 @@ router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (
     customerId = body.customerId;
   }
 
-  const { responseDueAt, resolutionDueAt } = computeSlaDueDates(body.priority);
+  const { responseDueAt, resolutionDueAt } = await computeSlaDueDates(body.priority);
   const ticket = await prisma.ticket.create({
     data: {
       subject: body.subject,
@@ -122,7 +122,7 @@ router.patch("/:id", requireAuth, requireRole("Admin", "Manager", "Agent"), asyn
 
   if (body.priority && body.priority !== existing.priority) {
     data.priority = body.priority;
-    const { responseDueAt, resolutionDueAt } = computeSlaDueDates(body.priority, existing.createdAt);
+    const { responseDueAt, resolutionDueAt } = await computeSlaDueDates(body.priority, existing.createdAt);
     data.responseDueAt = responseDueAt;
     data.resolutionDueAt = resolutionDueAt;
   }

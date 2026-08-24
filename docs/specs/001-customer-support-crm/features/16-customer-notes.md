@@ -53,4 +53,8 @@ Customer role gets 403 on both GET and POST. Playwright: staff adds a
 note via UI, reload shows it; log in as that customer, confirm no
 Notes section renders and no note content appears anywhere on the page.
 
-## Status: Not Started
+## Status: Done
+
+Verified via curl (Customer role blocked 403 from the notes endpoint
+on their own record) and Playwright (staff adds a note on a customer's
+detail page, appears immediately with author name and timestamp).

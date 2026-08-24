@@ -14,6 +14,7 @@ import { KbDetailPage } from "./pages/kb/KbDetailPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { QuickRepliesPage } from "./pages/QuickRepliesPage";
 import { AuditLogPage } from "./pages/AuditLogPage";
+import { AdminSlaSettingsPage } from "./pages/AdminSlaSettingsPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -90,6 +91,14 @@ function App() {
             element={
               <RequireAuth roles={["Admin"]}>
                 <AuditLogPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/sla-settings"
+            element={
+              <RequireAuth roles={["Admin"]}>
+                <AdminSlaSettingsPage />
               </RequireAuth>
             }
           />

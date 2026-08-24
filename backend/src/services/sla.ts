@@ -1,14 +1,21 @@
 import { Priority } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
-const SLA_MINUTES: Record<Priority, { responseMinutes: number; resolutionMinutes: number }> = {
+const FALLBACK_SLA_MINUTES: Record<Priority, { responseMinutes: number; resolutionMinutes: number }> = {
   Urgent: { responseMinutes: 30, resolutionMinutes: 4 * 60 },
   High: { responseMinutes: 2 * 60, resolutionMinutes: 8 * 60 },
   Medium: { responseMinutes: 8 * 60, resolutionMinutes: 24 * 60 },
   Low: { responseMinutes: 24 * 60, resolutionMinutes: 72 * 60 },
 };
 
-export function computeSlaDueDates(priority: Priority, from: Date = new Date()) {
-  const { responseMinutes, resolutionMinutes } = SLA_MINUTES[priority];
+/**
+ * SLA thresholds are admin-editable (SlaPolicy table). Falls back to
+ * hardcoded defaults only if a row is somehow missing (e.g. seed
+ * hasn't run yet) so the app never hard-fails on a missing policy.
+ */
+export async function computeSlaDueDates(priority: Priority, from: Date = new Date()) {
+  const policy = await prisma.slaPolicy.findUnique({ where: { priority } });
+  const { responseMinutes, resolutionMinutes } = policy ?? FALLBACK_SLA_MINUTES[priority];
   return {
     responseDueAt: new Date(from.getTime() + responseMinutes * 60_000),
     resolutionDueAt: new Date(from.getTime() + resolutionMinutes * 60_000),
