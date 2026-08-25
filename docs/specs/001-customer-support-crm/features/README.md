@@ -62,7 +62,11 @@ tasks + a final whole-branch review with one fix wave). 21 (Staff &
 user management UI) is Done as of 2026-08-25 (3 tasks + a final
 whole-branch review with one fix wave — caught and closed a real
 deactivation-bypass via the token-refresh endpoint and an unrecoverable
-last-Admin-lockout gap). 22-28 remain Not Started.
+last-Admin-lockout gap). 22 (Customer/ticket attachments) is Done as
+of 2026-08-25 (4 tasks — one went through its own fix round — + a
+final whole-branch review with one fix wave — caught and closed an
+orphan-file disk-fill vector, a production-path storage bug, and a
+client-spoofable file-type gate). 23-28 remain Not Started.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original
