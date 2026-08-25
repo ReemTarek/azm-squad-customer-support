@@ -24,6 +24,12 @@ enum ChatRole {
   assistant
 }
 
+enum LiveChatSessionStatus {
+  Waiting
+  Active
+  Ended
+}
+
 enum Priority {
   Low
   Medium
@@ -67,6 +73,9 @@ model User {
   chatConversations    ChatConversation[]
   uploadedAttachments Attachment[] @relation("AttachmentUploader")
   attachments         Attachment[] @relation("AttachmentCustomer")
+  liveChatSessionsAsCustomer LiveChatSession[] @relation("LiveChatCustomer")
+  liveChatSessionsAsAgent    LiveChatSession[] @relation("LiveChatAgent")
+  liveChatMessages           LiveChatMessage[]
 }
 
 model CustomerProfile {
@@ -260,6 +269,36 @@ model ChatMessage {
   createdAt      DateTime         @default(now())
 
   @@index([conversationId])
+}
+
+model LiveChatSession {
+  id              String                @id @default(uuid())
+  customerId      String
+  customer        User                  @relation("LiveChatCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  assignedAgentId String?
+  assignedAgent   User?                 @relation("LiveChatAgent", fields: [assignedAgentId], references: [id])
+  status          LiveChatSessionStatus @default(Waiting)
+  createdAt       DateTime              @default(now())
+  endedAt         DateTime?
+
+  messages LiveChatMessage[]
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([status])
+}
+
+model LiveChatMessage {
+  id         String          @id @default(uuid())
+  sessionId  String
+  session    LiveChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User            @relation(fields: [authorId], references: [id])
+  authorRole Role
+  body       String
+  createdAt  DateTime        @default(now())
+
+  @@index([sessionId])
 }
 
 model AuditLog {

@@ -21,6 +21,8 @@ async function resetDb() {
   await prisma.attachment.deleteMany();
   await prisma.chatMessage.deleteMany();
   await prisma.chatConversation.deleteMany();
+  await prisma.liveChatMessage.deleteMany();
+  await prisma.liveChatSession.deleteMany();
   await prisma.ticketTask.deleteMany();
   await prisma.ticketMessage.deleteMany();
   await prisma.ticketStatusHistory.deleteMany();
