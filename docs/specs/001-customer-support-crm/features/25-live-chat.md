@@ -104,24 +104,68 @@ talks to a human live).
 
 ## Acceptance criteria
 
-- [ ] A customer can start a live-chat session and send a message.
-- [ ] An agent sees the session appear in the queue in real time (no
+- [x] A customer can start a live-chat session and send a message.
+      Verified Task 7: two-browser Playwright run, "Talk to a human"
+      starts a session and messages send successfully.
+- [x] An agent sees the session appear in the queue in real time (no
       refresh/poll needed), claims it, and can reply.
-- [ ] The customer sees the agent's reply in real time (sub-second,
+      Verified Task 7: the new session appeared in the agent's
+      "Waiting" list with no page reload (`queue:new-session` socket
+      event → query invalidation), Claim switched the agent into the
+      active-chat view, and the agent's reply sent successfully.
+- [x] The customer sees the agent's reply in real time (sub-second,
       pushed over the socket — not a polling refetch).
-- [ ] A Customer cannot see or claim another customer's session; an
+      Verified Task 7: measured message delivery at 40ms and 41ms
+      (both directions) in the live two-browser round-trip, well
+      under the sub-second bar, pushed via `message:new` socket
+      events (no polling).
+- [x] A Customer cannot see or claim another customer's session; an
       Agent cannot post into, or receive socket events for, a session
       assigned to a different agent (room membership enforces this —
       verify a stray/forged room-join attempt is rejected server-side,
       not just hidden client-side).
-- [ ] Ending a session stops it from appearing in the active queue for
+      Verified by the automated backend suite (part of the 65 passing
+      tests, Task 7 Step 1): `liveChat.test.ts` — "a Customer cannot
+      see or claim another customer's session" and "an unassigned
+      Agent cannot post into a session assigned to a different agent";
+      `liveChatSocket.test.ts` — "rejects a stray join-session attempt
+      for a session the socket's user doesn't own" (server-side ack
+      `{ ok: false }`, not a client-side hide).
+- [x] Ending a session stops it from appearing in the active queue for
       either party, and both sockets leave the room.
-- [ ] A socket connection with an invalid/expired/missing token is
+      Verified by the automated backend suite: `liveChatSocket.test.ts`
+      — "ending a session removes every joined socket from that
+      session's room" asserts the Socket.IO room is empty
+      (`rooms.get(sessionId)` is `undefined`) immediately after `end`.
+      Queue exclusion follows directly from `GET /sessions`' query
+      (`status: "Waiting"` or `status: "Active"` only — an `Ended`
+      session matches neither), also confirmed live in the Task 7
+      round-trip (agent's active-chat view left the ended session).
+- [x] A socket connection with an invalid/expired/missing token is
       rejected at handshake — same auth guarantee as every HTTP route.
-- [ ] A dropped connection (e.g. network blip) reconnects and rejoins
+      Verified by the automated backend suite: `liveChatSocket.test.ts`
+      — "rejects a connection with a missing token" and "rejects a
+      connection with an invalid token" (part of the 65 passing
+      tests).
+- [x] A dropped connection (e.g. network blip) reconnects and rejoins
       its session's room automatically, with no lost messages (missed
       messages are recoverable via the existing `GET .../messages` on
       reconnect, since REST remains the source of truth).
+      Verified Task 7 with a genuine forced WebSocket close
+      (`context.routeWebSocket()` closing the live transport — plain
+      `context.setOffline()` was tried first per the original plan but
+      was found, empirically, not to interrupt an already-established
+      Socket.IO WebSocket in this Chromium/Playwright setup, so it
+      could not exercise real reconnect behavior on its own): the
+      client's `disconnect` event fired, `socket.io-client`'s built-in
+      reconnection manager auto-reconnected ~700ms later with a new
+      socket id (`connect` re-fired), and `join-session` re-ran,
+      confirmed by fresh messages flowing live again in both
+      directions immediately after. A message sent by the agent
+      *during* the outage window was not delivered live (expected —
+      Socket.IO room broadcasts aren't queued for a disconnected
+      socket) but was confirmed recoverable via `GET .../messages`
+      afterward, matching the spec's own accepted fallback wording.
 
 ## Implementation
 
@@ -147,4 +191,4 @@ customer, unassigned-agent) — extended here to also cover a rejected
 socket handshake (bad token) and a rejected cross-session room-join
 attempt.
 
-## Status: Not Started
+## Status: Done

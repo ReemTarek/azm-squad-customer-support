@@ -90,3 +90,9 @@ was a test-timing artifact, not an app bug — confirmed by a direct
 re-check of the same ticket immediately after. The 4 console 403s
 logged during this run are the *expected* result of the cross-customer
 access-blocked test, not errors.
+
+## Round 2 — Live chat
+
+| Feature | Verification | Result |
+|---|---|---|
+| Live chat (Socket.IO, room-scoped, RBAC-enforced) | Full backend test suite (socket + REST) + two-browser real-time verification | PASS |

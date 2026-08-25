@@ -345,7 +345,7 @@ last. SMS/WhatsApp stays blocked on credentials regardless of order.
 | TASK-051 | Customer/ticket attachments | `features/22-attachments.md` | Done |
 | TASK-052 | New-message customer notifications | `features/23-new-message-notifications.md` | Done |
 | TASK-053 | Real SMS (Twilio) + WhatsApp (Meta) channels | `features/24-real-sms-whatsapp-channels.md` | Not Started — blocked on credentials |
-| TASK-054 | Live chat (agent ↔ customer) | `features/25-live-chat.md` | Not Started |
+| TASK-054 | Live chat (agent ↔ customer) | `features/25-live-chat.md` | Done |
 | TASK-055 | AI automatic ticket categorization | `features/26-ai-auto-categorization.md` | Not Started |
 | TASK-056 | AI usage dashboard | `features/27-ai-usage-dashboard.md` | Not Started |
 | TASK-057 | Custom branding (reverses the earlier decline) | `features/28-custom-branding.md` | Not Started |
