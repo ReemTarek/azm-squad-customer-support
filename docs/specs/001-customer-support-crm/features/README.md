@@ -58,8 +58,11 @@ SQL Server, by final user decision — not a pending item). 19 is Done.
 any code on 2026-08-24, following this project's spec-first discipline
 throughout. 20 (Bootstrap responsive redesign) is Done as of
 2026-08-25 (built via `superpowers:subagent-driven-development` — 7
-tasks + a final whole-branch review with one fix wave). 21-28 remain
-Not Started.
+tasks + a final whole-branch review with one fix wave). 21 (Staff &
+user management UI) is Done as of 2026-08-25 (3 tasks + a final
+whole-branch review with one fix wave — caught and closed a real
+deactivation-bypass via the token-refresh endpoint and an unrecoverable
+last-Admin-lockout gap). 22-28 remain Not Started.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original
