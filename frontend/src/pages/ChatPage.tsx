@@ -58,14 +58,16 @@ export function ChatPage() {
       <p className="form-hint">Answers are sourced from our knowledge base only.</p>
       {error && <p role="alert" className="form-error">{error}</p>}
 
-      <ul className="message-thread">
+      <ul className="list-group mb-3">
         {conversationQuery.data?.messages.map((m) => (
-          <li key={m.id} className={m.role === "assistant" ? "message" : "message message--internal"}>
-            <span className="internal-tag">{m.role === "assistant" ? "Assistant" : "You"}</span>
-            <p>{m.body}</p>
+          <li key={m.id} className={m.role === "assistant" ? "list-group-item" : "list-group-item list-group-item-warning"}>
+            <span className={m.role === "assistant" ? "badge bg-secondary mb-1" : "badge bg-warning text-dark mb-1"}>
+              {m.role === "assistant" ? "Assistant" : "You"}
+            </span>
+            <p className="mb-0">{m.body}</p>
           </li>
         ))}
-        {conversationQuery.data?.messages.length === 0 && <li>Ask anything — I'll answer from our help articles.</li>}
+        {conversationQuery.data?.messages.length === 0 && <li className="list-group-item">Ask anything — I'll answer from our help articles.</li>}
       </ul>
 
       {!lastConfident && (
@@ -74,16 +76,19 @@ export function ChatPage() {
         </button>
       )}
 
-      <form onSubmit={handleSubmit} className="entity-form entity-form--inline">
+      <form onSubmit={handleSubmit} className="d-flex gap-2">
+        <label className="visually-hidden" htmlFor="chat-question-input">Type your question</label>
         <input
+          id="chat-question-input"
           type="text"
+          className="form-control"
           placeholder="Type your question…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           required
           disabled={!conversationId || sendMutation.isPending}
         />
-        <button type="submit" disabled={!conversationId || sendMutation.isPending}>
+        <button type="submit" className="btn btn-primary" disabled={!conversationId || sendMutation.isPending}>
           {sendMutation.isPending ? "Asking…" : "Send"}
         </button>
       </form>

@@ -51,29 +51,39 @@ export function AdminOrgSettingsPage() {
         Managers with no department/branch set continue to see everything.
       </p>
       {error && <p role="alert" className="form-error">{error}</p>}
-      <div className="report-grid">
-        <section className="report-card">
-          <h2>Departments</h2>
-          <ul className="history-list">
-            {departmentsQuery.data?.map((d) => <li key={d.id}>{d.name}</li>)}
-            {departmentsQuery.data?.length === 0 && <li>None yet.</li>}
-          </ul>
-          <form onSubmit={handleAddDept} className="entity-form entity-form--inline">
-            <input type="text" placeholder="New department name…" value={deptName} onChange={(e) => setDeptName(e.target.value)} required />
-            <button type="submit" disabled={createDeptMutation.isPending}>Add</button>
-          </form>
-        </section>
-        <section className="report-card">
-          <h2>Branches</h2>
-          <ul className="history-list">
-            {branchesQuery.data?.map((b) => <li key={b.id}>{b.name}</li>)}
-            {branchesQuery.data?.length === 0 && <li>None yet.</li>}
-          </ul>
-          <form onSubmit={handleAddBranch} className="entity-form entity-form--inline">
-            <input type="text" placeholder="New branch name…" value={branchName} onChange={(e) => setBranchName(e.target.value)} required />
-            <button type="submit" disabled={createBranchMutation.isPending}>Add</button>
-          </form>
-        </section>
+      <div className="row row-cols-1 row-cols-md-2 g-3">
+        <div className="col">
+          <div className="card h-100">
+            <div className="card-body">
+              <h2>Departments</h2>
+              <ul className="list-group list-group-flush mb-3">
+                {departmentsQuery.data?.map((d) => <li key={d.id} className="list-group-item">{d.name}</li>)}
+                {departmentsQuery.data?.length === 0 && <li className="list-group-item">None yet.</li>}
+              </ul>
+              <form onSubmit={handleAddDept} className="d-flex gap-2">
+                <label className="visually-hidden" htmlFor="new-department-name">New department name</label>
+                <input id="new-department-name" type="text" className="form-control" placeholder="New department name…" value={deptName} onChange={(e) => setDeptName(e.target.value)} required />
+                <button type="submit" className="btn btn-primary" disabled={createDeptMutation.isPending}>Add</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div className="col">
+          <div className="card h-100">
+            <div className="card-body">
+              <h2>Branches</h2>
+              <ul className="list-group list-group-flush mb-3">
+                {branchesQuery.data?.map((b) => <li key={b.id} className="list-group-item">{b.name}</li>)}
+                {branchesQuery.data?.length === 0 && <li className="list-group-item">None yet.</li>}
+              </ul>
+              <form onSubmit={handleAddBranch} className="d-flex gap-2">
+                <label className="visually-hidden" htmlFor="new-branch-name">New branch name</label>
+                <input id="new-branch-name" type="text" className="form-control" placeholder="New branch name…" value={branchName} onChange={(e) => setBranchName(e.target.value)} required />
+                <button type="submit" className="btn btn-primary" disabled={createBranchMutation.isPending}>Add</button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

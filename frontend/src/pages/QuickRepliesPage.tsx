@@ -35,25 +35,25 @@ export function QuickRepliesPage() {
       <h1>Quick Replies</h1>
       <p className="form-hint">Reusable reply templates, insertable from any ticket's reply box.</p>
 
-      <form onSubmit={handleSubmit} className="entity-form">
+      <form onSubmit={handleSubmit} className="card card-body mb-3">
         {error && <p role="alert" className="form-error">{error}</p>}
-        <label>
-          Title
-          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-        </label>
-        <label>
-          Body
-          <textarea rows={3} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
-        </label>
-        <button type="submit" disabled={createMutation.isPending}>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="quick-reply-title">Title</label>
+          <input id="quick-reply-title" className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="quick-reply-body">Body</label>
+          <textarea id="quick-reply-body" className="form-control" rows={3} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={createMutation.isPending}>
           {createMutation.isPending ? "Saving…" : "Save quick reply"}
         </button>
       </form>
 
       {isLoading && <p>Loading…</p>}
-      <ul className="kb-list quick-replies-list">
+      <ul className="list-group mt-3">
         {quickReplies?.map((qr) => (
-          <li key={qr.id}>
+          <li key={qr.id} className="list-group-item d-flex justify-content-between align-items-start">
             <div>
               <strong>{qr.title}</strong>
               <p className="form-hint">{qr.body}</p>
@@ -63,7 +63,7 @@ export function QuickRepliesPage() {
             </button>
           </li>
         ))}
-        {quickReplies?.length === 0 && <li>No quick replies saved yet.</li>}
+        {quickReplies?.length === 0 && <li className="list-group-item">No quick replies saved yet.</li>}
       </ul>
     </div>
   );

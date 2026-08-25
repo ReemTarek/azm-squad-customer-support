@@ -41,37 +41,45 @@ export function AdminSlaSettingsPage() {
         Changes apply to new tickets and priority changes going forward — existing tickets keep their original due dates.
       </p>
       {error && <p role="alert" className="form-error">{error}</p>}
-      <div className="report-grid">
+      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
         {sorted.map((p) => (
-          <section key={p.priority} className="report-card">
-            <h2>{p.priority}</h2>
-            <label>
-              Response (minutes)
-              <input
-                type="number"
-                min={1}
-                value={drafts[p.priority]?.responseMinutes ?? ""}
-                onChange={(e) =>
-                  setDrafts({ ...drafts, [p.priority]: { ...drafts[p.priority], responseMinutes: Number(e.target.value) } })
-                }
-              />
-            </label>
-            <label>
-              Resolution (minutes)
-              <input
-                type="number"
-                min={1}
-                value={drafts[p.priority]?.resolutionMinutes ?? ""}
-                onChange={(e) =>
-                  setDrafts({ ...drafts, [p.priority]: { ...drafts[p.priority], resolutionMinutes: Number(e.target.value) } })
-                }
-              />
-            </label>
-            <button onClick={() => mutation.mutate(p.priority)} disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving…" : "Save"}
-            </button>
-            {savedPriority === p.priority && mutation.isSuccess && <p className="form-success">Saved.</p>}
-          </section>
+          <div key={p.priority} className="col">
+            <div className="card h-100">
+              <div className="card-body">
+                <h2>{p.priority}</h2>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor={`sla-response-${p.priority}`}>Response (minutes)</label>
+                  <input
+                    id={`sla-response-${p.priority}`}
+                    type="number"
+                    className="form-control"
+                    min={1}
+                    value={drafts[p.priority]?.responseMinutes ?? ""}
+                    onChange={(e) =>
+                      setDrafts({ ...drafts, [p.priority]: { ...drafts[p.priority], responseMinutes: Number(e.target.value) } })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label" htmlFor={`sla-resolution-${p.priority}`}>Resolution (minutes)</label>
+                  <input
+                    id={`sla-resolution-${p.priority}`}
+                    type="number"
+                    className="form-control"
+                    min={1}
+                    value={drafts[p.priority]?.resolutionMinutes ?? ""}
+                    onChange={(e) =>
+                      setDrafts({ ...drafts, [p.priority]: { ...drafts[p.priority], resolutionMinutes: Number(e.target.value) } })
+                    }
+                  />
+                </div>
+                <button className="btn btn-primary" onClick={() => mutation.mutate(p.priority)} disabled={mutation.isPending}>
+                  {mutation.isPending ? "Saving…" : "Save"}
+                </button>
+                {savedPriority === p.priority && mutation.isSuccess && <p className="form-success">Saved.</p>}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>
