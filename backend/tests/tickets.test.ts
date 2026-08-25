@@ -4,6 +4,7 @@ import request from "supertest";
 import app from "../src/app";
 import { createUser, tokenFor } from "./helpers/fixtures";
 import { prisma } from "../src/lib/prisma";
+import { buildReplyPreview } from "../src/routes/tickets";
 
 describe("tickets", () => {
   it("a Customer creates their own ticket", async () => {
@@ -175,7 +176,10 @@ describe("tickets", () => {
       where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
     });
     expect(logs).toHaveLength(1);
-    expect(JSON.parse(logs[0].metadata ?? "{}")).toMatchObject({ subject: "New reply on your ticket" });
+    expect(JSON.parse(logs[0].metadata ?? "{}")).toMatchObject({
+      channel: "email",
+      subject: "New reply on your ticket",
+    });
   });
 
   it("does not notify the customer when staff post an internal note", async () => {
@@ -189,10 +193,12 @@ describe("tickets", () => {
       .send({ subject: "Internal note notify test", priority: "Low", customerId: customer.id });
     const ticketId = createRes.body.ticket.id;
 
-    await request(app)
+    const res = await request(app)
       .post(`/api/tickets/${ticketId}/messages`)
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ body: "internal escalation, do not share", isInternalNote: true });
+
+    expect(res.status).toBe(201);
 
     const logs = await prisma.auditLog.findMany({
       where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
@@ -210,14 +216,37 @@ describe("tickets", () => {
       .send({ subject: "Self notify test", priority: "Low" });
     const ticketId = createRes.body.ticket.id;
 
-    await request(app)
+    const res = await request(app)
       .post(`/api/tickets/${ticketId}/messages`)
       .set("Authorization", `Bearer ${customerToken}`)
       .send({ body: "Following up on my own ticket", isInternalNote: false });
+
+    expect(res.status).toBe(201);
 
     const logs = await prisma.auditLog.findMany({
       where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
     });
     expect(logs).toHaveLength(0);
+  });
+});
+
+describe("buildReplyPreview", () => {
+  it("passes a short body through unchanged", () => {
+    const body = "This is a short reply.";
+    expect(buildReplyPreview(body)).toBe(body);
+  });
+
+  it("passes a body of exactly 200 chars through unchanged", () => {
+    const body = "a".repeat(200);
+    const result = buildReplyPreview(body);
+    expect(result).toBe(body);
+    expect(result).toHaveLength(200);
+  });
+
+  it("truncates a body over 200 chars with a trailing ellipsis", () => {
+    const body = "a".repeat(250);
+    const result = buildReplyPreview(body);
+    expect(result).toBe(`${"a".repeat(200)}...`);
+    expect(result).toHaveLength(203);
   });
 });

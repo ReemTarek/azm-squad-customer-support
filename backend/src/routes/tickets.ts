@@ -21,6 +21,13 @@ import type { Ticket } from "@prisma/client";
 
 const router = Router();
 
+// Truncates a reply body for inclusion in the customer notification email,
+// keeping the message short while still giving the customer a preview of
+// what was said. Exported for focused unit testing.
+export function buildReplyPreview(body: string): string {
+  return body.length > 200 ? `${body.slice(0, 200)}...` : body;
+}
+
 function toTicketDto(ticket: Ticket) {
   return {
     id: ticket.id,
@@ -365,22 +372,31 @@ router.post(
     });
 
     if (!isInternalNote && user.role !== "Customer") {
-      const ticket = await prisma.ticket.findUnique({
-        where: { id },
-        select: { customerId: true, subject: true },
-      });
-      if (ticket) {
-        const customer = await prisma.user.findUnique({ where: { id: ticket.customerId } });
-        if (customer) {
-          const preview = body.body.length > 200 ? `${body.body.slice(0, 200)}...` : body.body;
-          await notifyCustomer(
-            "email",
-            customer.email,
-            "New reply on your ticket",
-            `You have a new reply on your ticket "${ticket.subject}":\n\n${preview}`,
-            user.id
-          ).catch((err) => console.error("Notification dispatch failed (non-fatal):", err));
+      // The entire notification dispatch — including the DB lookups it needs —
+      // is isolated behind this try/catch. The ticket message was already
+      // successfully created above, so a failure here (lookup or send) must
+      // never surface as a 500 to the client; that would invite a
+      // duplicate-creating retry for a message that was actually saved.
+      try {
+        const ticket = await prisma.ticket.findUnique({
+          where: { id },
+          select: { customerId: true, subject: true },
+        });
+        if (ticket) {
+          const customer = await prisma.user.findUnique({ where: { id: ticket.customerId } });
+          if (customer) {
+            const preview = buildReplyPreview(message.body);
+            await notifyCustomer(
+              "email",
+              customer.email,
+              "New reply on your ticket",
+              `You have a new reply on your ticket "${ticket.subject}":\n\n${preview}`,
+              user.id
+            );
+          }
         }
+      } catch (err) {
+        console.error("Notification dispatch failed (non-fatal):", err);
       }
     }
 

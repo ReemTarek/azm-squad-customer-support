@@ -16,6 +16,14 @@ export class SmtpEmailChannel implements NotificationChannel {
         port: env.smtpPort,
         secure: env.smtpPort === 465,
         auth: { user: env.smtpUser, pass: env.smtpPass },
+        // Nodemailer's defaults (2min / 30s / 10min) are far too long now that
+        // this transport is exercised inline on a high-frequency endpoint
+        // (every staff reply, not just the rare resolved/closed transition).
+        // Keep these short so a slow/hung SMTP host can't stall a routine
+        // "send reply" request for minutes.
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 10_000,
       })
     : null;
 
