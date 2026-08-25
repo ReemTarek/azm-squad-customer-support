@@ -66,7 +66,13 @@ last-Admin-lockout gap). 22 (Customer/ticket attachments) is Done as
 of 2026-08-25 (4 tasks — one went through its own fix round — + a
 final whole-branch review with one fix wave — caught and closed an
 orphan-file disk-fill vector, a production-path storage bug, and a
-client-spoofable file-type gate). 23-28 remain Not Started.
+client-spoofable file-type gate). 23 (New-message customer
+notifications) is Done as of 2026-08-25 (2 tasks + a final
+whole-branch review with one fix wave — caught and closed a
+failure-isolation gap that could 500 an already-saved message, and
+added SMTP transport timeouts before this pattern's exposure grew
+from a rare status transition to every staff reply). 24-28 remain Not
+Started.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original
