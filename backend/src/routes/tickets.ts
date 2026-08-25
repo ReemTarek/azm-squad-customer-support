@@ -238,6 +238,7 @@ router.post("/:id/assign", requireAuth, requireRole("Admin", "Manager"), async (
 
   const agent = await prisma.user.findUnique({ where: { id: body.agentId } });
   if (!agent || agent.role !== "Agent") throw Errors.validation("agentId must reference an existing Agent");
+  if (!agent.isActive) throw Errors.validation("agentId must reference an active Agent");
 
   const updated = await prisma.ticket.update({ where: { id }, data: { assignedAgentId: body.agentId } });
   await writeAuditLog(req.user!.id, "ticket.assign", "Ticket", id, { agentId: body.agentId, method: "manual" });
@@ -270,7 +271,7 @@ router.post("/:id/auto-assign", requireAuth, requireRole("Admin", "Manager"), as
   const ticket = await prisma.ticket.findUnique({ where: { id } });
   if (!ticket) throw Errors.notFound("Ticket not found");
 
-  const agents = await prisma.user.findMany({ where: { role: "Agent" }, orderBy: { createdAt: "asc" } });
+  const agents = await prisma.user.findMany({ where: { role: "Agent", isActive: true }, orderBy: { createdAt: "asc" } });
   if (agents.length === 0) throw Errors.validation("No agents exist to assign to");
 
   const openLoad = await prisma.ticket.groupBy({

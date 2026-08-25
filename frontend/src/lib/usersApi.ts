@@ -14,7 +14,10 @@ export interface StaffUser {
 
 export async function listUsersByRole(role: Role) {
   const { data } = await apiClient.get<{ users: StaffUser[] }>("/users", { params: { role } });
-  return data.users;
+  // Deactivated staff should never show up as assignable candidates (e.g. the
+  // ticket-assignment dropdown) — filter client-side since the API doesn't
+  // currently accept an isActive query param.
+  return data.users.filter((u) => u.isActive);
 }
 
 export async function listAllUsers() {
