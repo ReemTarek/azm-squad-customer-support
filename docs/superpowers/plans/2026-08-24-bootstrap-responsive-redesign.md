@@ -638,11 +638,30 @@ git commit -m "feat: migrate remaining pages to Bootstrap, remove dead dashboard
 ### Task 7: Full-suite verification and spec closeout
 
 **Files:**
+- Modify: `frontend/src/pages/kb/KbListPage.tsx` (one small missed
+  migration — see Step 0)
 - Modify: `frontend/src/App.css` (final cleanup sweep — see Step 1)
 - Modify: `docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md` (Status → Done, check acceptance criteria)
 - Modify: `docs/verification.md` (add a row)
 
-**Interfaces:** none — this task only verifies and documents.
+**Interfaces:** none besides the one fix below — this task otherwise
+only verifies and documents.
+
+- [ ] **Step 0: Fix a gap Task 4 left behind — `KbListPage.tsx`'s list itself was never migrated**
+
+Task 4 migrated this page's header/search-input/error-alert, but its
+brief never actually instructed migrating the `<ul className="kb-list">`
+list content (the brief only covered `<table>`-based pages, and this
+page has no table) — confirmed by reading the current file: the list
+is still bare `.kb-list`/`.kb-category`/`.kb-draft-tag` custom classes,
+which is exactly why Task 6 correctly refused to delete those CSS
+rules. Fix it now, per the Style Guide's own `.kb-list` row: the
+`<ul>` gets `className="list-group mb-3"`, each `<li>` gets
+`className="list-group-item d-flex align-items-center gap-2"`, the
+category `<span>` gets `className="text-muted small"`, the draft-tag
+`<span>` gets `className="badge bg-warning text-dark"`. Verify in the
+browser afterward (list renders, search still filters it, draft badge
+still shows only for unpublished articles to authors).
 
 - [ ] **Step 1: Final CSS cleanup sweep**
 
@@ -706,6 +725,6 @@ genuinely true based on Steps 1-4's results. Add a row to
 - [ ] **Step 6: Commit**
 
 ```bash
-git add frontend/src/App.css docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md docs/verification.md
+git add frontend/src/pages/kb/KbListPage.tsx frontend/src/App.css docs/specs/001-customer-support-crm/features/20-bootstrap-responsive-redesign.md docs/verification.md
 git commit -m "docs: mark Bootstrap responsive redesign done, record verification, final App.css cleanup"
 ```
