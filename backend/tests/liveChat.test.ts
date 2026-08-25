@@ -142,4 +142,81 @@ describe("live chat REST", () => {
       .send({ body: "still trying to chat" });
     expect(res.status).toBe(409);
   });
+
+  it("an Agent's GET /sessions includes Waiting and their own Active sessions but not another agent's Active session", async () => {
+    const customerWaiting = await createUser({ email: "livechatcustw1@test.com", role: "Customer" });
+    const customerOwn = await createUser({ email: "livechatcusto1@test.com", role: "Customer" });
+    const customerOther = await createUser({ email: "livechatcusts1@test.com", role: "Customer" });
+    const agentSelf = await createUser({ email: "livechatagentself@test.com", role: "Agent" });
+    const agentOther = await createUser({ email: "livechatagentother@test.com", role: "Agent" });
+
+    const waitingRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerWaiting)}`);
+    const waitingId = waitingRes.body.session.id;
+
+    const ownRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerOwn)}`);
+    const ownId = ownRes.body.session.id;
+    await request(app)
+      .post(`/api/live-chat/sessions/${ownId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agentSelf)}`);
+
+    const otherRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerOther)}`);
+    const otherId = otherRes.body.session.id;
+    await request(app)
+      .post(`/api/live-chat/sessions/${otherId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agentOther)}`);
+
+    const listRes = await request(app)
+      .get("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(agentSelf)}`);
+    expect(listRes.status).toBe(200);
+    const ids = listRes.body.sessions.map((s: { id: string }) => s.id);
+    expect(ids).toContain(waitingId);
+    expect(ids).toContain(ownId);
+    expect(ids).not.toContain(otherId);
+  });
+
+  it("an Admin's GET /sessions includes all Active sessions regardless of assigned agent, plus Waiting", async () => {
+    const admin = await createUser({ email: "livechatadmin1@test.com", role: "Admin" });
+    const customerWaiting = await createUser({ email: "livechatcustw2@test.com", role: "Customer" });
+    const customerA = await createUser({ email: "livechatcusta2@test.com", role: "Customer" });
+    const customerB = await createUser({ email: "livechatcustb2@test.com", role: "Customer" });
+    const agentA = await createUser({ email: "livechatagenta2@test.com", role: "Agent" });
+    const agentB = await createUser({ email: "livechatagentb2@test.com", role: "Agent" });
+
+    const waitingRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerWaiting)}`);
+    const waitingId = waitingRes.body.session.id;
+
+    const sessionARes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerA)}`);
+    const sessionAId = sessionARes.body.session.id;
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionAId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agentA)}`);
+
+    const sessionBRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerB)}`);
+    const sessionBId = sessionBRes.body.session.id;
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionBId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agentB)}`);
+
+    const listRes = await request(app)
+      .get("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(admin)}`);
+    expect(listRes.status).toBe(200);
+    const ids = listRes.body.sessions.map((s: { id: string }) => s.id);
+    expect(ids).toContain(waitingId);
+    expect(ids).toContain(sessionAId);
+    expect(ids).toContain(sessionBId);
+  });
 });
