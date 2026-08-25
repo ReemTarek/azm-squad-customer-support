@@ -12,7 +12,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
 
   if (err instanceof multer.MulterError) {
     const message =
-      err.code === "LIMIT_FILE_SIZE" ? "File exceeds the 10MB limit" : err.message;
+      err.code === "LIMIT_FILE_SIZE" ? "File exceeds the 10MB limit" : "Invalid file upload";
     return res.status(400).json({
       error: {
         code: "VALIDATION_ERROR",

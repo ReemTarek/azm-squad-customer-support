@@ -8,7 +8,7 @@ import { assertTicketAccess } from "./tickets";
 
 const router = Router();
 
-router.get("/:id", requireAuth, async (req, res) => {
+router.get("/:id", requireAuth, async (req, res, next) => {
   const user = req.user!;
   const id = String(req.params.id);
 
@@ -31,7 +31,19 @@ router.get("/:id", requireAuth, async (req, res) => {
     throw Errors.forbidden("Cannot access this attachment");
   }
 
-  res.download(path.join(UPLOAD_DIR, attachment.storagePath), attachment.fileName);
+  // Defense in depth: storagePath is always server-generated (a random UUID
+  // filename with no path separators — see lib/upload.ts), so this join can
+  // never actually escape UPLOAD_DIR today. Checking it anyway keeps that
+  // guarantee local to this route instead of depending on an invariant
+  // enforced only elsewhere.
+  const filePath = path.resolve(UPLOAD_DIR, attachment.storagePath);
+  if (filePath !== UPLOAD_DIR && !filePath.startsWith(UPLOAD_DIR + path.sep)) {
+    throw Errors.notFound("Attachment not found");
+  }
+
+  res.download(filePath, attachment.fileName, (err) => {
+    if (err) next(Errors.notFound("Attachment file not found"));
+  });
 });
 
 export default router;

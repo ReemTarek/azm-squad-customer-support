@@ -1,11 +1,55 @@
 // backend/tests/attachments.test.ts
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
 import request from "supertest";
 import app from "../src/app";
 import { prisma } from "../src/lib/prisma";
+import { UPLOAD_DIR } from "../src/lib/upload";
 import { createUser, tokenFor } from "./helpers/fixtures";
 
 describe("attachments", () => {
+  it("does not write an orphan file to disk when uploading to a ticket the requester cannot access", async () => {
+    const owner = await createUser({ email: "orphanowner@test.com", role: "Customer" });
+    const intruder = await createUser({ email: "orphanintruder@test.com", role: "Customer" });
+    const ownerToken = tokenFor(owner);
+    const intruderToken = tokenFor(intruder);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${ownerToken}`)
+      .send({ subject: "Orphan file test", priority: "Low" });
+    const ticketId = createRes.body.ticket.id;
+
+    const before = fs.readdirSync(UPLOAD_DIR).length;
+
+    const res = await request(app)
+      .post(`/api/tickets/${ticketId}/messages`)
+      .set("Authorization", `Bearer ${intruderToken}`)
+      .field("body", "trying to attach to someone else's ticket")
+      .attach("file", Buffer.from("would-be orphan bytes"), {
+        filename: "orphan-attempt.txt",
+        contentType: "text/plain",
+      });
+    expect(res.status).toBe(403);
+
+    const after = fs.readdirSync(UPLOAD_DIR).length;
+    expect(after).toBe(before);
+
+    // Same for a ticket that doesn't exist at all (404 path).
+    const before2 = fs.readdirSync(UPLOAD_DIR).length;
+    const res2 = await request(app)
+      .post(`/api/tickets/does-not-exist/messages`)
+      .set("Authorization", `Bearer ${intruderToken}`)
+      .field("body", "trying to attach to a nonexistent ticket")
+      .attach("file", Buffer.from("would-be orphan bytes 2"), {
+        filename: "orphan-attempt-2.txt",
+        contentType: "text/plain",
+      });
+    expect(res2.status).toBe(404);
+    const after2 = fs.readdirSync(UPLOAD_DIR).length;
+    expect(after2).toBe(before2);
+  });
+
   it("a Customer can attach a file to their own new ticket message", async () => {
     const customer = await createUser({ email: "attachcust@test.com", role: "Customer" });
     const token = tokenFor(customer);
@@ -199,6 +243,28 @@ describe("attachments", () => {
       .get(`/api/customers/${customer.id}/attachments`)
       .set("Authorization", `Bearer ${token}`);
     expect(listRes.status).toBe(403);
+  });
+
+  it("staff can download a customer-profile attachment they have access to (200 success path)", async () => {
+    const agent = await createUser({ email: "profileagent3@test.com", role: "Agent" });
+    const customer = await createUser({ email: "profilecust4@test.com", role: "Customer" });
+    const agentToken = tokenFor(agent);
+
+    const uploadRes = await request(app)
+      .post(`/api/customers/${customer.id}/attachments`)
+      .set("Authorization", `Bearer ${agentToken}`)
+      .attach("file", Buffer.from("customer profile file contents"), {
+        filename: "profile-doc.txt",
+        contentType: "text/plain",
+      });
+    expect(uploadRes.status).toBe(201);
+    const attachmentId = uploadRes.body.attachment.id;
+
+    const res = await request(app)
+      .get(`/api/attachments/${attachmentId}`)
+      .set("Authorization", `Bearer ${agentToken}`);
+    expect(res.status).toBe(200);
+    expect(res.text).toBe("customer profile file contents");
   });
 
   it("a Customer cannot download an attachment on any customer's profile", async () => {

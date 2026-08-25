@@ -38,7 +38,7 @@ export const assignTicketSchema = z.object({
 export const createMessageSchema = z.object({
   body: z.string().min(1, "Message body is required"),
   isInternalNote: z.preprocess(
-    (v) => (typeof v === "string" ? v === "true" : v),
+    (v) => (v === "true" ? true : v === "false" ? false : v),
     z.boolean().optional()
   ),
 });

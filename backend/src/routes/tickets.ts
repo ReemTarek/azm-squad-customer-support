@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
@@ -64,6 +64,20 @@ export async function assertTicketAccess(ticketId: string, user: { id: string; r
   }
 
   return ticket;
+}
+
+// Runs the ownership/scoping check for a ticket BEFORE any body-parsing
+// middleware that could have side effects (e.g. multer writing an uploaded
+// file to disk). Keeping this ahead of `upload.single(...)` on the
+// attachment-bearing route ensures an unauthorized request never gets far
+// enough to leave an orphaned file behind.
+async function loadTicketForAccess(req: Request, res: Response, next: NextFunction) {
+  try {
+    await assertTicketAccess(String(req.params.id), req.user!);
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (req, res) => {
@@ -318,11 +332,11 @@ router.post(
   "/:id/messages",
   requireAuth,
   requireRole("Admin", "Manager", "Agent", "Customer"),
+  loadTicketForAccess,
   upload.single("file"),
   async (req, res) => {
     const user = req.user!;
     const id = String(req.params.id);
-    await assertTicketAccess(id, user);
 
     const body = createMessageSchema.parse(req.body);
     const isInternalNote = user.role === "Customer" ? false : Boolean(body.isInternalNote);
