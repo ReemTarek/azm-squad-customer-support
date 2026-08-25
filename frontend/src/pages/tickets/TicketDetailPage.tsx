@@ -20,6 +20,7 @@ import type { TicketStatus } from "../../lib/ticketsApi";
 import { listUsersByRole } from "../../lib/usersApi";
 import { createTask, listTasks, updateTask } from "../../lib/tasksApi";
 import { listQuickReplies } from "../../lib/quickRepliesApi";
+import { downloadAttachment } from "../../lib/attachmentsApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
 import { useAuth } from "../../auth/AuthContext";
 import { SlaBadge } from "../../components/SlaBadge";
@@ -44,6 +45,7 @@ export function TicketDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
   const [isInternalNote, setIsInternalNote] = useState(false);
+  const [replyFile, setReplyFile] = useState<File | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const statusMutation = useMutation({
@@ -84,10 +86,11 @@ export function TicketDetailPage() {
   });
 
   const messageMutation = useMutation({
-    mutationFn: () => postMessage(id!, { body: replyBody, isInternalNote }),
+    mutationFn: () => postMessage(id!, { body: replyBody, isInternalNote, file: replyFile ?? undefined }),
     onSuccess: () => {
       setReplyBody("");
       setIsInternalNote(false);
+      setReplyFile(null);
       queryClient.invalidateQueries({ queryKey: ["ticket", id, "messages"] });
     },
     onError: (err) => setActionError(extractApiErrorMessage(err)),
@@ -240,6 +243,21 @@ export function TicketDetailPage() {
             <li key={m.id} className={m.isInternalNote ? "list-group-item list-group-item-warning" : "list-group-item"}>
               {m.isInternalNote && <span className="badge bg-warning text-dark mb-1">Internal note</span>}
               <p className="mb-0">{m.body}</p>
+              {m.attachments.length > 0 && (
+                <ul className="list-unstyled mb-0 mt-1">
+                  {m.attachments.map((a) => (
+                    <li key={a.id}>
+                      <button
+                        type="button"
+                        className="btn btn-link btn-sm p-0"
+                        onClick={() => downloadAttachment(a.id, a.fileName)}
+                      >
+                        📎 {a.fileName} ({Math.round(a.sizeBytes / 1024)} KB)
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>
@@ -247,6 +265,16 @@ export function TicketDetailPage() {
           <div className="mb-3">
             <label className="form-label" htmlFor="ticket-reply-body">Reply</label>
             <textarea id="ticket-reply-body" className="form-control" value={replyBody} onChange={(e) => setReplyBody(e.target.value)} required rows={3} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label" htmlFor="ticket-reply-file">Attach a file (optional)</label>
+            <input
+              id="ticket-reply-file"
+              type="file"
+              className="form-control"
+              accept="image/png,image/jpeg,image/gif,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,text/plain"
+              onChange={(e) => setReplyFile(e.target.files?.[0] ?? null)}
+            />
           </div>
           {canManage && (
             <div className="d-flex align-items-center gap-2 mb-2">

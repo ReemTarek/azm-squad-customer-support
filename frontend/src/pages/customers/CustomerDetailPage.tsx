@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { getCustomer, updateCustomer } from "../../lib/customersApi";
 import { listTickets } from "../../lib/ticketsApi";
 import { createCustomerNote, listCustomerNotes } from "../../lib/customerNotesApi";
+import { downloadAttachment, listCustomerAttachments, uploadCustomerAttachment } from "../../lib/attachmentsApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
 import { useAuth } from "../../auth/AuthContext";
 import { SlaBadge } from "../../components/SlaBadge";
@@ -30,10 +31,16 @@ export function CustomerDetailPage() {
     queryFn: () => listCustomerNotes(id!),
     enabled: Boolean(id) && isStaff,
   });
+  const attachmentsQuery = useQuery({
+    queryKey: ["customer", id, "attachments"],
+    queryFn: () => listCustomerAttachments(id!),
+    enabled: Boolean(id) && isStaff,
+  });
 
   const [form, setForm] = useState({ name: "", phone: "", company: "" });
   const [saveError, setSaveError] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (customer) {
@@ -65,6 +72,15 @@ export function CustomerDetailPage() {
     e.preventDefault();
     noteMutation.mutate();
   }
+
+  const uploadAttachmentMutation = useMutation({
+    mutationFn: () => uploadCustomerAttachment(id!, attachmentFile!),
+    onSuccess: () => {
+      setAttachmentFile(null);
+      queryClient.invalidateQueries({ queryKey: ["customer", id, "attachments"] });
+    },
+    onError: (err) => setSaveError(extractApiErrorMessage(err)),
+  });
 
   if (isLoading) return <p>Loading…</p>;
   if (error) return <p role="alert" className="alert alert-danger">Failed to load customer.</p>;
@@ -132,6 +148,46 @@ export function CustomerDetailPage() {
               {noteMutation.isPending ? "Adding…" : "Add"}
             </button>
           </form>
+        </section>
+      )}
+
+      {isStaff && (
+        <section className="card card-body mb-3">
+          <h2>Attachments</h2>
+          <ul className="list-group list-group-flush mb-3">
+            {attachmentsQuery.data?.map((a) => (
+              <li key={a.id} className="list-group-item d-flex justify-content-between align-items-center">
+                <button
+                  type="button"
+                  className="btn btn-link btn-sm p-0"
+                  onClick={() => downloadAttachment(a.id, a.fileName)}
+                >
+                  📎 {a.fileName} ({Math.round(a.sizeBytes / 1024)} KB)
+                </button>
+                <span className="form-text text-muted mb-0">{new Date(a.createdAt).toLocaleString()}</span>
+              </li>
+            ))}
+            {attachmentsQuery.data?.length === 0 && <li className="list-group-item">No attachments yet.</li>}
+          </ul>
+          <div className="d-flex gap-2 align-items-end">
+            <div className="flex-grow-1">
+              <label className="form-label" htmlFor="customer-attachment-file">Add a file</label>
+              <input
+                id="customer-attachment-file"
+                type="file"
+                className="form-control"
+                onChange={(e) => setAttachmentFile(e.target.files?.[0] ?? null)}
+              />
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!attachmentFile || uploadAttachmentMutation.isPending}
+              onClick={() => uploadAttachmentMutation.mutate()}
+            >
+              Upload
+            </button>
+          </div>
         </section>
       )}
     </div>

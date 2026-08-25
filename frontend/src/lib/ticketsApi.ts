@@ -29,6 +29,7 @@ export interface TicketMessage {
   body: string;
   isInternalNote: boolean;
   createdAt: string;
+  attachments: { id: string; fileName: string; mimeType: string; sizeBytes: number; createdAt: string }[];
 }
 
 export interface TicketStatusHistoryEntry {
@@ -112,7 +113,18 @@ export async function getSuggestedArticles(ticketId: string) {
   return data.articles;
 }
 
-export async function postMessage(ticketId: string, input: { body: string; isInternalNote?: boolean }) {
+export async function postMessage(
+  ticketId: string,
+  input: { body: string; isInternalNote?: boolean; file?: File }
+) {
+  if (input.file) {
+    const form = new FormData();
+    form.append("body", input.body);
+    if (input.isInternalNote !== undefined) form.append("isInternalNote", String(input.isInternalNote));
+    form.append("file", input.file);
+    const { data } = await apiClient.post<{ message: TicketMessage }>(`/tickets/${ticketId}/messages`, form);
+    return data.message;
+  }
   const { data } = await apiClient.post<{ message: TicketMessage }>(`/tickets/${ticketId}/messages`, input);
   return data.message;
 }
