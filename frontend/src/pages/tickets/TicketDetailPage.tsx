@@ -243,14 +243,18 @@ export function TicketDetailPage() {
             <li key={m.id} className={m.isInternalNote ? "list-group-item list-group-item-warning" : "list-group-item"}>
               {m.isInternalNote && <span className="badge bg-warning text-dark mb-1">Internal note</span>}
               <p className="mb-0">{m.body}</p>
-              {m.attachments.length > 0 && (
+              {m.attachments?.length > 0 && (
                 <ul className="list-unstyled mb-0 mt-1">
                   {m.attachments.map((a) => (
                     <li key={a.id}>
                       <button
                         type="button"
                         className="btn btn-link btn-sm p-0"
-                        onClick={() => downloadAttachment(a.id, a.fileName)}
+                        onClick={() =>
+                          downloadAttachment(a.id, a.fileName).catch(() =>
+                            setActionError("Could not download this file.")
+                          )
+                        }
                       >
                         📎 {a.fileName} ({Math.round(a.sizeBytes / 1024)} KB)
                       </button>

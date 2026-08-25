@@ -160,7 +160,11 @@ export function CustomerDetailPage() {
                 <button
                   type="button"
                   className="btn btn-link btn-sm p-0"
-                  onClick={() => downloadAttachment(a.id, a.fileName)}
+                  onClick={() =>
+                    downloadAttachment(a.id, a.fileName).catch(() =>
+                      setSaveError("Could not download this file.")
+                    )
+                  }
                 >
                   📎 {a.fileName} ({Math.round(a.sizeBytes / 1024)} KB)
                 </button>
