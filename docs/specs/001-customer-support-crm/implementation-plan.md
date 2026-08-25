@@ -341,7 +341,7 @@ last. SMS/WhatsApp stays blocked on credentials regardless of order.
 |---|---|---|---|
 | TASK-048 | Backend integration test suite | `features/19-backend-integration-tests.md` | Done |
 | TASK-049 | Bootstrap responsive redesign | `features/20-bootstrap-responsive-redesign.md` | Done |
-| TASK-050 | Staff & user management UI (+ deactivation) | `features/21-staff-user-management.md` | Not Started |
+| TASK-050 | Staff & user management UI (+ deactivation) | `features/21-staff-user-management.md` | Done |
 | TASK-051 | Customer/ticket attachments | `features/22-attachments.md` | Not Started |
 | TASK-052 | New-message customer notifications | `features/23-new-message-notifications.md` | Not Started |
 | TASK-053 | Real SMS (Twilio) + WhatsApp (Meta) channels | `features/24-real-sms-whatsapp-channels.md` | Not Started — blocked on credentials |

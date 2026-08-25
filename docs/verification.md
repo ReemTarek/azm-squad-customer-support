@@ -64,6 +64,7 @@ written after a real check, not because code exists.
 | Feature | Verification | Result |
 |---|---|---|
 | Bootstrap responsive redesign | Full demo path + 375px/RTL sweep across all pages | PASS |
+| Staff user management (create/edit/deactivate, dept/branch assignment) | Full UI + curl-verified deactivated-login rejection | PASS |
 
 ## Full-system re-verification (2026-08-24, post-enhancements)
 

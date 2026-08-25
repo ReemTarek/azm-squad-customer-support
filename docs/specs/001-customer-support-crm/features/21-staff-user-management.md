@@ -74,21 +74,26 @@ flags: assigning a staff member to a department/branch has no UI.
 
 ## Acceptance criteria
 
-- [ ] Admin can create an Agent, a Manager, and another Admin account
+- [x] Admin can create an Agent, a Manager, and another Admin account
       through the UI, each appearing correctly in the list.
-- [ ] Admin can edit an existing staff member's role and
+- [x] Admin can edit an existing staff member's role and
       department/branch through the UI, and the change is reflected
       immediately (e.g. a Manager's ticket-list scope changes
       accordingly — reusing the existing scoping logic, unchanged).
-- [ ] Admin can deactivate a staff account; that account's next login
+- [x] Admin can deactivate a staff account; that account's next login
       attempt is rejected with 401.
-- [ ] Admin cannot deactivate their own account (UI prevents it; a
+- [x] Admin cannot deactivate their own account (UI prevents it; a
       direct API attempt is also rejected).
 - [ ] A deactivated Agent's already-issued access token still works
       until it naturally expires (per the existing JWT expiry, not
       instantly revoked) — document this as the accepted trade-off
       (no token-revocation list exists in this project; consistent
       with the stateless-JWT design already chosen, `decisions.md`).
+      Not re-verified live in Task 3 (would require capturing a token,
+      deactivating the account, then replaying the token before natural
+      expiry) — accepted as an architectural consequence of the
+      stateless-JWT design, unchanged and already documented in
+      `decisions.md`, not because it was newly tested here.
 
 ## Implementation
 
@@ -108,4 +113,15 @@ department/branch reassignment actually changes what a Manager sees in
 their ticket list (re-using the TASK-042 regression scenario as the
 check).
 
-## Status: Not Started
+## Status: Done
+
+Verified end-to-end across Tasks 1-3: schema migration + backend
+login-enforcement/audit-logging (Task 1, 27/27 backend tests
+including the new deactivated-login test), the `/admin/users` UI
+(Task 2, browser-driven verification of create/edit/deactivate),
+and this task's live re-verification that reassigning a Manager's
+department through the UI's department-edit control actually changes
+their real ticket-list authorization scope (not just a displayed
+label) — see `docs/verification.md` and
+`.superpowers/sdd/2026-08-25-staff-user-management/task-3-report.md`
+for full evidence.
