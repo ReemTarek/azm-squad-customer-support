@@ -18,6 +18,7 @@ import { AdminSlaSettingsPage } from "./pages/AdminSlaSettingsPage";
 import { AdminOrgSettingsPage } from "./pages/AdminOrgSettingsPage";
 import { UsersPage } from "./pages/admin/UsersPage";
 import { ChatPage } from "./pages/ChatPage";
+import { LiveChatQueuePage } from "./pages/LiveChatQueuePage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { Layout } from "./components/Layout";
 import "./App.css";
@@ -126,6 +127,14 @@ function App() {
             element={
               <RequireAuth roles={["Customer"]}>
                 <ChatPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/live-chat"
+            element={
+              <RequireAuth roles={["Admin", "Manager", "Agent"]}>
+                <LiveChatQueuePage />
               </RequireAuth>
             }
           />

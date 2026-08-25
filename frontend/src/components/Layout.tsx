@@ -60,6 +60,9 @@ export function Layout() {
               {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
                 <li className="nav-item"><Link to="/quick-replies" className="nav-link">Quick Replies</Link></li>
               )}
+              {(user.role === "Admin" || user.role === "Manager" || user.role === "Agent") && (
+                <li className="nav-item"><Link to="/live-chat" className="nav-link">Live Chat</Link></li>
+              )}
               {(user.role === "Admin" || user.role === "Manager") && (
                 <li className="nav-item"><Link to="/reports" className="nav-link">{t("nav.reports")}</Link></li>
               )}
