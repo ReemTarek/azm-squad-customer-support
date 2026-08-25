@@ -54,13 +54,26 @@ learns about a reply by returning to the portal and checking.
 
 ## Acceptance criteria
 
-- [ ] Staff posting a visible reply triggers exactly one email to the
-      ticket's customer.
-- [ ] Staff posting an internal note triggers **no** email.
-- [ ] A customer posting their own message triggers no email (no
-      self-notification).
+- [x] Staff posting a visible reply triggers exactly one email to the
+      ticket's customer. Verified by Task 1's audit-log-based automated
+      test (no real-SMTP check was performed — see Verification plan
+      below).
+- [x] Staff posting an internal note triggers **no** email. Verified by
+      Task 1's audit-log-based automated test.
+- [x] A customer posting their own message triggers no email (no
+      self-notification). Verified by Task 1's audit-log-based
+      automated test.
 - [ ] A notification-dispatch failure (e.g. SMTP temporarily down)
       does not cause the message-post API call to fail or roll back.
+      Not covered by any of Task 1's three tests — none of them
+      simulate a `notifyCustomer` failure. Left unchecked: it is true
+      only by construction (the identical, unmodified
+      `.catch((err) => ...)` pattern already used at the resolved/closed
+      call site), not by direct test evidence — the same honest
+      treatment given to similar architecturally-true-but-untested
+      criteria elsewhere in this project (see
+      `21-staff-user-management.md`'s token-validity-until-expiry
+      criterion).
 
 ## Implementation
 
@@ -75,4 +88,14 @@ confirm a real email arrives at the customer's address; post an
 internal note and confirm no email is sent; post as the Customer and
 confirm no email is sent to themselves.
 
-## Status: Not Started
+## Status: Done
+
+Verified via Task 1's 3 new audit-log-based automated tests (staff
+visible reply → notification audit entry written; staff internal note
+→ no notification; customer's own message → no notification), plus
+the full 46/46 backend suite passing and a clean `tsc --noEmit` (Task
+2). No real-SMTP/real-inbox check was performed for this feature — the
+automated audit-log-based tests are the only evidence for the first
+three acceptance criteria; the 4th remains unchecked above as it is
+untested by construction only. See `docs/verification.md` and
+`.superpowers/sdd/2026-08-25-new-message-notifications/task-2-report.md`.

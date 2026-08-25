@@ -72,6 +72,12 @@ written after a real check, not because code exists.
 |---|---|---|
 | Customer/ticket attachments (upload, download, visibility-scoped, size/type limits) | Full backend test suite + UI verification | PASS |
 
+## Round 2 — New-message customer notifications
+
+| Feature | Verification | Result |
+|---|---|---|
+| New-message customer notifications (email on visible reply, none on internal note or self-message) | Automated audit-log-based tests only — no real-inbox check was performed | PASS |
+
 ## Full-system re-verification (2026-08-24, post-enhancements)
 
 A single continuous Playwright run replaying auth, customer+ticket
