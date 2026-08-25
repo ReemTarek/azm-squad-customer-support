@@ -54,9 +54,12 @@ process-gap entry.
 01-18 are Done, except 01-database.md which records one deliberate
 deviation from the original wording of CRM-DB-001 (SQLite instead of
 SQL Server, by final user decision — not a pending item). 19 is Done.
-20-28 ("Round 2", see `implementation-plan.md`) are Not Started as of
-2026-08-24 — each is spec'd ahead of any code, following this
-project's spec-first discipline throughout.
+20-28 ("Round 2", see `implementation-plan.md`) were spec'd ahead of
+any code on 2026-08-24, following this project's spec-first discipline
+throughout. 20 (Bootstrap responsive redesign) is Done as of
+2026-08-25 (built via `superpowers:subagent-driven-development` — 7
+tasks + a final whole-branch review with one fix wave). 21-28 remain
+Not Started.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original
