@@ -7,7 +7,7 @@ export function RequireAuth({ children, roles }: { children: ReactNode; roles?: 
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) return <div className="page-loading">Loading…</div>;
+  if (isLoading) return <div className="d-flex align-items-center justify-content-center vh-100">Loading…</div>;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
 

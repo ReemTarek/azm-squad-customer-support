@@ -21,7 +21,7 @@ function applyBootstrapBundle(locale: SupportedLocale) {
     link = document.createElement("link");
     link.id = BOOTSTRAP_LINK_ID;
     link.rel = "stylesheet";
-    document.head.appendChild(link);
+    document.head.prepend(link);
   }
   link.href = locale === "ar" ? bootstrapRtlUrl : bootstrapLtrUrl;
 }
