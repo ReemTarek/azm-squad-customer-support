@@ -37,6 +37,8 @@ router.post("/login", async (req, res) => {
   const passwordMatches = await bcrypt.compare(body.password, user.passwordHash);
   if (!passwordMatches) throw Errors.unauthenticated("Invalid email or password");
 
+  if (!user.isActive) throw Errors.unauthenticated("Invalid email or password");
+
   const accessToken = signAccessToken({ sub: user.id, role: user.role });
   const refreshToken = signRefreshToken({ sub: user.id });
   res.json({ user: toPublicUser(user), accessToken, refreshToken });

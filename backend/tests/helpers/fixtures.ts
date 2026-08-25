@@ -9,6 +9,7 @@ export async function createUser(overrides: {
   name?: string;
   departmentId?: string;
   branchId?: string;
+  isActive?: boolean;
 }) {
   const passwordHash = await bcrypt.hash("Password123!", 10);
   return prisma.user.create({
@@ -19,6 +20,7 @@ export async function createUser(overrides: {
       name: overrides.name ?? overrides.email,
       departmentId: overrides.departmentId,
       branchId: overrides.branchId,
+      isActive: overrides.isActive ?? true,
     },
   });
 }

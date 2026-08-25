@@ -14,6 +14,7 @@ export const updateUserSchema = z.object({
   role: z.enum(["Admin", "Manager", "Agent", "Customer"]).optional(),
   departmentId: z.string().uuid().nullable().optional(),
   branchId: z.string().uuid().nullable().optional(),
+  isActive: z.boolean().optional(),
 });
 
 export const listUsersQuerySchema = z.object({

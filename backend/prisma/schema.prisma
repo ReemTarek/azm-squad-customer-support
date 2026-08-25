@@ -43,6 +43,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role
+  isActive     Boolean  @default(true)
   name         String
   locale       Locale   @default(en)
   departmentId String?

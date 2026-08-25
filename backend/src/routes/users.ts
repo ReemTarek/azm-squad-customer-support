@@ -16,6 +16,7 @@ function toPublicUser(user: {
   locale: string;
   departmentId: string | null;
   branchId: string | null;
+  isActive: boolean;
 }) {
   return {
     id: user.id,
@@ -25,6 +26,7 @@ function toPublicUser(user: {
     locale: user.locale,
     departmentId: user.departmentId,
     branchId: user.branchId,
+    isActive: user.isActive,
   };
 }
 
@@ -74,7 +76,12 @@ router.patch("/:id", requireAuth, requireRole("Admin"), async (req, res) => {
   const existing = await prisma.user.findUnique({ where: { id } });
   if (!existing) throw Errors.notFound("User not found");
 
+  if (body.isActive === false && id === req.user!.id) {
+    throw Errors.forbidden("Cannot deactivate your own account");
+  }
+
   const user = await prisma.user.update({ where: { id }, data: body });
+  await writeAuditLog(req.user!.id, "user.update", "User", user.id, body);
   res.json({ user: toPublicUser(user) });
 });
 

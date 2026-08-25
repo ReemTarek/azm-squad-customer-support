@@ -46,6 +46,21 @@ describe("auth", () => {
     expect(res.body.accessToken).toBeUndefined();
   });
 
+  it("rejects login for a deactivated account", async () => {
+    const user = await createUser({
+      email: "deactivated@test.com",
+      role: "Agent",
+      isActive: false,
+    });
+
+    const res = await request(app).post("/api/auth/login").send({
+      email: "deactivated@test.com",
+      password: "Password123!",
+    });
+    expect(res.status).toBe(401);
+    expect(res.body.accessToken).toBeUndefined();
+  });
+
   it("refreshes tokens with a valid refresh token", async () => {
     const registerRes = await request(app).post("/api/auth/register").send({
       email: "refreshtest@test.com",
