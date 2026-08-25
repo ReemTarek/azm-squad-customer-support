@@ -93,6 +93,11 @@ department-assignment UI page was built (none existed for staff
 management generally — done via `PATCH /users/:id`, already
 functional and tested).
 
+**Update:** superseded by feature 21
+(`21-staff-user-management.md`, TASK-050) — a dedicated `/admin/users`
+staff management page (including department/branch assignment) was
+built and is now done.
+
 Verified via curl: a Manager scoped to Department A sees only
 Department A's ticket in the list, gets 403 on direct GET/PATCH/assign
 of a Department B ticket by ID, and their reports are scoped

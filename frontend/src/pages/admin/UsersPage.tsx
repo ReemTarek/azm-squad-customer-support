@@ -88,6 +88,10 @@ export function UsersPage() {
         <h1>Users</h1>
       </div>
       {error && <p role="alert" className="alert alert-danger">{error}</p>}
+      <p className="form-text text-muted">
+        Department/branch scoping applies to Managers; Agents are scoped by ticket assignment,
+        not by the department/branch fields below.
+      </p>
 
       <div className="card mb-4">
         <div className="card-body">

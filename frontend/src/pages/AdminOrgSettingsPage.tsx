@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createBranch, createDepartment, listBranches, listDepartments } from "../lib/orgApi";
 import { extractApiErrorMessage } from "../lib/apiClient";
@@ -47,8 +48,8 @@ export function AdminOrgSettingsPage() {
     <div className="page">
       <h1>Departments &amp; Branches</h1>
       <p className="form-text text-muted">
-        Assign a Manager to a department/branch via user management (API) to scope their ticket visibility.
-        Managers with no department/branch set continue to see everything.
+        Assign a Manager to a department/branch via the <Link to="/admin/users">Users</Link> page to scope
+        their ticket visibility. Managers with no department/branch set continue to see everything.
       </p>
       {error && <p role="alert" className="alert alert-danger">{error}</p>}
       <div className="row row-cols-1 row-cols-md-2 g-3">
