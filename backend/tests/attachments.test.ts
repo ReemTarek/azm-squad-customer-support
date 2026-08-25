@@ -170,4 +170,52 @@ describe("attachments", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(403);
   });
+
+  it("an Agent can attach a file directly to a customer's profile", async () => {
+    const agent = await createUser({ email: "profileagent@test.com", role: "Agent" });
+    const customer = await createUser({ email: "profilecust@test.com", role: "Customer" });
+    const agentToken = tokenFor(agent);
+
+    const res = await request(app)
+      .post(`/api/customers/${customer.id}/attachments`)
+      .set("Authorization", `Bearer ${agentToken}`)
+      .attach("file", Buffer.from("id scan contents"), { filename: "id-scan.pdf", contentType: "application/pdf" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.attachment.fileName).toBe("id-scan.pdf");
+  });
+
+  it("a Customer cannot upload or list their own profile attachments", async () => {
+    const customer = await createUser({ email: "profilecust2@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const uploadRes = await request(app)
+      .post(`/api/customers/${customer.id}/attachments`)
+      .set("Authorization", `Bearer ${token}`)
+      .attach("file", Buffer.from("contents"), { filename: "file.txt", contentType: "text/plain" });
+    expect(uploadRes.status).toBe(403);
+
+    const listRes = await request(app)
+      .get(`/api/customers/${customer.id}/attachments`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(listRes.status).toBe(403);
+  });
+
+  it("a Customer cannot download an attachment on any customer's profile", async () => {
+    const agent = await createUser({ email: "profileagent2@test.com", role: "Agent" });
+    const customer = await createUser({ email: "profilecust3@test.com", role: "Customer" });
+    const agentToken = tokenFor(agent);
+    const customerToken = tokenFor(customer);
+
+    const uploadRes = await request(app)
+      .post(`/api/customers/${customer.id}/attachments`)
+      .set("Authorization", `Bearer ${agentToken}`)
+      .attach("file", Buffer.from("profile doc contents"), { filename: "doc.pdf", contentType: "application/pdf" });
+    const attachmentId = uploadRes.body.attachment.id;
+
+    const res = await request(app)
+      .get(`/api/attachments/${attachmentId}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+    expect(res.status).toBe(403);
+  });
 });

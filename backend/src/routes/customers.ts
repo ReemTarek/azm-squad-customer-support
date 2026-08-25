@@ -7,6 +7,8 @@ import { createCustomerSchema, updateCustomerSchema } from "../validation/custom
 import { createCustomerNoteSchema } from "../validation/customerNotes.schema";
 import { writeAuditLog } from "../lib/audit";
 import { erpClient } from "../integrations/erpClient";
+import { upload } from "../lib/upload";
+import { toAttachmentDto } from "../lib/attachmentDto";
 
 const router = Router();
 
@@ -133,6 +135,45 @@ router.post("/:id/notes", requireAuth, requireRole("Admin", "Manager", "Agent"),
   });
 
   res.status(201).json({ note: { id: note.id, body: note.body, authorName: note.author.name, createdAt: note.createdAt } });
+});
+
+router.post(
+  "/:id/attachments",
+  requireAuth,
+  requireRole("Admin", "Manager", "Agent"),
+  upload.single("file"),
+  async (req, res) => {
+    const customerId = String(req.params.id);
+    const customer = await prisma.user.findUnique({ where: { id: customerId } });
+    if (!customer || customer.role !== "Customer") throw Errors.notFound("Customer not found");
+    if (!req.file) {
+      throw Errors.validation("A file is required", [{ field: "file", message: "A file is required" }]);
+    }
+
+    const attachment = await prisma.attachment.create({
+      data: {
+        fileName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        sizeBytes: req.file.size,
+        storagePath: req.file.filename,
+        uploadedById: req.user!.id,
+        customerId,
+      },
+    });
+    res.status(201).json({ attachment: toAttachmentDto(attachment) });
+  }
+);
+
+router.get("/:id/attachments", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const customerId = String(req.params.id);
+  const customer = await prisma.user.findUnique({ where: { id: customerId } });
+  if (!customer || customer.role !== "Customer") throw Errors.notFound("Customer not found");
+
+  const attachments = await prisma.attachment.findMany({
+    where: { customerId },
+    orderBy: { createdAt: "desc" },
+  });
+  res.json({ attachments: attachments.map(toAttachmentDto) });
 });
 
 export default router;
