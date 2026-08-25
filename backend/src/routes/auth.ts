@@ -56,6 +56,7 @@ router.post("/refresh", async (req, res) => {
 
   const user = await prisma.user.findUnique({ where: { id: payload.sub } });
   if (!user) throw Errors.unauthenticated("User no longer exists");
+  if (!user.isActive) throw Errors.unauthenticated("Invalid or expired refresh token");
 
   const accessToken = signAccessToken({ sub: user.id, role: user.role });
   const refreshToken = signRefreshToken({ sub: user.id });

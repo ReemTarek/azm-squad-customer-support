@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../src/app";
 import { createUser, tokenFor } from "./helpers/fixtures";
+import { signRefreshToken } from "../src/lib/jwt";
 
 describe("auth", () => {
   it("registers a new customer and returns tokens", async () => {
@@ -73,6 +74,19 @@ describe("auth", () => {
       .send({ refreshToken: registerRes.body.refreshToken });
     expect(res.status).toBe(200);
     expect(res.body.accessToken).toBeTruthy();
+  });
+
+  it("rejects a refresh token for a deactivated account", async () => {
+    const user = await createUser({
+      email: "deactivated-refresh@test.com",
+      role: "Agent",
+      isActive: false,
+    });
+    const refreshToken = signRefreshToken({ sub: user.id });
+
+    const res = await request(app).post("/api/auth/refresh").send({ refreshToken });
+    expect(res.status).toBe(401);
+    expect(res.body.accessToken).toBeUndefined();
   });
 
   it("rejects an invalid refresh token", async () => {

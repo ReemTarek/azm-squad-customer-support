@@ -80,6 +80,20 @@ router.patch("/:id", requireAuth, requireRole("Admin"), async (req, res) => {
     throw Errors.forbidden("Cannot deactivate your own account");
   }
 
+  const removesActiveAdminStatus =
+    existing.role === "Admin" &&
+    existing.isActive &&
+    (body.isActive === false || (body.role !== undefined && body.role !== "Admin"));
+
+  if (removesActiveAdminStatus) {
+    const otherActiveAdmins = await prisma.user.count({
+      where: { role: "Admin", isActive: true, id: { not: id } },
+    });
+    if (otherActiveAdmins === 0) {
+      throw Errors.forbidden("Cannot remove the last active Admin");
+    }
+  }
+
   const user = await prisma.user.update({ where: { id }, data: body });
   await writeAuditLog(req.user!.id, "user.update", "User", user.id, body);
   res.json({ user: toPublicUser(user) });
