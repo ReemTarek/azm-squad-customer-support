@@ -59,6 +59,12 @@ written after a real check, not because code exists.
 | P2 notification adapter | Mock email/SMS/WhatsApp behind one interface, real call site on ticket resolution | PASS — isolated script + live audit-log entry |
 | P2 ERP adapter | Mock client behind one interface, real call site on customer creation | PASS — isolated script + live 201 response |
 
+## Round 2 — UI redesign
+
+| Feature | Verification | Result |
+|---|---|---|
+| Bootstrap responsive redesign | Full demo path + 375px/RTL sweep across all pages | PASS |
+
 ## Full-system re-verification (2026-08-24, post-enhancements)
 
 A single continuous Playwright run replaying auth, customer+ticket

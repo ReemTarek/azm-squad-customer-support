@@ -73,17 +73,17 @@ RTL support.
 
 ## Acceptance criteria
 
-- [ ] `npm run build` (frontend) succeeds with Bootstrap installed.
-- [ ] Every existing page renders with no visual regression in
+- [x] `npm run build` (frontend) succeeds with Bootstrap installed.
+- [x] Every existing page renders with no visual regression in
       functionality (all buttons/forms/links still work — verified
       via Playwright click-through, not just visual inspection).
-- [ ] At a narrow viewport (375px, the same width used to catch the
+- [x] At a narrow viewport (375px, the same width used to catch the
       original `.app-header` overflow bug in `debugging-notes.md`),
       every migrated page has no horizontal scroll and the nav
       collapses into a usable mobile menu.
-- [ ] RTL (Arabic) rendering is verified correct after the Bootstrap
+- [x] RTL (Arabic) rendering is verified correct after the Bootstrap
       RTL bundle loads — mirrored layout, no broken alignment.
-- [ ] No console errors introduced on any page.
+- [x] No console errors introduced on any page.
 
 ## Implementation
 
@@ -101,4 +101,4 @@ Manual Playwright click-through of the full guaranteed demo path
 at each, checked for console errors, matching the verification rigor
 used throughout this project (real running app, not code review).
 
-## Status: Not Started
+## Status: Done
