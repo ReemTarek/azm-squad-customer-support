@@ -65,6 +65,8 @@ model User {
   notesAboutMe         CustomerNote[] @relation("CustomerNoteSubject")
   notesAuthored        CustomerNote[] @relation("CustomerNoteAuthor")
   chatConversations    ChatConversation[]
+  uploadedAttachments Attachment[] @relation("AttachmentUploader")
+  attachments         Attachment[] @relation("AttachmentCustomer")
 }
 
 model CustomerProfile {
@@ -135,7 +137,27 @@ model TicketMessage {
   isInternalNote Boolean  @default(false)
   createdAt      DateTime @default(now())
 
+  attachments Attachment[]
+
   @@index([ticketId])
+}
+
+model Attachment {
+  id              String         @id @default(uuid())
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  storagePath     String
+  uploadedById    String
+  uploadedBy      User           @relation("AttachmentUploader", fields: [uploadedById], references: [id])
+  ticketMessageId String?
+  ticketMessage   TicketMessage? @relation(fields: [ticketMessageId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        User?          @relation("AttachmentCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now())
+
+  @@index([ticketMessageId])
+  @@index([customerId])
 }
 
 model TicketStatusHistory {

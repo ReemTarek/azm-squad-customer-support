@@ -1,11 +1,34 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import multer from "multer";
 import { AppError } from "../lib/errors";
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof AppError) {
     return res.status(err.status).json({
       error: { code: err.code, message: err.message, details: err.details },
+    });
+  }
+
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "File exceeds the 10MB limit" : err.message;
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message,
+        details: [{ field: "file", message }],
+      },
+    });
+  }
+
+  if (err instanceof Error && err.message === "UNSUPPORTED_FILE_TYPE") {
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Unsupported file type",
+        details: [{ field: "file", message: "Unsupported file type" }],
+      },
     });
   }
 

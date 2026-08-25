@@ -3,6 +3,8 @@ dist/
 build/
 *.db
 *.db-journal
+backend/uploads/
+backend/uploads-test/
 .env
 .env.*
 !.env.example

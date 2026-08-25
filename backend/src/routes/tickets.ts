@@ -15,6 +15,8 @@ import { createTaskSchema, updateTaskSchema } from "../validation/tasks.schema";
 import { createFeedbackSchema } from "../validation/feedback.schema";
 import { writeAuditLog } from "../lib/audit";
 import { notifyCustomer } from "../integrations/notificationDispatcher";
+import { upload } from "../lib/upload";
+import { toAttachmentDto } from "../lib/attachmentDto";
 import type { Ticket } from "@prisma/client";
 
 const router = Router();
@@ -39,7 +41,7 @@ function toTicketDto(ticket: Ticket) {
   };
 }
 
-async function assertTicketAccess(ticketId: string, user: { id: string; role: string }) {
+export async function assertTicketAccess(ticketId: string, user: { id: string; role: string }) {
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket) throw Errors.notFound("Ticket not found");
   if (user.role === "Customer" && ticket.customerId !== user.id) {
@@ -305,23 +307,53 @@ router.get("/:id/messages", requireAuth, requireRole("Admin", "Manager", "Agent"
       ...(user.role === "Customer" ? { isInternalNote: false } : {}),
     },
     orderBy: { createdAt: "asc" },
+    include: { attachments: true },
   });
-  res.json({ messages });
+  res.json({
+    messages: messages.map((m) => ({ ...m, attachments: m.attachments.map(toAttachmentDto) })),
+  });
 });
 
-router.post("/:id/messages", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {
-  const user = req.user!;
-  const id = String(req.params.id);
-  await assertTicketAccess(id, user);
+router.post(
+  "/:id/messages",
+  requireAuth,
+  requireRole("Admin", "Manager", "Agent", "Customer"),
+  upload.single("file"),
+  async (req, res) => {
+    const user = req.user!;
+    const id = String(req.params.id);
+    await assertTicketAccess(id, user);
 
-  const body = createMessageSchema.parse(req.body);
-  const isInternalNote = user.role === "Customer" ? false : Boolean(body.isInternalNote);
+    const body = createMessageSchema.parse(req.body);
+    const isInternalNote = user.role === "Customer" ? false : Boolean(body.isInternalNote);
 
-  const message = await prisma.ticketMessage.create({
-    data: { ticketId: id, authorId: user.id, body: body.body, isInternalNote },
-  });
-  res.status(201).json({ message });
-});
+    const message = await prisma.ticketMessage.create({
+      data: {
+        ticketId: id,
+        authorId: user.id,
+        body: body.body,
+        isInternalNote,
+        ...(req.file
+          ? {
+              attachments: {
+                create: {
+                  fileName: req.file.originalname,
+                  mimeType: req.file.mimetype,
+                  sizeBytes: req.file.size,
+                  storagePath: req.file.filename,
+                  uploadedById: user.id,
+                },
+              },
+            }
+          : {}),
+      },
+      include: { attachments: true },
+    });
+    res.status(201).json({
+      message: { ...message, attachments: message.attachments.map(toAttachmentDto) },
+    });
+  }
+);
 
 router.post("/:id/suggest-reply", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
   const id = String(req.params.id);

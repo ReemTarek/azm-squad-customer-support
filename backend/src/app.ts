@@ -12,6 +12,7 @@ import notificationsRouter from "./routes/notifications";
 import adminSlaConfigRouter from "./routes/adminSlaConfig";
 import adminOrgRouter from "./routes/adminOrg";
 import chatRouter from "./routes/chat";
+import attachmentsRouter from "./routes/attachments";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/notifications", notificationsRouter);
 app.use("/api/admin/sla-config", adminSlaConfigRouter);
 app.use("/api/admin", adminOrgRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/attachments", attachmentsRouter);
 
 app.use(errorHandler);
 

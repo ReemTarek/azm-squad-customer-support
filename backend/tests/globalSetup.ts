@@ -14,6 +14,9 @@ export default async function globalSetup() {
   const journalPath = `${dbPath}-journal`;
   if (existsSync(journalPath)) rmSync(journalPath);
 
+  const uploadsTestDir = path.join(backendDir, "uploads-test");
+  if (existsSync(uploadsTestDir)) rmSync(uploadsTestDir, { recursive: true, force: true });
+
   execSync("npx prisma migrate deploy", {
     cwd: backendDir,
     env: { ...process.env, DATABASE_URL: "file:./test.db" },
