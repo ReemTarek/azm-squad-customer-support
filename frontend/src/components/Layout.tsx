@@ -72,6 +72,9 @@ export function Layout() {
               {user.role === "Admin" && (
                 <li className="nav-item"><Link to="/admin/org-settings" className="nav-link">Departments &amp; Branches</Link></li>
               )}
+              {user.role === "Admin" && (
+                <li className="nav-item"><Link to="/admin/users" className="nav-link">Users</Link></li>
+              )}
             </ul>
             <div className="d-flex align-items-center gap-2">
               <LanguageSwitcher />
