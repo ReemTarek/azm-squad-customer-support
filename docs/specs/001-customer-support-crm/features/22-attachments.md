@@ -74,16 +74,16 @@ attachments didn't).
 
 ## Acceptance criteria
 
-- [ ] A Customer can attach a file to their own new ticket message.
-- [ ] An Agent can attach a file to a ticket message (internal note or
+- [x] A Customer can attach a file to their own new ticket message.
+- [x] An Agent can attach a file to a ticket message (internal note or
       visible reply) and to a customer's profile directly.
-- [ ] A file over 10MB is rejected with a clear validation error.
-- [ ] A disallowed file type (e.g. `.exe`) is rejected.
-- [ ] Downloading an attachment enforces the same visibility rules as
+- [x] A file over 10MB is rejected with a clear validation error.
+- [x] A disallowed file type (e.g. `.exe`) is rejected.
+- [x] Downloading an attachment enforces the same visibility rules as
       its parent — a Customer cannot download an attachment on another
       customer's ticket, and cannot download one attached to an
       internal note.
-- [ ] Uploaded files persist correctly across a backend restart (they
+- [x] Uploaded files persist correctly across a backend restart (they
       live on disk under `backend/uploads/`, not in memory).
 
 ## Implementation
@@ -102,4 +102,4 @@ each role combination in the acceptance criteria above, including the
 existing internal-note-isolation negative test extended to also cover
 attachment visibility.
 
-## Status: Not Started
+## Status: Done

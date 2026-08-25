@@ -66,6 +66,12 @@ written after a real check, not because code exists.
 | Bootstrap responsive redesign | Full demo path + 375px/RTL sweep across all pages | PASS |
 | Staff user management (create/edit/deactivate, dept/branch assignment) | Full UI + curl-verified deactivated-login rejection | PASS |
 
+## Round 2 — Customer/ticket attachments
+
+| Feature | Verification | Result |
+|---|---|---|
+| Customer/ticket attachments (upload, download, visibility-scoped, size/type limits) | Full backend test suite + UI verification | PASS |
+
 ## Full-system re-verification (2026-08-24, post-enhancements)
 
 A single continuous Playwright run replaying auth, customer+ticket
