@@ -13,6 +13,12 @@ function assertTestDatabase() {
 
 async function resetDb() {
   assertTestDatabase();
+  // Delete Attachment rows before anything they reference (TicketMessage,
+  // User) — a normal attachment cascades away with its parent TicketMessage,
+  // but a row with neither ticketMessageId nor customerId set (e.g. the
+  // invariant-violation fixture in attachments.test.ts) has no cascade path
+  // and would otherwise block deleting the uploader User below.
+  await prisma.attachment.deleteMany();
   await prisma.chatMessage.deleteMany();
   await prisma.chatConversation.deleteMany();
   await prisma.ticketTask.deleteMany();

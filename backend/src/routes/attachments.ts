@@ -27,6 +27,8 @@ router.get("/:id", requireAuth, async (req, res) => {
     if (user.role === "Customer") {
       throw Errors.forbidden("Cannot access this attachment");
     }
+  } else {
+    throw Errors.forbidden("Cannot access this attachment");
   }
 
   res.download(path.join(UPLOAD_DIR, attachment.storagePath), attachment.fileName);

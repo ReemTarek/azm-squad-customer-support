@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../src/app";
+import { prisma } from "../src/lib/prisma";
 import { createUser, tokenFor } from "./helpers/fixtures";
 
 describe("attachments", () => {
@@ -145,5 +146,28 @@ describe("attachments", () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("fails closed when an attachment row has neither parent FK set (invariant violation)", async () => {
+    const customer = await createUser({ email: "attachcust6@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    // Bypass the normal creation routes to simulate a row that violates the
+    // "exactly one of ticketMessageId/customerId is set" invariant, proving
+    // the download route rejects rather than silently allowing access.
+    const orphanAttachment = await prisma.attachment.create({
+      data: {
+        fileName: "orphan.txt",
+        mimeType: "text/plain",
+        sizeBytes: 3,
+        storagePath: "orphan.txt",
+        uploadedById: customer.id,
+      },
+    });
+
+    const res = await request(app)
+      .get(`/api/attachments/${orphanAttachment.id}`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(403);
   });
 });
