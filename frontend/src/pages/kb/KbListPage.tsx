@@ -28,7 +28,7 @@ export function KbListPage() {
         style={{ maxWidth: 280 }}
       />
       {isLoading && <p>Loading…</p>}
-      {error && <p role="alert" className="form-error">Failed to load articles.</p>}
+      {error && <p role="alert" className="alert alert-danger">Failed to load articles.</p>}
       <ul className="list-group mb-3">
         {articles?.map((a) => (
           <li key={a.id} className="list-group-item d-flex align-items-center gap-2">

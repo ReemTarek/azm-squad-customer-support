@@ -25,7 +25,7 @@ export function CustomersListPage() {
         style={{ maxWidth: 280 }}
       />
       {isLoading && <p>Loading…</p>}
-      {error && <p role="alert" className="form-error">Failed to load customers.</p>}
+      {error && <p role="alert" className="alert alert-danger">Failed to load customers.</p>}
       {customers && (
         <div className="table-responsive">
         <table className="table table-striped table-hover align-middle">

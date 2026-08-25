@@ -26,7 +26,7 @@ export function AuditLogPage() {
         </select>
       </div>
       {isLoading && <p>Loading…</p>}
-      {error && <p role="alert" className="form-error">Failed to load audit log.</p>}
+      {error && <p role="alert" className="alert alert-danger">Failed to load audit log.</p>}
       {logs && (
         <div className="table-responsive">
           <table className="table table-striped table-hover align-middle">

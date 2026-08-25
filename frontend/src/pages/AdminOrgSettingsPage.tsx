@@ -46,16 +46,16 @@ export function AdminOrgSettingsPage() {
   return (
     <div className="page">
       <h1>Departments &amp; Branches</h1>
-      <p className="form-hint">
+      <p className="form-text text-muted">
         Assign a Manager to a department/branch via user management (API) to scope their ticket visibility.
         Managers with no department/branch set continue to see everything.
       </p>
-      {error && <p role="alert" className="form-error">{error}</p>}
+      {error && <p role="alert" className="alert alert-danger">{error}</p>}
       <div className="row row-cols-1 row-cols-md-2 g-3">
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Departments</h2>
+              <h2 className="h5 card-title">Departments</h2>
               <ul className="list-group list-group-flush mb-3">
                 {departmentsQuery.data?.map((d) => <li key={d.id} className="list-group-item">{d.name}</li>)}
                 {departmentsQuery.data?.length === 0 && <li className="list-group-item">None yet.</li>}
@@ -71,7 +71,7 @@ export function AdminOrgSettingsPage() {
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Branches</h2>
+              <h2 className="h5 card-title">Branches</h2>
               <ul className="list-group list-group-flush mb-3">
                 {branchesQuery.data?.map((b) => <li key={b.id} className="list-group-item">{b.name}</li>)}
                 {branchesQuery.data?.length === 0 && <li className="list-group-item">None yet.</li>}

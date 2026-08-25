@@ -35,7 +35,7 @@ export function RegisterPage() {
       <div className="position-absolute top-0 end-0 m-3"><LanguageSwitcher /></div>
       <form onSubmit={handleSubmit} className="auth-form card p-4 shadow-sm">
         <h1>{t("auth.createAccount")}</h1>
-        <p className="form-hint">{t("auth.customerHint")}</p>
+        <p className="form-text text-muted">{t("auth.customerHint")}</p>
         {error && <p role="alert" className="alert alert-danger">{error}</p>}
         <div className="mb-3">
           <label className="form-label">{t("auth.name")}</label>

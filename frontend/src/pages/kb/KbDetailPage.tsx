@@ -21,7 +21,7 @@ export function KbDetailPage() {
   });
 
   if (isLoading) return <p>Loading…</p>;
-  if (error) return <p role="alert" className="form-error">Article not found.</p>;
+  if (error) return <p role="alert" className="alert alert-danger">Article not found.</p>;
   if (!article) return null;
 
   return (
@@ -34,9 +34,9 @@ export function KbDetailPage() {
           </button>
         )}
       </div>
-      <p className="form-hint">{article.category} {!article.published && "· Draft"}</p>
+      <p className="form-text text-muted">{article.category} {!article.published && "· Draft"}</p>
       <div className="card card-body">
-        <p className="kb-body mb-0">{article.body}</p>
+        <p className="kb-body mb-0 lh-lg">{article.body}</p>
       </div>
     </div>
   );

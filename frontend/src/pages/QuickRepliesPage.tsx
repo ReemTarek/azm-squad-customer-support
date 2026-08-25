@@ -33,10 +33,10 @@ export function QuickRepliesPage() {
   return (
     <div className="page">
       <h1>Quick Replies</h1>
-      <p className="form-hint">Reusable reply templates, insertable from any ticket's reply box.</p>
+      <p className="form-text text-muted">Reusable reply templates, insertable from any ticket's reply box.</p>
 
       <form onSubmit={handleSubmit} className="card card-body mb-3">
-        {error && <p role="alert" className="form-error">{error}</p>}
+        {error && <p role="alert" className="alert alert-danger">{error}</p>}
         <div className="mb-3">
           <label className="form-label" htmlFor="quick-reply-title">Title</label>
           <input id="quick-reply-title" className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
@@ -56,9 +56,9 @@ export function QuickRepliesPage() {
           <li key={qr.id} className="list-group-item d-flex justify-content-between align-items-start">
             <div>
               <strong>{qr.title}</strong>
-              <p className="form-hint">{qr.body}</p>
+              <p className="form-text text-muted">{qr.body}</p>
             </div>
-            <button className="secondary-button" onClick={() => deleteMutation.mutate(qr.id)}>
+            <button className="btn btn-outline-primary" onClick={() => deleteMutation.mutate(qr.id)}>
               Delete
             </button>
           </li>

@@ -37,16 +37,16 @@ export function AdminSlaSettingsPage() {
   return (
     <div className="page">
       <h1>SLA Settings</h1>
-      <p className="form-hint">
+      <p className="form-text text-muted">
         Changes apply to new tickets and priority changes going forward — existing tickets keep their original due dates.
       </p>
-      {error && <p role="alert" className="form-error">{error}</p>}
+      {error && <p role="alert" className="alert alert-danger">{error}</p>}
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
         {sorted.map((p) => (
           <div key={p.priority} className="col">
             <div className="card h-100">
               <div className="card-body">
-                <h2>{p.priority}</h2>
+                <h2 className="h5 card-title">{p.priority}</h2>
                 <div className="mb-3">
                   <label className="form-label" htmlFor={`sla-response-${p.priority}`}>Response (minutes)</label>
                   <input
@@ -76,7 +76,7 @@ export function AdminSlaSettingsPage() {
                 <button className="btn btn-primary" onClick={() => mutation.mutate(p.priority)} disabled={mutation.isPending}>
                   {mutation.isPending ? "Saving…" : "Save"}
                 </button>
-                {savedPriority === p.priority && mutation.isSuccess && <p className="form-success">Saved.</p>}
+                {savedPriority === p.priority && mutation.isSuccess && <p className="alert alert-success">Saved.</p>}
               </div>
             </div>
           </div>

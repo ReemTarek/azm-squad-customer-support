@@ -28,7 +28,7 @@ export function KbFormPage() {
     <div className="page">
       <h1>New Article</h1>
       <form onSubmit={handleSubmit} className="card card-body mb-3">
-        {error && <p role="alert" className="form-error">{error}</p>}
+        {error && <p role="alert" className="alert alert-danger">{error}</p>}
         <div className="mb-3">
           <label className="form-label" htmlFor="kb-title">Title</label>
           <input id="kb-title" className="form-control" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />

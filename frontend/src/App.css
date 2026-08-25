@@ -1,43 +1,5 @@
 .auth-form {
-  width: 320px;
-}
-
-.form-error {
-  color: #c0392b;
-  font-size: 0.85rem;
-}
-
-.form-hint {
-  color: #666;
-  font-size: 0.8rem;
-}
-
-.page-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.form-success {
-  color: #1a7a3c;
-  font-size: 0.85rem;
-}
-
-.secondary-button {
-  padding: 0.5rem 0.9rem;
-  background: white;
-  color: #2f6fed;
-  border: 1px solid #2f6fed;
-  border-radius: 4px;
-  cursor: pointer;
-  width: fit-content;
-  font-size: 0.85rem;
-}
-
-.secondary-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  max-width: 320px;
 }
 
 .trend-card {

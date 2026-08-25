@@ -34,7 +34,7 @@ export function CustomerFormPage() {
     <div className="page">
       <h1>New Customer</h1>
       <form onSubmit={handleSubmit} className="card card-body mb-3">
-        {error && <p role="alert" className="form-error">{error}</p>}
+        {error && <p role="alert" className="alert alert-danger">{error}</p>}
         <div className="mb-3">
           <label className="form-label" htmlFor="new-customer-name">Name</label>
           <input id="new-customer-name" className="form-control" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />

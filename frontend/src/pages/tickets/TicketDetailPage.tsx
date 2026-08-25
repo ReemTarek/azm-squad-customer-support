@@ -136,7 +136,7 @@ export function TicketDetailPage() {
   }
 
   if (ticketQuery.isLoading) return <p>Loading…</p>;
-  if (ticketQuery.error) return <p role="alert" className="form-error">Failed to load ticket.</p>;
+  if (ticketQuery.error) return <p role="alert" className="alert alert-danger">Failed to load ticket.</p>;
   const ticket = ticketQuery.data;
   if (!ticket) return null;
 
@@ -146,7 +146,7 @@ export function TicketDetailPage() {
         <h1>{ticket.subject}</h1>
         <SlaBadge state={ticket.slaState} />
       </div>
-      {actionError && <p role="alert" className="form-error">{actionError}</p>}
+      {actionError && <p role="alert" className="alert alert-danger">{actionError}</p>}
 
       <div className="d-flex flex-wrap gap-4 text-secondary mb-3">
         <span>Category: {ticket.category}</span>
@@ -371,7 +371,7 @@ export function TicketDetailPage() {
               </button>
             </form>
           ) : (
-            <p className="form-hint">No feedback submitted yet.</p>
+            <p className="form-text text-muted">No feedback submitted yet.</p>
           )}
         </section>
       )}

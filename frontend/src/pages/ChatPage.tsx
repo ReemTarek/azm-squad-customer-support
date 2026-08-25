@@ -55,8 +55,8 @@ export function ChatPage() {
   return (
     <div className="page">
       <h1>Ask a Question</h1>
-      <p className="form-hint">Answers are sourced from our knowledge base only.</p>
-      {error && <p role="alert" className="form-error">{error}</p>}
+      <p className="form-text text-muted">Answers are sourced from our knowledge base only.</p>
+      {error && <p role="alert" className="alert alert-danger">{error}</p>}
 
       <ul className="list-group mb-3">
         {conversationQuery.data?.messages.map((m) => (
@@ -71,7 +71,7 @@ export function ChatPage() {
       </ul>
 
       {!lastConfident && (
-        <button type="button" className="secondary-button" onClick={handleCreateTicket}>
+        <button type="button" className="btn btn-outline-primary" onClick={handleCreateTicket}>
           Create a ticket about this
         </button>
       )}

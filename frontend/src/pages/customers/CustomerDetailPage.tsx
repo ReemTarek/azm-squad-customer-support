@@ -67,15 +67,15 @@ export function CustomerDetailPage() {
   }
 
   if (isLoading) return <p>Loading…</p>;
-  if (error) return <p role="alert" className="form-error">Failed to load customer.</p>;
+  if (error) return <p role="alert" className="alert alert-danger">Failed to load customer.</p>;
   if (!customer) return null;
 
   return (
     <div className="page">
       <h1>{customer.name}</h1>
-      <p className="form-hint">{customer.email}</p>
+      <p className="form-text text-muted">{customer.email}</p>
       <form onSubmit={handleSubmit} className="card card-body mb-3">
-        {saveError && <p role="alert" className="form-error">{saveError}</p>}
+        {saveError && <p role="alert" className="alert alert-danger">{saveError}</p>}
         <div className="mb-3">
           <label className="form-label" htmlFor="customer-name">Name</label>
           <input id="customer-name" className="form-control" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -91,7 +91,7 @@ export function CustomerDetailPage() {
         <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
           {mutation.isPending ? "Saving…" : "Save changes"}
         </button>
-        {mutation.isSuccess && <p className="form-success">Saved.</p>}
+        {mutation.isSuccess && <p className="alert alert-success">Saved.</p>}
       </form>
 
       {isStaff && (
@@ -114,7 +114,7 @@ export function CustomerDetailPage() {
           <ul className="list-group list-group-flush mb-3">
             {notesQuery.data?.map((n) => (
               <li key={n.id} className="list-group-item">
-                {n.body} <span className="form-hint">— {n.authorName}, {new Date(n.createdAt).toLocaleString()}</span>
+                {n.body} <span className="form-text text-muted">— {n.authorName}, {new Date(n.createdAt).toLocaleString()}</span>
               </li>
             ))}
             {notesQuery.data?.length === 0 && <li className="list-group-item">No notes yet.</li>}

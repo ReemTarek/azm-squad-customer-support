@@ -19,7 +19,7 @@ export function ReportsPage() {
   });
 
   if (summaryQuery.isLoading) return <p>Loading…</p>;
-  if (summaryQuery.error) return <p role="alert" className="form-error">Failed to load report.</p>;
+  if (summaryQuery.error) return <p role="alert" className="alert alert-danger">Failed to load report.</p>;
   const data = summaryQuery.data;
   if (!data) return null;
 
@@ -32,20 +32,20 @@ export function ReportsPage() {
         <h1>Reports</h1>
         <button
           type="button"
-          className="secondary-button"
+          className="btn btn-outline-primary"
           onClick={() => escalateMutation.mutate()}
           disabled={escalateMutation.isPending}
         >
           {escalateMutation.isPending ? "Checking…" : "Escalate Overdue Tickets"}
         </button>
       </div>
-      {escalationResult && <p className="form-success">{escalationResult}</p>}
+      {escalationResult && <p className="alert alert-success">{escalationResult}</p>}
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Tickets by status</h2>
-              <ul>
+              <h2 className="h5 card-title">Tickets by status</h2>
+              <ul className="list-unstyled mb-0">
                 {data.byStatus.map((s) => <li key={s.status}>{s.status}: {s.count}</li>)}
               </ul>
             </div>
@@ -54,8 +54,8 @@ export function ReportsPage() {
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Tickets by priority</h2>
-              <ul>
+              <h2 className="h5 card-title">Tickets by priority</h2>
+              <ul className="list-unstyled mb-0">
                 {data.byPriority.map((p) => <li key={p.priority}>{p.priority}: {p.count}</li>)}
               </ul>
             </div>
@@ -64,7 +64,7 @@ export function ReportsPage() {
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Avg. resolution time</h2>
+              <h2 className="h5 card-title">Avg. resolution time</h2>
               <p className="display-6 fw-bold mb-0">
                 {data.avgResolutionMinutes === null ? "No resolved tickets yet" : `${data.avgResolutionMinutes} min`}
               </p>
@@ -75,8 +75,8 @@ export function ReportsPage() {
           <div className="col">
             <div className="card h-100">
               <div className="card-body">
-                <h2>Tickets by department</h2>
-                <ul>
+                <h2 className="h5 card-title">Tickets by department</h2>
+                <ul className="list-unstyled mb-0">
                   {data.byDepartment.map((d) => <li key={d.departmentId}>{d.departmentName}: {d.count}</li>)}
                 </ul>
               </div>
@@ -86,8 +86,8 @@ export function ReportsPage() {
         <div className="col">
           <div className="card h-100">
             <div className="card-body">
-              <h2>Tickets per agent</h2>
-              <ul>
+              <h2 className="h5 card-title">Tickets per agent</h2>
+              <ul className="list-unstyled mb-0">
                 {data.ticketsPerAgent.map((a) => <li key={a.agentId}>{a.agentName}: {a.count}</li>)}
                 {data.ticketsPerAgent.length === 0 && <li>No assignments yet.</li>}
               </ul>
@@ -98,9 +98,9 @@ export function ReportsPage() {
           <div className="col">
             <div className="card h-100">
               <div className="card-body">
-                <h2>SLA breach rate</h2>
+                <h2 className="h5 card-title">SLA breach rate</h2>
                 <p className="display-6 fw-bold mb-0">{trends.slaBreachRatePercent}%</p>
-                <p className="form-hint">{trends.totalBreached} of {trends.totalResolved} resolved tickets breached SLA</p>
+                <p className="form-text text-muted">{trends.totalBreached} of {trends.totalResolved} resolved tickets breached SLA</p>
               </div>
             </div>
           </div>
@@ -109,9 +109,9 @@ export function ReportsPage() {
           <div className="col">
             <div className="card h-100">
               <div className="card-body">
-                <h2>Customer satisfaction</h2>
+                <h2 className="h5 card-title">Customer satisfaction</h2>
                 <p className="display-6 fw-bold mb-0">{trends.avgCsatRating === null ? "No ratings yet" : `${trends.avgCsatRating} / 5`}</p>
-                <p className="form-hint">{trends.csatCount} rating{trends.csatCount === 1 ? "" : "s"} submitted</p>
+                <p className="form-text text-muted">{trends.csatCount} rating{trends.csatCount === 1 ? "" : "s"} submitted</p>
               </div>
             </div>
           </div>
@@ -120,8 +120,8 @@ export function ReportsPage() {
           <div className="col">
             <div className="card h-100">
               <div className="card-body">
-                <h2>Agent performance</h2>
-                <ul>
+                <h2 className="h5 card-title">Agent performance</h2>
+                <ul className="list-unstyled mb-0">
                   {trends.agentPerformance.map((a) => (
                     <li key={a.agentId}>{a.agentName}: {a.resolvedCount} resolved, avg {a.avgResolutionMinutes} min</li>
                   ))}

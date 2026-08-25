@@ -96,7 +96,7 @@ export function TicketsListPage() {
         )}
       </div>
       {isLoading && <p>Loading…</p>}
-      {error && <p role="alert" className="form-error">Failed to load tickets.</p>}
+      {error && <p role="alert" className="alert alert-danger">Failed to load tickets.</p>}
       {tickets && (
         <div className="table-responsive">
         <table className="table table-striped table-hover align-middle">
