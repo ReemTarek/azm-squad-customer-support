@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { io as ioClient } from "socket.io-client";
 import type { Socket as ClientSocket } from "socket.io-client";
+import request from "supertest";
 import app from "../src/app";
 import { createSocketServer, registerSocketHandlers } from "../src/lib/socket";
 import { createUser, tokenFor } from "./helpers/fixtures";
@@ -69,5 +70,103 @@ describe("live chat socket auth handshake", () => {
 
   it("rejects a connection with an invalid token", async () => {
     await expect(connect("not-a-real-token")).rejects.toBeTruthy();
+  });
+});
+
+describe("live chat socket room scoping", () => {
+  it("a customer can join their own session's room and receive a message event", async () => {
+    const customer = await createUser({ email: "socketcust@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const createRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${token}`);
+    const sessionId = createRes.body.session.id;
+
+    const socket = await connect(token);
+    const joinAck = await new Promise<{ ok: boolean }>((resolve) =>
+      socket.emit("join-session", { sessionId }, resolve)
+    );
+    expect(joinAck.ok).toBe(true);
+
+    const messageEvent = new Promise((resolve) => socket.once("message:new", resolve));
+
+    const agent = await createUser({ email: "socketagent2@test.com", role: "Agent" });
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agent)}`);
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionId}/messages`)
+      .set("Authorization", `Bearer ${tokenFor(agent)}`)
+      .send({ body: "live push test" });
+
+    const received = (await messageEvent) as { body: string };
+    expect(received.body).toBe("live push test");
+    socket.disconnect();
+  });
+
+  it("rejects a stray join-session attempt for a session the socket's user doesn't own", async () => {
+    const customerA = await createUser({ email: "socketcusta@test.com", role: "Customer" });
+    const customerB = await createUser({ email: "socketcustb@test.com", role: "Customer" });
+
+    const createRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customerA)}`);
+    const sessionId = createRes.body.session.id;
+
+    const socketB = await connect(tokenFor(customerB));
+    const joinAck = await new Promise<{ ok: boolean; error?: string }>((resolve) =>
+      socketB.emit("join-session", { sessionId }, resolve)
+    );
+    expect(joinAck.ok).toBe(false);
+    socketB.disconnect();
+  });
+
+  it("an agent auto-joins the shared agents room and receives queue:new-session", async () => {
+    const agent = await createUser({ email: "socketagent3@test.com", role: "Agent" });
+    const socket = await connect(tokenFor(agent));
+
+    const queueEvent = new Promise((resolve) => socket.once("queue:new-session", resolve));
+
+    const customer = await createUser({ email: "socketcust3@test.com", role: "Customer" });
+    await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customer)}`);
+
+    const received = (await queueEvent) as { customerId: string };
+    expect(received.customerId).toBe(customer.id);
+    socket.disconnect();
+  });
+
+  it("ending a session removes every joined socket from that session's room", async () => {
+    const customer = await createUser({ email: "socketcust4@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const createRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${token}`);
+    const sessionId = createRes.body.session.id;
+
+    const socket = await connect(token);
+    await new Promise<{ ok: boolean }>((resolve) => socket.emit("join-session", { sessionId }, resolve));
+
+    // Confirm the room actually has a member before ending — otherwise
+    // an empty-room false positive after `end` would prove nothing.
+    expect(io.sockets.adapter.rooms.get(sessionId)?.size).toBe(1);
+
+    const endedEvent = new Promise((resolve) => socket.once("session:ended", resolve));
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionId}/end`)
+      .set("Authorization", `Bearer ${token}`);
+    await endedEvent;
+
+    // `socketsLeave()` runs synchronously within the same event-loop
+    // turn as the response the client already awaited above, but leave
+    // one microtask's worth of room for Socket.IO's internal adapter
+    // bookkeeping to settle before asserting on it directly.
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(io.sockets.adapter.rooms.get(sessionId)).toBeUndefined();
+
+    socket.disconnect();
   });
 });

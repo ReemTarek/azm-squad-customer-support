@@ -50,7 +50,13 @@ export function registerSocketHandlers(io: SocketIOServer): void {
           return;
         }
 
-        const session = await prisma.liveChatSession.findUnique({ where: { id: sessionId } });
+        let session;
+        try {
+          session = await prisma.liveChatSession.findUnique({ where: { id: sessionId } });
+        } catch {
+          ack?.({ ok: false, error: "Failed to look up session" });
+          return;
+        }
         if (!session) {
           ack?.({ ok: false, error: "Session not found" });
           return;
