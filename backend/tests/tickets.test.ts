@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../src/app";
 import { createUser, tokenFor } from "./helpers/fixtures";
+import { prisma } from "../src/lib/prisma";
 
 describe("tickets", () => {
   it("a Customer creates their own ticket", async () => {
@@ -152,5 +153,71 @@ describe("tickets", () => {
       .set("Authorization", `Bearer ${otherAgentToken}`)
       .send({ status: "InProgress" });
     expect(res.status).toBe(403);
+  });
+
+  it("notifies the customer by email when staff post a visible reply", async () => {
+    const admin = await createUser({ email: "notifyadmin@test.com", role: "Admin" });
+    const customer = await createUser({ email: "notifycust@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "Notify test", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    await request(app)
+      .post(`/api/tickets/${ticketId}/messages`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ body: "Here is an update on your issue.", isInternalNote: false });
+
+    const logs = await prisma.auditLog.findMany({
+      where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
+    });
+    expect(logs).toHaveLength(1);
+    expect(JSON.parse(logs[0].metadata ?? "{}")).toMatchObject({ subject: "New reply on your ticket" });
+  });
+
+  it("does not notify the customer when staff post an internal note", async () => {
+    const admin = await createUser({ email: "notifyadmin2@test.com", role: "Admin" });
+    const customer = await createUser({ email: "notifycust2@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "Internal note notify test", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    await request(app)
+      .post(`/api/tickets/${ticketId}/messages`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ body: "internal escalation, do not share", isInternalNote: true });
+
+    const logs = await prisma.auditLog.findMany({
+      where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
+    });
+    expect(logs).toHaveLength(0);
+  });
+
+  it("does not notify a customer of their own message", async () => {
+    const customer = await createUser({ email: "notifycust3@test.com", role: "Customer" });
+    const customerToken = tokenFor(customer);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({ subject: "Self notify test", priority: "Low" });
+    const ticketId = createRes.body.ticket.id;
+
+    await request(app)
+      .post(`/api/tickets/${ticketId}/messages`)
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({ body: "Following up on my own ticket", isInternalNote: false });
+
+    const logs = await prisma.auditLog.findMany({
+      where: { action: "notification.sent", entityType: "Notification", entityId: customer.email },
+    });
+    expect(logs).toHaveLength(0);
   });
 });
