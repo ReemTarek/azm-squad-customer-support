@@ -369,6 +369,30 @@ describe("tickets", () => {
     const events = await prisma.aiUsageEvent.findMany({ where: { ticketId, eventType: "suggested_articles_shown" } });
     expect(events).toHaveLength(0);
   });
+
+  it("writes no AiUsageEvent when suggested-articles succeeds but finds nothing to show (no published KB articles)", async () => {
+    const admin = await createUser({ email: "aiusage4@test.com", role: "Admin" });
+    const customer = await createUser({ email: "aiusagecust4@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "AI usage test 4", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    // No published KB articles exist (default resetDb() state), so
+    // suggestRelevantArticleIds short-circuits to [] without calling Gemini,
+    // and the route should succeed with an empty list rather than fail.
+    const res = await request(app)
+      .get(`/api/tickets/${ticketId}/suggested-articles`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.articles).toEqual([]);
+    const events = await prisma.aiUsageEvent.findMany({ where: { ticketId, eventType: "suggested_articles_shown" } });
+    expect(events).toHaveLength(0);
+  });
 });
 
 describe("buildReplyPreview", () => {

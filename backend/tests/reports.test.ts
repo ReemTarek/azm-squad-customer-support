@@ -40,6 +40,21 @@ describe("reports: AI usage", () => {
     expect(events).toHaveLength(1);
   });
 
+  it("returns 404 and records nothing when ticketId does not exist", async () => {
+    const agent = await createUser({ email: "aiusagepost4@test.com", role: "Agent" });
+    const token = tokenFor(agent);
+    const nonexistentTicketId = "00000000-0000-4000-8000-000000000000";
+
+    const res = await request(app)
+      .post("/api/reports/ai-usage/event")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ eventType: "suggested_article_clicked", ticketId: nonexistentTicketId });
+
+    expect(res.status).toBe(404);
+    const events = await prisma.aiUsageEvent.findMany({ where: { ticketId: nonexistentTicketId } });
+    expect(events).toHaveLength(0);
+  });
+
   it("rejects an eventType outside the two client-observable values", async () => {
     const agent = await createUser({ email: "aiusagepost3@test.com", role: "Agent" });
     const token = tokenFor(agent);

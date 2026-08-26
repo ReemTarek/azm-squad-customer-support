@@ -527,12 +527,14 @@ router.get("/:id/suggested-articles", requireAuth, requireRole("Admin", "Manager
       articles
     );
     const suggested = articles.filter((a) => ids.includes(a.id));
-    try {
-      await prisma.aiUsageEvent.create({
-        data: { eventType: "suggested_articles_shown", ticketId: id, userId: req.user!.id },
-      });
-    } catch (logErr) {
-      console.error("AI usage event logging failed (non-fatal):", logErr);
+    if (suggested.length > 0) {
+      try {
+        await prisma.aiUsageEvent.create({
+          data: { eventType: "suggested_articles_shown", ticketId: id, userId: req.user!.id },
+        });
+      } catch (logErr) {
+        console.error("AI usage event logging failed (non-fatal):", logErr);
+      }
     }
     res.json({ articles: suggested });
   } catch (err) {

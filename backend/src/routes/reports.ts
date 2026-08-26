@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
+import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { recordAiUsageEventSchema } from "../validation/aiUsage.schema";
 
@@ -158,6 +159,10 @@ router.get("/trends", requireAuth, requireRole("Admin", "Manager"), async (req, 
 
 router.post("/ai-usage/event", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
   const body = recordAiUsageEventSchema.parse(req.body);
+  if (body.ticketId) {
+    const ticket = await prisma.ticket.findUnique({ where: { id: body.ticketId } });
+    if (!ticket) throw Errors.notFound("Ticket not found");
+  }
   const event = await prisma.aiUsageEvent.create({
     data: { eventType: body.eventType, ticketId: body.ticketId, userId: req.user!.id },
   });
