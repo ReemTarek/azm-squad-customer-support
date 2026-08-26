@@ -23,7 +23,20 @@
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
-    "subtitle": "Role-specific dashboard views land here in later tasks."
+    "myTickets": "My Tickets",
+    "newTicket": "New Ticket",
+    "viewAllMyTickets": "View all my tickets",
+    "loading": "Loading…",
+    "noTicketsCustomer": "You have no tickets yet.",
+    "noTicketsAgent": "No tickets currently assigned to you.",
+    "slaAlerts": "SLA alerts",
+    "breached": "breached",
+    "atRisk": "at risk",
+    "avgResolution": "Avg. resolution time",
+    "slaBreachRate": "SLA breach rate",
+    "aiTrust": "AI trust",
+    "aiTrustSubtext": "suggested replies used",
+    "viewFullReport": "View full report"
   },
   "tickets": {
     "title": "Tickets",

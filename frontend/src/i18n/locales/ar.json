@@ -23,7 +23,20 @@
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
-    "subtitle": "ستظهر هنا لوحات التحكم الخاصة بكل دور في المهام القادمة."
+    "myTickets": "تذاكري",
+    "newTicket": "تذكرة جديدة",
+    "viewAllMyTickets": "عرض جميع تذاكري",
+    "loading": "جارٍ التحميل…",
+    "noTicketsCustomer": "ليس لديك أي تذاكر بعد.",
+    "noTicketsAgent": "لا توجد تذاكر مسندة إليك حاليًا.",
+    "slaAlerts": "تنبيهات اتفاقية مستوى الخدمة",
+    "breached": "متجاوزة",
+    "atRisk": "معرضة للخطر",
+    "avgResolution": "متوسط وقت الحل",
+    "slaBreachRate": "معدل تجاوز اتفاقية مستوى الخدمة",
+    "aiTrust": "ثقة الذكاء الاصطناعي",
+    "aiTrustSubtext": "الردود المقترحة المستخدمة",
+    "viewFullReport": "عرض التقرير الكامل"
   },
   "tickets": {
     "title": "التذاكر",
