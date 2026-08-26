@@ -58,8 +58,20 @@ themselves.
   Reports route's role gate) returning: suggested-reply
   shown-vs-used count and rate, suggested-articles shown-vs-clicked
   count and rate, summary-request volume, chatbot confident-vs-fallback
-  count and rate — over the same optional date range already supported
-  by `/reports/trends`.
+  count and rate — as an all-time aggregate.
+  **Correction (2026-08-26, caught during plan self-review):** the
+  original wording claimed this would reuse "the same optional date
+  range already supported by `/reports/trends`" — that support doesn't
+  exist. Reading the real current `backend/src/routes/reports.ts`
+  confirms `/trends` hardcodes a rolling 7-day window internally for
+  one field (`ticketsCreatedPerDay`) and accepts no `from`/`to` query
+  params; no endpoint in this file has date-range filtering. There is
+  no established convention to reuse. Since no acceptance criterion
+  below actually requires date filtering, this ships as an all-time
+  aggregate instead — consistent with `/summary`'s existing behavior
+  (also unfiltered), which is the closer analog for an aggregate-style
+  report anyway. Date-range filtering is a reasonable future add-on,
+  not a regression from this correction.
 - **Frontend:** a new "AI Usage" section/tab on the existing
   `ReportsPage.tsx`.
 
@@ -103,5 +115,36 @@ Trigger each AI feature a known number of times, verify the report's
 counts match exactly via a manual Prisma query cross-check — the same
 rigor already used to verify the existing CSAT/agent-performance
 reports.
+
+**Correction (2026-08-26, caught during plan self-review):** this
+project's test environment intentionally leaves `GEMINI_API_KEY`
+unconfigured (established in two prior Round 2 features), so
+`suggestReply`/`summarizeTicket`/`suggestRelevantArticleIds` always
+throw in automated tests, and their three route handlers
+(`/:id/suggest-reply`, `/:id/summary`, `/:id/suggested-articles`)
+already convert that into `Errors.aiUnavailable()` — the whole request
+fails before an `AiUsageEvent` write is ever reached. This means the
+"shown"/"requested" event writes for those three routes cannot be
+exercised end-to-end via an automated HTTP test in this environment,
+the same limitation the two prior AI-touching Round 2 features hit.
+The plan verifies this differently: (a) the *aggregation* logic in
+`GET /api/reports/ai-usage` is fully and rigorously tested by seeding
+`AiUsageEvent` rows directly (bypassing the instrumented call sites,
+which is fine — the report's job is to aggregate whatever rows exist,
+independent of how they got there) and cross-checking against a manual
+Prisma query, satisfying this criterion's letter exactly; (b) the
+negative property — a failed Gemini call writes **no** event — is
+automated-tested for all three ticket-AI routes, since Gemini failure
+is the deterministic path in this environment; (c) the chatbot path
+(`answerFromKnowledgeBase` in `chat.ts`) already degrades to a fallback
+response rather than an error even when Gemini is unconfigured, so its
+event-write (`chatbot_fallback`) *is* fully automated-testable
+end-to-end; (d) the three ticket-route "on success, writes exactly one
+event" claims are verified by direct code reading (the write sits
+immediately after the Gemini call succeeds, structurally symmetric
+with the already-tested chatbot path) plus an optional manual
+real-Gemini check if credentials are available in the environment,
+documented honestly either way — matching this project's established
+convention for this exact class of gap.
 
 ## Status: Not Started
