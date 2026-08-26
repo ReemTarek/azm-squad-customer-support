@@ -96,3 +96,9 @@ access-blocked test, not errors.
 | Feature | Verification | Result |
 |---|---|---|
 | Live chat (Socket.IO, room-scoped, RBAC-enforced) | Full backend test suite (socket + REST) + two-browser real-time verification | PASS |
+
+## Round 2 — AI automatic ticket categorization
+
+| Feature | Verification | Result |
+|---|---|---|
+| AI automatic ticket categorization (Gemini-suggested, grounded in existing categories only) | Automated tests (unavailable + explicit-category-respected paths) + real-Gemini manual verification (2 real calls, both correct) | PASS |
