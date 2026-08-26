@@ -82,8 +82,16 @@ before Gemini was called), plus a real, working `GEMINI_API_KEY`
 leaking from `backend/.env` into every test run). 27 (AI usage dashboard)
 is Done as of 2026-08-26 (5 tasks — schema, instrumentation, endpoints,
 frontend, and closeout — all approved with zero unresolved findings
-beyond one pre-existing out-of-scope Minor noted on Task 4). 24 remains
-blocked on credentials (SMS/WhatsApp). 28 remains Not Started.
+beyond one pre-existing out-of-scope Minor noted on Task 4). 28 (Custom
+branding) is Done as of 2026-08-26 (5 tasks — schema/backend, frontend
+provider + Layout/LoginPage integration, the Admin settings page, and
+a final closeout — all approved with zero blocking issues; the
+closeout task's live Playwright verification confirmed genuine
+computed-style button re-tinting, not just a CSS-variable check, plus
+cross-page, hard-refresh, and pre-login persistence, and a full
+clear-and-revert with no leftover DOM artifacts). 24 remains blocked on
+credentials (SMS/WhatsApp) — it is the only Round 2 item still
+outstanding.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original

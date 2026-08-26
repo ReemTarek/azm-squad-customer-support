@@ -348,7 +348,10 @@ last. SMS/WhatsApp stays blocked on credentials regardless of order.
 | TASK-054 | Live chat (agent ↔ customer) | `features/25-live-chat.md` | Done |
 | TASK-055 | AI automatic ticket categorization | `features/26-ai-auto-categorization.md` | Done |
 | TASK-056 | AI usage dashboard | `features/27-ai-usage-dashboard.md` | Done |
-| TASK-057 | Custom branding (reverses the earlier decline) | `features/28-custom-branding.md` | Not Started |
+| TASK-057 | Custom branding (reverses the earlier decline) | `features/28-custom-branding.md` | Done |
+
+**Round 2 is now complete except TASK-053** (SMS/WhatsApp), which
+remains blocked on credentials — every other Round 2 item above is Done.
 
 **Explicitly out of this round, per user decision (2026-08-24):**
 - **ERP integration** — no target system named; stays a documented,

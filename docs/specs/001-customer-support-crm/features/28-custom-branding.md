@@ -116,17 +116,54 @@ theirs," not per-tenant multi-brand theming.
 
 ## Acceptance criteria
 
-- [ ] Admin can set a custom app name; it appears in the nav bar and
-      the browser tab title.
-- [ ] Admin can upload a logo; it appears in the nav bar.
-- [ ] Admin can set a primary accent color; primary buttons/nav/links
+- [x] Admin can set a custom app name; it appears in the nav bar and
+      the browser tab title. Live-verified: after saving app name
+      "Test Corp Support", `document.title` read "Test Corp Support"
+      and `.navbar-brand` read "Test Corp Support" — confirmed on the
+      dashboard, `/tickets`, and `/reports` after client-side
+      navigation, and again after a fresh browser context (equivalent
+      to a hard refresh, see below).
+- [x] Admin can upload a logo; it appears in the nav bar. Live-verified:
+      uploaded a 20×20 solid-green test PNG; `.navbar-brand img` was
+      present (`count() > 0`) and visibly rendered (screenshot) on the
+      settings page, `/tickets`, `/reports`, a fresh browser context,
+      and the logged-out `/login` page.
+- [x] Admin can set a primary accent color; primary buttons/nav/links
       across the app reflect it (verified visually, not just that the
-      CSS variable was set).
-- [ ] With no branding configured (fresh install), the app looks
+      CSS variable was set). **Live computed-style evidence** (Playwright,
+      real Chromium, `getComputedStyle`, not a CSS-variable string
+      check): before setting branding, the Save button
+      (`.btn-primary`) computed `backgroundColor` was
+      `rgb(13, 110, 253)` (Bootstrap's default `#0d6efd`). After
+      setting the accent color to `#8b1e3f` and saving, the same
+      button's computed `backgroundColor` was `rgb(139, 30, 63)` —
+      the exact RGB decomposition of `#8b1e3f` (0x8b=139, 0x1e=30,
+      0x3f=63). The `.btn-outline-primary` "Run escalation sweep"
+      button on `/reports` showed computed `color` and `borderColor`
+      both `rgb(139, 30, 63)` as well. The retinted color was also
+      confirmed by screenshot (dark red Save/Sign-in buttons, visible
+      in the nav-crop and login-form-crop screenshots taken during
+      verification). This confirms the runtime override actually
+      repaints Bootstrap's baked-in `--bs-btn-bg`/`--bs-btn-border-color`
+      custom properties on `.btn-primary`/`.btn-outline-primary`, not
+      just `--bs-primary` at `:root`.
+- [x] With no branding configured (fresh install), the app looks
       exactly as it does today — no regression for deployments that
-      never touch this feature.
-- [ ] Only Admin can change branding; any other role's `PATCH` attempt
-      is rejected with 403.
+      never touch this feature. Live-verified: with all branding
+      cleared (Reset app name, Reset color, Remove logo, Save), the
+      nav reverted to "AZM Support CRM", `.navbar-brand img` count was
+      0, `document.title` was "AZM Support CRM" again, the Save/Sign-in
+      buttons' computed `backgroundColor` reverted to
+      `rgb(13, 110, 253)` (the exact pre-branding default), and
+      `document.getElementById("branding-color-override")` returned
+      `null` (the injected `<style>` tag is genuinely removed from the
+      DOM, not merely emptied) — checked both immediately after
+      clearing and again from a fresh, logged-out browser context
+      loading `/login` directly.
+- [x] Only Admin can change branding; any other role's `PATCH` attempt
+      is rejected with 403. Covered by the backend automated test
+      suite (role-gating test on `PATCH /api/admin/branding`), part of
+      the 90/90 passing suite as of this verification pass.
 
 ## Implementation
 
@@ -144,4 +181,4 @@ render correctly across multiple pages; then clear the config and
 confirm the app reverts to its default, unbranded look with no visual
 artifacts left behind.
 
-## Status: Not Started
+## Status: Done
