@@ -228,6 +228,51 @@ describe("tickets", () => {
     });
     expect(logs).toHaveLength(0);
   });
+
+  it("keeps category General when Gemini is unavailable (test env has no GEMINI_API_KEY)", async () => {
+    const customer = await createUser({ email: "catgeneral@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const res = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ subject: "My internet keeps disconnecting", priority: "Medium" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.ticket.category).toBe("General");
+  });
+
+  it("never overrides an explicit non-default category", async () => {
+    const customer = await createUser({ email: "catexplicit@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const res = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ subject: "Ambiguous subject that could be anything", priority: "Low", category: "Billing" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.ticket.category).toBe("Billing");
+  });
+
+  it("does not call Gemini at all when an explicit category is provided", async () => {
+    // Regression guard for the "skip the AI call entirely" requirement,
+    // not just "the result happens to still be Billing" — if the category
+    // stored in the DB right after creation (before any async enrichment
+    // could plausibly finish) is already the explicit value, the AI path
+    // was never taken.
+    const customer = await createUser({ email: "catskip@test.com", role: "Customer" });
+    const token = tokenFor(customer);
+
+    const res = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ subject: "Need help with my invoice", priority: "Low", category: "Account" });
+
+    expect(res.status).toBe(201);
+    const stored = await prisma.ticket.findUnique({ where: { id: res.body.ticket.id } });
+    expect(stored?.category).toBe("Account");
+  });
 });
 
 describe("buildReplyPreview", () => {

@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { Errors } from "../lib/errors";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeSlaDueDates, computeSlaState } from "../services/sla";
-import { suggestReply, summarizeTicket, suggestRelevantArticleIds } from "../services/gemini";
+import { suggestReply, summarizeTicket, suggestRelevantArticleIds, suggestTicketCategory } from "../services/gemini";
 import {
   assignTicketSchema,
   createMessageSchema,
@@ -117,7 +117,30 @@ router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (
     data: { ticketId: ticket.id, fromStatus: null, toStatus: "Open", changedById: req.user!.id },
   });
 
-  res.status(201).json({ ticket: toTicketDto(ticket) });
+  let finalTicket = ticket;
+  if (ticket.category === "General") {
+    try {
+      const distinct = await prisma.ticket.findMany({
+        where: { category: { not: "General" } },
+        distinct: ["category"],
+        select: { category: true },
+      });
+      const existingCategories = distinct.map((t) => t.category);
+      if (existingCategories.length > 0) {
+        const suggested = await suggestTicketCategory(body.subject, existingCategories);
+        if (suggested !== "General") {
+          finalTicket = await prisma.ticket.update({
+            where: { id: ticket.id },
+            data: { category: suggested },
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Ticket category suggestion failed (non-fatal):", err);
+    }
+  }
+
+  res.status(201).json({ ticket: toTicketDto(finalTicket) });
 });
 
 router.get("/", requireAuth, requireRole("Admin", "Manager", "Agent", "Customer"), async (req, res) => {

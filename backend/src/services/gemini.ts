@@ -116,6 +116,33 @@ JSON array of relevant article ids:`;
   }
 }
 
+export async function suggestTicketCategory(
+  subject: string,
+  existingCategories: string[]
+): Promise<string> {
+  if (existingCategories.length === 0) return "General";
+  const model = getModel();
+
+  const categoryList = existingCategories.join(", ");
+
+  const prompt = `A new support ticket needs a category assigned. Pick exactly ONE
+category from the list below that best matches the ticket's subject, or
+respond with "General" if none fit well. Respond with ONLY the category
+name, nothing else — no punctuation, no explanation.
+
+Available categories: ${categoryList}
+
+Ticket subject: ${subject}
+
+Category:`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+
+  const validCategories = new Set([...existingCategories, "General"]);
+  return validCategories.has(text) ? text : "General";
+}
+
 export interface ChatHistoryMessage {
   role: "user" | "assistant";
   body: string;
