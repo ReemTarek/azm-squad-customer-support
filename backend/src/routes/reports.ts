@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { recordAiUsageEventSchema } from "../validation/aiUsage.schema";
 
 const router = Router();
 
@@ -152,6 +153,46 @@ router.get("/trends", requireAuth, requireRole("Admin", "Manager"), async (req, 
     avgCsatRating,
     csatCount: feedback.length,
     agentPerformance,
+  });
+});
+
+router.post("/ai-usage/event", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
+  const body = recordAiUsageEventSchema.parse(req.body);
+  const event = await prisma.aiUsageEvent.create({
+    data: { eventType: body.eventType, ticketId: body.ticketId, userId: req.user!.id },
+  });
+  res.status(201).json({ event });
+});
+
+router.get("/ai-usage", requireAuth, requireRole("Admin", "Manager"), async (req, res) => {
+  const counts = await prisma.aiUsageEvent.groupBy({ by: ["eventType"], _count: { _all: true } });
+  const countOf = (type: string) => counts.find((c) => c.eventType === type)?._count._all ?? 0;
+
+  const replyShown = countOf("suggest_reply_shown");
+  const replyUsed = countOf("suggest_reply_used");
+  const articlesShown = countOf("suggested_articles_shown");
+  const articlesClicked = countOf("suggested_article_clicked");
+  const chatbotConfident = countOf("chatbot_confident");
+  const chatbotFallback = countOf("chatbot_fallback");
+  const chatbotTotal = chatbotConfident + chatbotFallback;
+
+  res.json({
+    suggestedReply: {
+      shown: replyShown,
+      used: replyUsed,
+      usedRatePercent: replyShown === 0 ? 0 : Math.round((replyUsed / replyShown) * 100),
+    },
+    suggestedArticles: {
+      shown: articlesShown,
+      clicked: articlesClicked,
+      clickRatePercent: articlesShown === 0 ? 0 : Math.round((articlesClicked / articlesShown) * 100),
+    },
+    summaryRequests: countOf("summary_requested"),
+    chatbot: {
+      confident: chatbotConfident,
+      fallback: chatbotFallback,
+      confidentRatePercent: chatbotTotal === 0 ? 0 : Math.round((chatbotConfident / chatbotTotal) * 100),
+    },
   });
 });
 
