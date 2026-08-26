@@ -60,12 +60,22 @@ ticket as the default `"General"`.
   is corrected to `(subject, existingCategories)`; categorization runs
   on the subject line alone.
 - `backend/src/routes/tickets.ts`'s `POST /` handler: after creating a
-  ticket whose `category` is still the default `"General"`, fetch
-  `SELECT DISTINCT category FROM Ticket` (via Prisma `findMany` +
-  `distinct`), call `suggestTicketCategory`, and update the ticket's
-  category if the model returns something other than `"General"`.
-  Wrapped in try/catch — any failure just leaves the category as
-  `"General"`, logged but not surfaced to the customer.
+  ticket whose `category` is still the default `"General"`, fetch the
+  distinct non-`"General"` categories already in use (via Prisma
+  `groupBy`, capped at 50), call `suggestTicketCategory`, and update the
+  ticket's category if the model returns something other than
+  `"General"`. Wrapped in try/catch — any failure just leaves the
+  category as `"General"`, logged but not surfaced to the customer.
+  **Correction (2026-08-26, fix wave 1):** originally implemented as
+  `findMany({ distinct: ["category"] })`, which Prisma does not push
+  down to SQLite as a real `DISTINCT` — the final whole-branch review
+  found this fetched every matching row unbounded (`LIMIT -1`) on an
+  unindexed column. Replaced with `groupBy` (which does push down
+  correctly) capped at `take: 50`, plus a new `@@index([category])` on
+  `Ticket`. The category update is also now atomic (`updateMany` scoped
+  to `category: "General"` in its `where` clause, re-fetching only on a
+  successful match) so a concurrent edit to the category can't be
+  silently clobbered.
 
 ## Out of scope
 
@@ -90,10 +100,13 @@ ticket as the default `"General"`.
       members, confirming sensible, real categorization.
 - [x] A customer who explicitly picks "Billing" (or any non-default
       value) keeps that exact value — no AI override. **Evidence:**
-      `backend/tests/tickets.test.ts:245–256` ("never overrides an
-      explicit non-default category") and `:258–275` ("does not call
+      `backend/tests/tickets.test.ts:273–284` ("never overrides an
+      explicit non-default category") and `:286–303` ("does not call
       Gemini at all when an explicit category is provided") confirm the
-      category is preserved and the AI path is skipped entirely.
+      category is preserved and the AI path is skipped entirely. (Line
+      numbers as of fix wave 1, commit cfe6ae7 — the unavailable-Gemini
+      test above it grew by ~28 lines during that fix, shifting these
+      two down from their original `:245–256`/`:258–275`.)
 - [x] If Gemini is unavailable, ticket creation still succeeds and the
       category stays `"General"` — no error surfaced to the customer.
       **Evidence:** `backend/tests/tickets.test.ts:232–271` ("keeps
