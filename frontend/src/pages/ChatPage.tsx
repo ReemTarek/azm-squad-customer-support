@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from "../lib/apiClient";
 import { connectSocket } from "../lib/socketClient";
 import {
   endLiveChatSession,
+  getMyLiveChatSession,
   listLiveChatMessages,
   sendLiveChatMessage,
   startLiveChatSession,
@@ -25,7 +26,8 @@ export function ChatPage() {
   const [liveMessages, setLiveMessages] = useState<LiveChatMessage[]>([]);
   const [liveInput, setLiveInput] = useState("");
   const [liveEnded, setLiveEnded] = useState(false);
-  const joinedSessionRef = useRef<string | null>(null);
+  const [liveJoinError, setLiveJoinError] = useState<string | null>(null);
+  const [liveConnectionError, setLiveConnectionError] = useState<string | null>(null);
 
   const startMutation = useMutation({
     mutationFn: createConversation,
@@ -35,6 +37,22 @@ export function ChatPage() {
 
   useEffect(() => {
     if (!conversationId) startMutation.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Resume an already-open live-chat session on mount (e.g. after a
+  // page reload) instead of always requiring a fresh "Talk to a
+  // human" click — mirrors how an existing session id's history is
+  // loaded elsewhere on this page.
+  useEffect(() => {
+    getMyLiveChatSession()
+      .then((session) => {
+        if (!session) return;
+        setLiveSessionId(session.id);
+        setLiveEnded(false);
+        return listLiveChatMessages(session.id).then(setLiveMessages);
+      })
+      .catch((err) => setError(extractApiErrorMessage(err)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -74,8 +92,11 @@ export function ChatPage() {
     if (!session) return;
     setLiveSessionId(session.id);
     setLiveEnded(false);
-    const history = await listLiveChatMessages(session.id);
-    setLiveMessages(history);
+    const history = await listLiveChatMessages(session.id).catch((err) => {
+      setError(extractApiErrorMessage(err));
+      return null;
+    });
+    if (history) setLiveMessages(history);
   }
 
   useEffect(() => {
@@ -84,13 +105,27 @@ export function ChatPage() {
     const socket = connectSocket();
 
     function join() {
-      socket.emit("join-session", { sessionId: liveSessionId }, (ack: { ok: boolean }) => {
-        if (ack.ok) joinedSessionRef.current = liveSessionId;
-      });
+      socket.emit(
+        "join-session",
+        { sessionId: liveSessionId },
+        (ack: { ok: boolean; error?: string }) => {
+          if (ack.ok) {
+            setLiveConnectionError(null);
+            setLiveJoinError(null);
+          } else {
+            setLiveJoinError(ack.error ?? "Unable to join this chat session");
+          }
+        }
+      );
     }
 
     if (socket.connected) join();
     socket.on("connect", join);
+
+    function onConnectError(err: Error) {
+      setLiveConnectionError(err.message || "Connection error — please refresh");
+    }
+    socket.on("connect_error", onConnectError);
 
     function onMessage(message: LiveChatMessage) {
       if (message.sessionId !== liveSessionId) return;
@@ -106,6 +141,7 @@ export function ChatPage() {
 
     return () => {
       socket.off("connect", join);
+      socket.off("connect_error", onConnectError);
       socket.off("message:new", onMessage);
       socket.off("session:ended", onEnded);
     };
@@ -113,7 +149,7 @@ export function ChatPage() {
 
   async function handleSendLive(e: FormEvent) {
     e.preventDefault();
-    if (!liveSessionId || !liveInput.trim()) return;
+    if (!liveSessionId || !liveInput.trim() || liveJoinError) return;
     const body = liveInput;
     setLiveInput("");
     await sendLiveChatMessage(liveSessionId, body).catch((err) => setError(extractApiErrorMessage(err)));
@@ -123,6 +159,13 @@ export function ChatPage() {
     if (!liveSessionId) return;
     await endLiveChatSession(liveSessionId).catch((err) => setError(extractApiErrorMessage(err)));
     setLiveEnded(true);
+    // Clear the session id (not just the "ended" flag) so the "Talk to
+    // a human" button becomes available again — otherwise a customer
+    // who ends one chat is permanently gated off from starting another.
+    setLiveSessionId(null);
+    setLiveMessages([]);
+    setLiveJoinError(null);
+    setLiveConnectionError(null);
   }
 
   return (
@@ -177,6 +220,10 @@ export function ChatPage() {
         <section className="card card-body mt-3">
           <h2>Live Chat</h2>
           {liveEnded && <p className="alert alert-secondary">This chat has ended.</p>}
+          {liveConnectionError && (
+            <p role="alert" className="alert alert-warning">Reconnecting… ({liveConnectionError})</p>
+          )}
+          {liveJoinError && <p role="alert" className="alert alert-danger">{liveJoinError}</p>}
           <ul className="list-group mb-3">
             {liveMessages.map((m) => (
               <li key={m.id} className={m.authorRole === "Customer" ? "list-group-item list-group-item-warning" : "list-group-item"}>
@@ -198,8 +245,9 @@ export function ChatPage() {
                 placeholder="Type a message…"
                 value={liveInput}
                 onChange={(e) => setLiveInput(e.target.value)}
+                disabled={Boolean(liveJoinError)}
               />
-              <button type="submit" className="btn btn-primary">Send</button>
+              <button type="submit" className="btn btn-primary" disabled={Boolean(liveJoinError)}>Send</button>
               <button type="button" className="btn btn-outline-secondary" onClick={handleEndLive}>End chat</button>
             </form>
           )}

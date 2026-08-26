@@ -69,8 +69,12 @@ talks to a human live).
     for the agent queue view; kept live afterward via the socket
     event above, no polling/refetch needed).
   - `POST /api/live-chat/sessions/:id/claim` (Agent) — moves a
-    `Waiting` session to `Active`, sets `assignedAgentId`, joins the
-    claiming agent's socket to that session's room.
+    `Waiting` session to `Active`, sets `assignedAgentId`. Room-joining
+    is *not* done by this route directly (see the implementation-
+    deviation note below); it happens via the client's existing
+    `join-session` socket event, which the claiming agent's page
+    already emits on connect/session-change the same way it does for
+    every other session it opens.
   - `GET/POST /api/live-chat/sessions/:id/messages` — post/list
     messages; ownership: the session's customer, or its assigned
     agent, or Admin/Manager. `POST` also emits the new message to the
@@ -79,8 +83,10 @@ talks to a human live).
     emits a `session:ended` event to the room.
   - `backend/src/lib/socket.ts` (new) — creates the Socket.IO server,
     the JWT-handshake auth middleware, and the room-join/leave logic
-    (a customer joins their own session's room on connect; an agent
-    joins on claim).
+    (both a customer and an agent join a session's room via the same
+    client-initiated, server-revalidated `join-session` event — see
+    the implementation-deviation note below for why claim doesn't
+    auto-join the room server-side).
 - **Frontend:**
   - `frontend/src/lib/socketClient.ts` (new) — one shared Socket.IO
     client instance, connected with the current access token.
@@ -92,6 +98,28 @@ talks to a human live).
     (`Waiting` sessions, updated live via `queue:new-session`) and the
     agent's own active session(s), with messages arriving live via the
     socket once claimed.
+
+## Implementation deviations
+
+- **Claim does not make the server auto-join the claiming agent's
+  socket to the session's room.** The Scope section above originally
+  described `claim` as joining the claiming agent's socket to the
+  room directly, as part of the claim request itself. What's actually
+  built instead: `claim` only performs the REST status transition
+  (`Waiting` → `Active` + `assignedAgentId`); room membership is
+  established the same way for every session an agent opens (claimed
+  or already-active) — the agent's own page emits the existing
+  client-initiated `join-session` socket event, which the server
+  re-validates against the *current* DB state of the session
+  (assigned agent, not-Ended) before letting the socket into the
+  room. This was a deliberate, reviewed choice, not an oversight:
+  trusting the claim HTTP request's own request context to also join
+  a *different* channel (the socket) would mean room membership is
+  granted based on a snapshot of "who's allowed" at claim time, with
+  no re-check if that ever changes; re-validating on every
+  `join-session` call (the same path a page-reload or reconnect
+  already goes through) is strictly stronger and reuses one
+  authorization code path instead of two.
 
 ## Out of scope
 
@@ -124,13 +152,17 @@ talks to a human live).
       assigned to a different agent (room membership enforces this —
       verify a stray/forged room-join attempt is rejected server-side,
       not just hidden client-side).
-      Verified by the automated backend suite (part of the 65 passing
-      tests, Task 7 Step 1): `liveChat.test.ts` — "a Customer cannot
-      see or claim another customer's session" and "an unassigned
-      Agent cannot post into a session assigned to a different agent";
-      `liveChatSocket.test.ts` — "rejects a stray join-session attempt
-      for a session the socket's user doesn't own" (server-side ack
-      `{ ok: false }`, not a client-side hide).
+      Verified by the automated backend suite: `liveChat.test.ts` — "a
+      Customer cannot see or claim another customer's session" and "an
+      unassigned Agent cannot post into a session assigned to a
+      different agent"; `liveChatSocket.test.ts` — "rejects a stray
+      join-session attempt for a session the socket's user doesn't
+      own" (customer-vs-customer, server-side ack `{ ok: false }`, not
+      a client-side hide) and "rejects a stray join-session attempt
+      from an agent not assigned to the session" (the agent-vs-agent
+      counterpart: Agent A claims a session, Agent B's `join-session`
+      attempt on it gets `{ ok: false }`) — both room-membership and
+      the socket's own auth are enforced server-side for both roles.
 - [x] Ending a session stops it from appearing in the active queue for
       either party, and both sockets leave the room.
       Verified by the automated backend suite: `liveChatSocket.test.ts`

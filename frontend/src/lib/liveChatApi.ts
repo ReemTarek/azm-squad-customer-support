@@ -25,6 +25,13 @@ export async function startLiveChatSession() {
   return data.session;
 }
 
+export async function getMyLiveChatSession() {
+  const { data } = await apiClient.get<{ session: LiveChatSession | null }>(
+    "/live-chat/sessions/mine"
+  );
+  return data.session;
+}
+
 export async function listLiveChatSessions() {
   const { data } = await apiClient.get<{ sessions: LiveChatSession[] }>("/live-chat/sessions");
   return data.sessions;

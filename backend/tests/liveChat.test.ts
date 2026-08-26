@@ -181,6 +181,33 @@ describe("live chat REST", () => {
     expect(ids).not.toContain(otherId);
   });
 
+  it("exactly one of two concurrent claim requests on the same session succeeds", async () => {
+    const customer = await createUser({ email: "livechatraceCust@test.com", role: "Customer" });
+    const agentA = await createUser({ email: "livechatraceA@test.com", role: "Agent" });
+    const agentB = await createUser({ email: "livechatraceB@test.com", role: "Agent" });
+
+    const createRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customer)}`);
+    const sessionId = createRes.body.session.id;
+
+    const [resA, resB] = await Promise.all([
+      request(app)
+        .post(`/api/live-chat/sessions/${sessionId}/claim`)
+        .set("Authorization", `Bearer ${tokenFor(agentA)}`),
+      request(app)
+        .post(`/api/live-chat/sessions/${sessionId}/claim`)
+        .set("Authorization", `Bearer ${tokenFor(agentB)}`),
+    ]);
+
+    const statuses = [resA.status, resB.status].sort();
+    expect(statuses).toEqual([200, 409]);
+
+    const winner = resA.status === 200 ? resA : resB;
+    expect(winner.body.session.status).toBe("Active");
+    expect([agentA.id, agentB.id]).toContain(winner.body.session.assignedAgentId);
+  });
+
   it("an Admin's GET /sessions includes all Active sessions regardless of assigned agent, plus Waiting", async () => {
     const admin = await createUser({ email: "livechatadmin1@test.com", role: "Admin" });
     const customerWaiting = await createUser({ email: "livechatcustw2@test.com", role: "Customer" });

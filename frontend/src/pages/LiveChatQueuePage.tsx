@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { connectSocket } from "../lib/socketClient";
@@ -21,7 +21,8 @@ export function LiveChatQueuePage() {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sessionEnded, setSessionEnded] = useState(false);
-  const joinedSessionRef = useRef<string | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
     const socket = connectSocket();
@@ -29,10 +30,27 @@ export function LiveChatQueuePage() {
     function onQueueUpdate() {
       queryClient.invalidateQueries({ queryKey: ["live-chat-sessions"] });
     }
+    // "queue:new-session" fires when a customer starts a session;
+    // "queue:session-updated" fires when a session is claimed or ended
+    // — both need the same queue-list refresh so every agent's view
+    // stays live without polling.
     socket.on("queue:new-session", onQueueUpdate);
+    socket.on("queue:session-updated", onQueueUpdate);
+
+    function onConnectError(err: Error) {
+      setConnectionError(err.message || "Connection error — please refresh");
+    }
+    function onConnect() {
+      setConnectionError(null);
+    }
+    socket.on("connect_error", onConnectError);
+    socket.on("connect", onConnect);
 
     return () => {
       socket.off("queue:new-session", onQueueUpdate);
+      socket.off("queue:session-updated", onQueueUpdate);
+      socket.off("connect_error", onConnectError);
+      socket.off("connect", onConnect);
     };
   }, [queryClient]);
 
@@ -41,9 +59,17 @@ export function LiveChatQueuePage() {
     const socket = connectSocket();
 
     function join() {
-      socket.emit("join-session", { sessionId: activeSessionId }, (ack: { ok: boolean }) => {
-        if (ack.ok) joinedSessionRef.current = activeSessionId;
-      });
+      socket.emit(
+        "join-session",
+        { sessionId: activeSessionId },
+        (ack: { ok: boolean; error?: string }) => {
+          if (ack.ok) {
+            setJoinError(null);
+          } else {
+            setJoinError(ack.error ?? "Unable to join this chat session");
+          }
+        }
+      );
     }
     if (socket.connected) join();
     socket.on("connect", join);
@@ -76,15 +102,19 @@ export function LiveChatQueuePage() {
     });
     if (!claimed) return;
     setSessionEnded(false);
+    setJoinError(null);
     setActiveSessionId(claimed.id);
-    const history = await listLiveChatMessages(claimed.id);
-    setMessages(history);
+    const history = await listLiveChatMessages(claimed.id).catch((err) => {
+      setError(extractApiErrorMessage(err));
+      return null;
+    });
+    if (history) setMessages(history);
     queryClient.invalidateQueries({ queryKey: ["live-chat-sessions"] });
   }
 
   async function handleSend(e: FormEvent) {
     e.preventDefault();
-    if (!activeSessionId || !input.trim()) return;
+    if (!activeSessionId || !input.trim() || joinError) return;
     const body = input;
     setInput("");
     await sendLiveChatMessage(activeSessionId, body).catch((err) => setError(extractApiErrorMessage(err)));
@@ -96,6 +126,7 @@ export function LiveChatQueuePage() {
     setActiveSessionId(null);
     setMessages([]);
     setSessionEnded(false);
+    setJoinError(null);
     queryClient.invalidateQueries({ queryKey: ["live-chat-sessions"] });
   }
 
@@ -136,8 +167,13 @@ export function LiveChatQueuePage() {
                     className="btn btn-outline-primary btn-sm"
                     onClick={async () => {
                       setSessionEnded(false);
+                      setJoinError(null);
                       setActiveSessionId(s.id);
-                      setMessages(await listLiveChatMessages(s.id));
+                      const history = await listLiveChatMessages(s.id).catch((err) => {
+                        setError(extractApiErrorMessage(err));
+                        return null;
+                      });
+                      if (history) setMessages(history);
                     }}
                   >
                     Open
@@ -153,6 +189,10 @@ export function LiveChatQueuePage() {
           {activeSessionId ? (
             <div className="card card-body">
               {sessionEnded && <p className="alert alert-secondary">This chat has ended.</p>}
+              {connectionError && (
+                <p role="alert" className="alert alert-warning">Reconnecting… ({connectionError})</p>
+              )}
+              {joinError && <p role="alert" className="alert alert-danger">{joinError}</p>}
               <ul className="list-group mb-3">
                 {messages.map((m) => (
                   <li key={m.id} className="list-group-item">
@@ -171,8 +211,9 @@ export function LiveChatQueuePage() {
                     className="form-control"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    disabled={Boolean(joinError)}
                   />
-                  <button type="submit" className="btn btn-primary">Send</button>
+                  <button type="submit" className="btn btn-primary" disabled={Boolean(joinError)}>Send</button>
                   <button type="button" className="btn btn-outline-secondary" onClick={handleEnd}>End chat</button>
                 </form>
               )}

@@ -122,6 +122,35 @@ describe("live chat socket room scoping", () => {
     socketB.disconnect();
   });
 
+  it("rejects a stray join-session attempt from an agent not assigned to the session", async () => {
+    const customer = await createUser({ email: "socketcustagentpair@test.com", role: "Customer" });
+    const agentA = await createUser({ email: "socketagentpaira@test.com", role: "Agent" });
+    const agentB = await createUser({ email: "socketagentpairb@test.com", role: "Agent" });
+
+    const createRes = await request(app)
+      .post("/api/live-chat/sessions")
+      .set("Authorization", `Bearer ${tokenFor(customer)}`);
+    const sessionId = createRes.body.session.id;
+
+    // Agent A claims the session over REST, becoming its assigned agent.
+    await request(app)
+      .post(`/api/live-chat/sessions/${sessionId}/claim`)
+      .set("Authorization", `Bearer ${tokenFor(agentA)}`);
+
+    // Agent B — a different agent, never assigned to this session —
+    // attempts to join its room directly over the socket. This is the
+    // agent-vs-agent counterpart to the customer-vs-customer case
+    // above: the room-membership check must reject a stray/forged
+    // join attempt from an unrelated agent, not just an unrelated
+    // customer.
+    const socketB = await connect(tokenFor(agentB));
+    const joinAck = await new Promise<{ ok: boolean; error?: string }>((resolve) =>
+      socketB.emit("join-session", { sessionId }, resolve)
+    );
+    expect(joinAck.ok).toBe(false);
+    socketB.disconnect();
+  });
+
   it("an agent auto-joins the shared agents room and receives queue:new-session", async () => {
     const agent = await createUser({ email: "socketagent3@test.com", role: "Agent" });
     const socket = await connect(tokenFor(agent));

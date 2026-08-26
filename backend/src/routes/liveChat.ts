@@ -56,6 +56,20 @@ async function assertLiveChatAccess(sessionId: string, user: { id: string; role:
 }
 
 router.post("/sessions", requireAuth, requireRole("Customer"), async (req, res) => {
+  // Idempotent per open session: if this customer already has a
+  // Waiting/Active session (e.g. they reloaded the page before ending
+  // it), return that one instead of creating a duplicate — lets
+  // ChatPage resume the same session across a reload rather than
+  // orphaning the old one.
+  const existing = await prisma.liveChatSession.findFirst({
+    where: { customerId: req.user!.id, status: { in: ["Waiting", "Active"] } },
+    orderBy: { createdAt: "desc" },
+  });
+  if (existing) {
+    res.status(201).json({ session: toSessionDto(existing) });
+    return;
+  }
+
   const session = await prisma.liveChatSession.create({
     data: { customerId: req.user!.id },
   });
@@ -64,6 +78,14 @@ router.post("/sessions", requireAuth, requireRole("Customer"), async (req, res) 
   io?.to("agents").emit("queue:new-session", toSessionDto(session));
 
   res.status(201).json({ session: toSessionDto(session) });
+});
+
+router.get("/sessions/mine", requireAuth, requireRole("Customer"), async (req, res) => {
+  const session = await prisma.liveChatSession.findFirst({
+    where: { customerId: req.user!.id, status: { in: ["Waiting", "Active"] } },
+    orderBy: { createdAt: "desc" },
+  });
+  res.json({ session: session ? toSessionDto(session) : null });
 });
 
 router.get("/sessions", requireAuth, requireRole("Admin", "Manager", "Agent"), async (req, res) => {
@@ -93,14 +115,25 @@ router.post("/sessions/:id/claim", requireAuth, requireRole("Agent"), async (req
   const id = String(req.params.id);
   const session = await prisma.liveChatSession.findUnique({ where: { id } });
   if (!session) throw Errors.notFound("Live chat session not found");
-  if (session.status !== "Waiting") {
+
+  // Atomic claim: the status transition and the "still Waiting" check
+  // happen as a single conditional update (`where: { status: "Waiting" }`
+  // as part of the update's own filter), not a separate read-then-write.
+  // Two agents racing to claim the same session can both pass the
+  // find-then-check above, but only one `updateMany` call can match a
+  // row still in `Waiting` status — the loser's `count` comes back 0.
+  const { count } = await prisma.liveChatSession.updateMany({
+    where: { id, status: "Waiting" },
+    data: { status: "Active", assignedAgentId: req.user!.id },
+  });
+  if (count === 0) {
     throw Errors.conflict("Session is not waiting to be claimed");
   }
 
-  const updated = await prisma.liveChatSession.update({
-    where: { id },
-    data: { status: "Active", assignedAgentId: req.user!.id },
-  });
+  const updated = await prisma.liveChatSession.findUniqueOrThrow({ where: { id } });
+
+  const io = req.app.locals.io as SocketIOServer | undefined;
+  io?.to("agents").emit("queue:session-updated", { sessionId: updated.id });
 
   res.json({ session: toSessionDto(updated) });
 });
@@ -152,6 +185,7 @@ router.post("/sessions/:id/end", requireAuth, requireRole("Admin", "Manager", "A
   // rather than relying on each client to voluntarily leave after
   // receiving the event above.
   io?.in(session.id).socketsLeave(session.id);
+  io?.to("agents").emit("queue:session-updated", { sessionId: session.id });
 
   res.json({ session: toSessionDto(updated) });
 });
