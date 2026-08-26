@@ -19,6 +19,25 @@ export function getSocket(): Socket {
       auth: (cb) => cb({ token: tokenStorage.getAccessToken() ?? "" }),
       autoConnect: false,
     });
+
+    // The server's periodic re-auth check (backend/src/lib/socket.ts)
+    // disconnects a socket whose handshake token has since expired, even
+    // if the user holds a valid refreshed access token at the HTTP layer
+    // (refreshed independently by apiClient's 401 interceptor, which never
+    // touches this socket). Socket.IO does NOT auto-reconnect after a
+    // server-initiated disconnect ("io server disconnect") by design, so
+    // without this the socket would go silently and permanently dead for
+    // an actively-chatting, fully legitimate user. Reconnecting manually
+    // re-invokes the auth callback above, which pulls the current
+    // (already-refreshed) token — so a still-valid user reconnects
+    // seamlessly, and only a genuinely logged-out/expired user falls
+    // through to the connect_error handling already wired up in
+    // ChatPage.tsx/LiveChatQueuePage.tsx.
+    socket.on("disconnect", (reason) => {
+      if (reason === "io server disconnect") {
+        socket?.connect();
+      }
+    });
   }
   return socket;
 }
