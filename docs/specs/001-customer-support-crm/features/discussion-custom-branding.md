@@ -3,6 +3,8 @@
 **Status: decided 2026-08-24 — Skip.** User decision, despite this
 being the lowest-risk of the four discussion items. Not building.
 
+**Superseded 2026-08-26 by [28-custom-branding.md](28-custom-branding.md), now built.** This file remains as the historical record of the original discussion and decision.
+
 ## What was asked
 
 The full feature catalog listed "Custom branding" under Platform.

@@ -17,7 +17,9 @@ function toBrandingDto(config: BrandingConfig | null) {
   return {
     appName: config?.appName ?? null,
     primaryColor: config?.primaryColor ?? null,
-    logoUrl: config?.logoPath ? "/api/admin/branding/logo" : null,
+    logoUrl: config?.logoPath
+      ? `/api/admin/branding/logo?v=${config.updatedAt.getTime()}`
+      : null,
   };
 }
 
@@ -58,6 +60,12 @@ router.patch("/", requireAuth, requireRole("Admin"), upload.single("logo"), asyn
     data.logoPath = null;
   }
 
+  const config = await prisma.brandingConfig.upsert({
+    where: { id: SINGLETON_ID },
+    update: data,
+    create: { id: SINGLETON_ID, ...data },
+  });
+
   // Best-effort cleanup of the previous logo file when it's being
   // replaced or removed — a cleanup failure never fails the request
   // (caught and logged, not thrown), but IS awaited before responding
@@ -65,7 +73,11 @@ router.patch("/", requireAuth, requireRole("Admin"), upload.single("logo"), asyn
   // genuinely already been deleted (or the failure already logged) —
   // not still in flight. This keeps the response a reliable signal of
   // the operation's actual on-disk state instead of a race between the
-  // response and a background unlink.
+  // response and a background unlink. Run only AFTER the upsert commits
+  // successfully: if the upsert throws, the old file must stay in place
+  // so the DB (unchanged, still pointing at it) and disk stay consistent
+  // — the failure mode is "nothing changed," not "DB points at a
+  // deleted file."
   if (data.logoPath !== undefined && existing?.logoPath && existing.logoPath !== data.logoPath) {
     try {
       await fs.unlink(path.join(UPLOAD_DIR, existing.logoPath));
@@ -73,12 +85,6 @@ router.patch("/", requireAuth, requireRole("Admin"), upload.single("logo"), asyn
       console.error("Old logo file cleanup failed (non-fatal):", err);
     }
   }
-
-  const config = await prisma.brandingConfig.upsert({
-    where: { id: SINGLETON_ID },
-    update: data,
-    create: { id: SINGLETON_ID, ...data },
-  });
 
   await writeAuditLog(req.user!.id, "branding.update", "BrandingConfig", config.id, data);
 

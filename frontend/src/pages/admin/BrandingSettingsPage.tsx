@@ -10,6 +10,7 @@ export function BrandingSettingsPage() {
 
   const [appName, setAppName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#0d6efd");
+  const [colorTouched, setColorTouched] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -18,6 +19,7 @@ export function BrandingSettingsPage() {
     if (config) {
       setAppName(config.appName ?? "");
       setPrimaryColor(config.primaryColor ?? "#0d6efd");
+      setColorTouched(false);
     }
   }, [config]);
 
@@ -25,7 +27,13 @@ export function BrandingSettingsPage() {
     mutationFn: () =>
       updateBranding({
         appName,
-        primaryColor,
+        // Only send primaryColor when the Admin actually interacted with
+        // the color control, or when a color override already existed —
+        // otherwise a save that only changed the app name or logo would
+        // silently introduce an explicit color override (the input's
+        // initial state is just Bootstrap's default blue, not "no
+        // opinion").
+        primaryColor: colorTouched || config?.primaryColor ? primaryColor : undefined,
         logo: logoFile ?? undefined,
       }),
     onSuccess: () => {
@@ -90,6 +98,7 @@ export function BrandingSettingsPage() {
               id="branding-app-name"
               className="form-control"
               placeholder="AZM Support CRM"
+              maxLength={100}
               value={appName}
               onChange={(e) => setAppName(e.target.value)}
             />
@@ -111,7 +120,10 @@ export function BrandingSettingsPage() {
               type="color"
               className="form-control form-control-color"
               value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
+              onChange={(e) => {
+                setPrimaryColor(e.target.value);
+                setColorTouched(true);
+              }}
             />
             <button
               type="button"

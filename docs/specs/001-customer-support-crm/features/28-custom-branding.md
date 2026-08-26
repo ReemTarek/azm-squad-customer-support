@@ -8,11 +8,18 @@ custom-property structure)
 
 **Reverses an earlier decision.** Custom branding was discussed and
 explicitly declined by the user during the original scoping round
-(`discussion-custom-branding.md`, `docs/decisions.md`'s "Decided, Not
-Building" section). The user has now asked to revisit and build it —
+(`discussion-custom-branding.md`, `gap-analysis.md`'s recommendation to
+explicitly not build it). The user has now asked to revisit and build it —
 this spec supersedes that earlier decline; `discussion-custom-branding.md`
 stays in place as the historical record of the original discussion, not
 deleted or rewritten to look like it was always planned.
+
+**Correction (2026-08-26, caught during final review):** the citation
+above originally pointed at `docs/decisions.md`'s "Decided, Not Building"
+section, which does not exist in that file. The original decline is
+actually documented in `gap-analysis.md` (see its Platform section and
+its final recommendations list, both of which name "custom branding"
+among the items recommended not to build).
 
 ## Goal
 
