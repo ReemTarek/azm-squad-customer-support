@@ -85,3 +85,14 @@ Server instance had TCP/IP disabled at the protocol level; switching
 back is a one-line `datasource.provider` + `DATABASE_URL` change. See
 [`docs/decisions.md`](docs/decisions.md) and
 [`docs/debugging-notes.md`](docs/debugging-notes.md).
+
+## Known limitation
+
+Real SMS (Twilio) and WhatsApp (Meta Cloud API) notification channels
+are **not implemented** — blocked on provider credentials, not a gap in
+scope. The spec is fully written and ready to build the moment
+credentials are supplied; see
+[`docs/specs/001-customer-support-crm/features/24-real-sms-whatsapp-channels.md`](docs/specs/001-customer-support-crm/features/24-real-sms-whatsapp-channels.md).
+Email notifications are fully implemented and send real messages via
+SMTP; SMS/WhatsApp currently fall back to console-logging mock
+channels only.
