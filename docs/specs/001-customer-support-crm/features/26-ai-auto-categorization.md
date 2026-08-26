@@ -46,9 +46,19 @@ ticket as the default `"General"`.
 ## Scope
 
 - `backend/src/services/gemini.ts`: new `suggestTicketCategory(subject,
-  messageBody, existingCategories: string[]): Promise<string>` —
+  existingCategories: string[]): Promise<string>` —
   same constrained-output prompting style as `suggestRelevantArticleIds`
   (ask for exactly one value from the given list, or `"General"`).
+  **Correction (2026-08-26, caught during plan self-review):** the
+  original wording of this line included a `messageBody` parameter, but
+  `POST /api/tickets` (`createTicketSchema`,
+  `backend/src/validation/tickets.schema.ts:6-13`) never collects an
+  initial message body — a ticket is created with only `subject`/
+  `category`/`priority`/org fields, and any message is added afterward
+  via the separate `POST /:id/messages` endpoint. There is no message
+  body available at ticket-creation time to pass. The function signature
+  is corrected to `(subject, existingCategories)`; categorization runs
+  on the subject line alone.
 - `backend/src/routes/tickets.ts`'s `POST /` handler: after creating a
   ticket whose `category` is still the default `"General"`, fetch
   `SELECT DISTINCT category FROM Ticket` (via Prisma `findMany` +
@@ -86,10 +96,18 @@ ticket as the default `"General"`.
 ## Verification plan
 
 Real end-to-end check: seed a few tickets with distinct real
-categories, submit a new ticket with an ambiguous subject/message and
-no explicit category, confirm Gemini picks one of the existing values;
+categories, submit a new ticket with an ambiguous subject and no
+explicit category, confirm Gemini picks one of the existing values;
 separately confirm an explicit category submission is never
 overridden; separately confirm ticket creation still succeeds with
-Gemini's key temporarily invalid (simulating unavailability).
+Gemini's key temporarily invalid (simulating unavailability). The
+"unavailable" and "explicit category respected" paths are
+deterministically automatable in this project's test suite (the test
+environment's `GEMINI_API_KEY` is intentionally blank, so
+`suggestTicketCategory` genuinely throws and the fallback genuinely
+runs — no mocking needed, consistent with this project's no-mocks test
+convention). The "Gemini successfully picks a real category" path
+requires a real configured key and is verified manually if available
+in the environment, documented honestly either way.
 
 ## Status: Not Started
