@@ -129,7 +129,7 @@ export function DashboardShellPage() {
         </div>
       )}
 
-      {user.role === "Agent" && notificationsQuery.data && (
+      {user.role === "Agent" && !notificationsQuery.error && notificationsQuery.data && (
         <div className="row row-cols-1 row-cols-md-2 g-3 mb-3">
           <div className="col">
             <div className="card h-100">
@@ -159,7 +159,7 @@ export function DashboardShellPage() {
             <p role="alert" className="alert alert-danger">{t("dashboard.reportError")}</p>
           )}
 
-          {(summaryQuery.data || trendsQuery.data) && (
+          {!(summaryQuery.error || trendsQuery.error) && (summaryQuery.data || trendsQuery.data) && (
             <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-3">
               {summaryQuery.data?.byStatus.map((s) => (
                 <div className="col" key={s.status}>
@@ -203,7 +203,7 @@ export function DashboardShellPage() {
                   </div>
                 </div>
               )}
-              {user.role === "Admin" && aiUsageQuery.data && (
+              {user.role === "Admin" && !aiUsageQuery.error && aiUsageQuery.data && (
                 <div className="col">
                   <div className="card h-100">
                     <div className="card-body">
