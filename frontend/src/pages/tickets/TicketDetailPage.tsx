@@ -21,6 +21,7 @@ import { listUsersByRole } from "../../lib/usersApi";
 import { createTask, listTasks, updateTask } from "../../lib/tasksApi";
 import { listQuickReplies } from "../../lib/quickRepliesApi";
 import { downloadAttachment } from "../../lib/attachmentsApi";
+import { recordAiUsageEvent } from "../../lib/reportsApi";
 import { extractApiErrorMessage } from "../../lib/apiClient";
 import { useAuth } from "../../auth/AuthContext";
 import { SlaBadge } from "../../components/SlaBadge";
@@ -47,6 +48,7 @@ export function TicketDetailPage() {
   const [isInternalNote, setIsInternalNote] = useState(false);
   const [replyFile, setReplyFile] = useState<File | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [wasAiSuggestedReply, setWasAiSuggestedReply] = useState(false);
 
   const statusMutation = useMutation({
     mutationFn: (status: TicketStatus) => updateTicket(id!, { status }),
@@ -71,7 +73,10 @@ export function TicketDetailPage() {
 
   const suggestMutation = useMutation({
     mutationFn: () => suggestReply(id!),
-    onSuccess: (reply) => setReplyBody(reply),
+    onSuccess: (reply) => {
+      setReplyBody(reply);
+      setWasAiSuggestedReply(true);
+    },
     onError: (err) => setActionError(extractApiErrorMessage(err)),
   });
 
@@ -88,6 +93,10 @@ export function TicketDetailPage() {
   const messageMutation = useMutation({
     mutationFn: () => postMessage(id!, { body: replyBody, isInternalNote, file: replyFile ?? undefined }),
     onSuccess: () => {
+      if (wasAiSuggestedReply) {
+        recordAiUsageEvent("suggest_reply_used", id).catch((err) => console.error("AI usage event logging failed (non-fatal):", err));
+      }
+      setWasAiSuggestedReply(false);
       setReplyBody("");
       setIsInternalNote(false);
       setReplyFile(null);
@@ -228,7 +237,14 @@ export function TicketDetailPage() {
           {suggestedArticlesMutation.data && (
             <ul className="list-unstyled card card-body bg-light mb-3">
               {suggestedArticlesMutation.data.map((a) => (
-                <li key={a.id}><Link to={`/kb/${a.id}`}>{a.title}</Link> ({a.category})</li>
+                <li key={a.id}>
+                  <Link
+                    to={`/kb/${a.id}`}
+                    onClick={() => recordAiUsageEvent("suggested_article_clicked", id).catch((err) => console.error("AI usage event logging failed (non-fatal):", err))}
+                  >
+                    {a.title}
+                  </Link> ({a.category})
+                </li>
               ))}
               {suggestedArticlesMutation.data.length === 0 && <li>No relevant articles found.</li>}
             </ul>

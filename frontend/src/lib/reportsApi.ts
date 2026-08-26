@@ -27,3 +27,21 @@ export async function getReportsTrends() {
   const { data } = await apiClient.get<ReportsTrends>("/reports/trends");
   return data;
 }
+
+export interface AiUsageReport {
+  suggestedReply: { shown: number; used: number; usedRatePercent: number };
+  suggestedArticles: { shown: number; clicked: number; clickRatePercent: number };
+  summaryRequests: number;
+  chatbot: { confident: number; fallback: number; confidentRatePercent: number };
+}
+
+export async function getAiUsageReport() {
+  const { data } = await apiClient.get<AiUsageReport>("/reports/ai-usage");
+  return data;
+}
+
+export type AiUsageEventType = "suggest_reply_used" | "suggested_article_clicked";
+
+export async function recordAiUsageEvent(eventType: AiUsageEventType, ticketId?: string) {
+  await apiClient.post("/reports/ai-usage/event", { eventType, ticketId });
+}

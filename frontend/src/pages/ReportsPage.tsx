@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getReportsSummary, getReportsTrends } from "../lib/reportsApi";
+import { getReportsSummary, getReportsTrends, getAiUsageReport } from "../lib/reportsApi";
 import { escalateOverdueTickets } from "../lib/notificationsApi";
 
 export function ReportsPage() {
   const queryClient = useQueryClient();
   const summaryQuery = useQuery({ queryKey: ["reports-summary"], queryFn: getReportsSummary });
   const trendsQuery = useQuery({ queryKey: ["reports-trends"], queryFn: getReportsTrends });
+  const aiUsageQuery = useQuery({ queryKey: ["reports-ai-usage"], queryFn: getAiUsageReport });
   const [escalationResult, setEscalationResult] = useState<string | null>(null);
 
   const escalateMutation = useMutation({
@@ -144,6 +145,33 @@ export function ReportsPage() {
                 <span className="trend-bar-count">{d.count}</span>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {aiUsageQuery.data && (
+        <section className="card card-body mt-3">
+          <h2>AI Usage</h2>
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+            <div className="col">
+              <h3 className="h6">Suggested replies</h3>
+              <p className="mb-0">{aiUsageQuery.data.suggestedReply.used} used / {aiUsageQuery.data.suggestedReply.shown} shown</p>
+              <p className="form-text text-muted">{aiUsageQuery.data.suggestedReply.usedRatePercent}% used</p>
+            </div>
+            <div className="col">
+              <h3 className="h6">Suggested articles</h3>
+              <p className="mb-0">{aiUsageQuery.data.suggestedArticles.clicked} clicked / {aiUsageQuery.data.suggestedArticles.shown} shown</p>
+              <p className="form-text text-muted">{aiUsageQuery.data.suggestedArticles.clickRatePercent}% clicked</p>
+            </div>
+            <div className="col">
+              <h3 className="h6">Ticket summaries</h3>
+              <p className="mb-0">{aiUsageQuery.data.summaryRequests} requested</p>
+            </div>
+            <div className="col">
+              <h3 className="h6">Chatbot confidence</h3>
+              <p className="mb-0">{aiUsageQuery.data.chatbot.confident} confident / {aiUsageQuery.data.chatbot.fallback} fallback</p>
+              <p className="form-text text-muted">{aiUsageQuery.data.chatbot.confidentRatePercent}% confident</p>
+            </div>
           </div>
         </section>
       )}
