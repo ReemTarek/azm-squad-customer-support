@@ -81,6 +81,9 @@ export function Layout() {
                 <li className="nav-item"><Link to="/admin/org-settings" className="nav-link">Departments &amp; Branches</Link></li>
               )}
               {user.role === "Admin" && (
+                <li className="nav-item"><Link to="/admin/branding" className="nav-link">Branding</Link></li>
+              )}
+              {user.role === "Admin" && (
                 <li className="nav-item"><Link to="/admin/users" className="nav-link">Users</Link></li>
               )}
             </ul>
