@@ -301,6 +301,74 @@ describe("tickets", () => {
     const stored = await prisma.ticket.findUnique({ where: { id: res.body.ticket.id } });
     expect(stored?.category).toBe("Account");
   });
+
+  it("writes no AiUsageEvent when suggest-reply fails (Gemini unavailable in test env)", async () => {
+    const admin = await createUser({ email: "aiusage1@test.com", role: "Admin" });
+    const customer = await createUser({ email: "aiusagecust1@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "AI usage test 1", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    const res = await request(app)
+      .post(`/api/tickets/${ticketId}/suggest-reply`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(503);
+    const events = await prisma.aiUsageEvent.findMany({ where: { ticketId, eventType: "suggest_reply_shown" } });
+    expect(events).toHaveLength(0);
+  });
+
+  it("writes no AiUsageEvent when summary fails (Gemini unavailable in test env)", async () => {
+    const admin = await createUser({ email: "aiusage2@test.com", role: "Admin" });
+    const customer = await createUser({ email: "aiusagecust2@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "AI usage test 2", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    const res = await request(app)
+      .get(`/api/tickets/${ticketId}/summary`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(503);
+    const events = await prisma.aiUsageEvent.findMany({ where: { ticketId, eventType: "summary_requested" } });
+    expect(events).toHaveLength(0);
+  });
+
+  it("writes no AiUsageEvent when suggested-articles fails (Gemini unavailable in test env)", async () => {
+    const admin = await createUser({ email: "aiusage3@test.com", role: "Admin" });
+    const customer = await createUser({ email: "aiusagecust3@test.com", role: "Customer" });
+    const adminToken = tokenFor(admin);
+
+    // suggestRelevantArticleIds short-circuits to [] (without calling Gemini)
+    // when there are no published articles, which would make this route
+    // succeed with 200 rather than fail — so a published article must exist
+    // for the Gemini call (and thus the failure) to actually happen.
+    await prisma.knowledgeBaseArticle.create({
+      data: { title: "Password reset", body: "How to reset your password.", category: "Account", authorId: admin.id, published: true },
+    });
+
+    const createRes = await request(app)
+      .post("/api/tickets")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ subject: "AI usage test 3", priority: "Low", customerId: customer.id });
+    const ticketId = createRes.body.ticket.id;
+
+    const res = await request(app)
+      .get(`/api/tickets/${ticketId}/suggested-articles`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(503);
+    const events = await prisma.aiUsageEvent.findMany({ where: { ticketId, eventType: "suggested_articles_shown" } });
+    expect(events).toHaveLength(0);
+  });
 });
 
 describe("buildReplyPreview", () => {

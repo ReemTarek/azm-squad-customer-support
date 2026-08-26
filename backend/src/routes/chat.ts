@@ -69,6 +69,21 @@ router.post("/conversations/:id/messages", requireAuth, requireRole("Customer"),
     // Falls back to CHATBOT_FALLBACK_MESSAGE (already set) rather than
     // erroring the request — a chat reply failing shouldn't 503 the
     // whole conversation the way the agent-facing Gemini features do.
+    // A genuine Gemini failure and an explicit "I don't have a
+    // confident answer" model response are both recorded as
+    // chatbot_fallback — the spec's event-type list doesn't distinguish
+    // them, and both produce the same fallback message to the customer.
+  }
+
+  try {
+    await prisma.aiUsageEvent.create({
+      data: {
+        eventType: confident ? "chatbot_confident" : "chatbot_fallback",
+        userId: req.user!.id,
+      },
+    });
+  } catch (logErr) {
+    console.error("AI usage event logging failed (non-fatal):", logErr);
   }
 
   const assistantMessage = await prisma.chatMessage.create({

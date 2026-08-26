@@ -458,6 +458,13 @@ router.post("/:id/suggest-reply", requireAuth, requireRole("Admin", "Manager", "
       ticket.priority,
       messages.map((m) => ({ authorRole: m.author.role, body: m.body, isInternalNote: m.isInternalNote }))
     );
+    try {
+      await prisma.aiUsageEvent.create({
+        data: { eventType: "suggest_reply_shown", ticketId: id, userId: req.user!.id },
+      });
+    } catch (logErr) {
+      console.error("AI usage event logging failed (non-fatal):", logErr);
+    }
     res.json({ reply });
   } catch (err) {
     console.error("Gemini suggest-reply failed:", err);
@@ -482,6 +489,13 @@ router.get("/:id/summary", requireAuth, requireRole("Admin", "Manager", "Agent")
       ticket.priority,
       messages.map((m) => ({ authorRole: m.author.role, body: m.body, isInternalNote: m.isInternalNote }))
     );
+    try {
+      await prisma.aiUsageEvent.create({
+        data: { eventType: "summary_requested", ticketId: id, userId: req.user!.id },
+      });
+    } catch (logErr) {
+      console.error("AI usage event logging failed (non-fatal):", logErr);
+    }
     res.json({ summary });
   } catch (err) {
     console.error("Gemini summarize failed:", err);
@@ -513,6 +527,13 @@ router.get("/:id/suggested-articles", requireAuth, requireRole("Admin", "Manager
       articles
     );
     const suggested = articles.filter((a) => ids.includes(a.id));
+    try {
+      await prisma.aiUsageEvent.create({
+        data: { eventType: "suggested_articles_shown", ticketId: id, userId: req.user!.id },
+      });
+    } catch (logErr) {
+      console.error("AI usage event logging failed (non-fatal):", logErr);
+    }
     res.json({ articles: suggested });
   } catch (err) {
     console.error("Gemini suggested-articles failed:", err);
