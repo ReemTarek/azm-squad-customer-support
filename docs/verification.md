@@ -114,3 +114,9 @@ attempted and asserts the failure was actually caught, and
 runs. See `docs/specs/001-customer-support-crm/features/26-ai-auto-categorization.md`
 AC#3 for full detail. The row above reflects the now-corrected,
 verified state.
+
+## Round 2 — AI usage dashboard
+
+| Feature | Verification | Result |
+|---|---|---|
+| AI usage dashboard (event logging + aggregate report) | Automated tests (negative-property tests on Gemini failure paths for 3 ticket routes; chatbot fallback event test; event-recording endpoint tests; aggregation cross-check via manual Prisma groupBy query; role-gating test) + real-Gemini manual check (all 3 ticket-route success paths verified, each returning 200 with genuine Gemini output and exactly one `AiUsageEvent` row) + live frontend verification (both client-driven events: `suggest_reply_used` verified fully live with real Gemini key, no mocking; `suggested_article_clicked` verified with only the upstream Gemini response mocked for quota/timing, all downstream real) | PASS |

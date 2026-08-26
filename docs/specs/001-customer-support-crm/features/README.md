@@ -79,9 +79,11 @@ a final whole-branch review with one fix wave — caught and closed a
 real coverage gap where the "Gemini unavailable" test never actually
 exercised that path (an empty existing-categories list short-circuited
 before Gemini was called), plus a real, working `GEMINI_API_KEY`
-leaking from `backend/.env` into every test run). 24 remains blocked on
-credentials (SMS/WhatsApp). 27-28 remain
-Not Started.
+leaking from `backend/.env` into every test run). 27 (AI usage dashboard)
+is Done as of 2026-08-26 (5 tasks — schema, instrumentation, endpoints,
+frontend, and closeout — all approved with zero unresolved findings
+beyond one pre-existing out-of-scope Minor noted on Task 4). 24 remains
+blocked on credentials (SMS/WhatsApp). 28 remains Not Started.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original

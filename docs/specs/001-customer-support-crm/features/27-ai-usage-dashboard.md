@@ -87,18 +87,44 @@ themselves.
 
 ## Acceptance criteria
 
-- [ ] Every `suggestReply`/`summarizeTicket`/`suggestRelevantArticleIds`/
+- [x] Every `suggestReply`/`summarizeTicket`/`suggestRelevantArticleIds`/
       `answerFromKnowledgeBase` call writes exactly one corresponding
-      `AiUsageEvent` row.
-- [ ] Sending an AI-drafted reply (edited or not) records a
+      `AiUsageEvent` row. **Evidence:** Task 2's automated negative-property
+      tests (`backend/tests/tickets.test.ts` and `backend/tests/chat.test.ts`)
+      confirm that failed Gemini calls write no event; the chatbot fallback
+      path (`answerFromKnowledgeBase` → `chatbot_fallback`) is fully testable
+      end-to-end in the automated suite and passes. The three ticket-AI route
+      success paths (`suggest_reply_shown`, `summary_requested`,
+      `suggested_articles_shown`) are verified by direct code reading (the
+      write sits immediately after each route's Gemini call succeeds, in an
+      inner try/catch nested inside the outer error handler, structurally
+      symmetric with the already-tested chatbot path) plus Task 2's manual
+      real-Gemini check confirming all three routes' success paths genuinely
+      write exactly one event each.
+- [x] Sending an AI-drafted reply (edited or not) records a
       `suggest_reply_used` event; discarding it without sending
       records nothing further beyond the original `_shown` event.
-- [ ] The new report endpoint returns accurate counts/rates verified
+      **Evidence:** Task 4's live browser verification (Check 3) confirmed
+      end-to-end: Agent clicked "Suggest Reply" (recorded `suggest_reply_shown`),
+      Gemini returned a real drafted reply, Agent clicked "Send" without
+      editing (recorded `suggest_reply_used`), and `/reports` reload showed
+      the count incremented correctly. This is frontend behavioral logic —
+      this project has no automated frontend test suite, so verification is
+      via the live manual check documented in Task 4 Step 7, consistent with
+      this plan's testing-approach note.
+- [x] The new report endpoint returns accurate counts/rates verified
       by direct comparison against a manual Prisma query, matching this
       project's established reporting-verification standard
-      (`14d-csat-agent-performance-reports.md`).
-- [ ] The AI Usage report is visible only to Admin/Manager, matching
-      the existing Reports page's access control.
+      (`14d-csat-agent-performance-reports.md`). **Evidence:** Task 3's
+      aggregation test (`backend/tests/reports.test.ts` lines 57–112) seeded
+      a known, deliberately-uneven distribution of `AiUsageEvent` rows
+      directly, queried them via the report endpoint `/api/reports/ai-usage`,
+      and cross-checked the endpoint's response counts/rates against an
+      independent manual `groupBy` Prisma query in the same test.
+- [x] The AI Usage report is visible only to Admin/Manager, matching
+      the existing Reports page's access control. **Evidence:** Task 3's
+      role-gating test (`backend/tests/reports.test.ts` lines 128–137)
+      confirmed the report returns 403 Forbidden to Agent-role users.
 
 ## Implementation
 
@@ -147,4 +173,4 @@ real-Gemini check if credentials are available in the environment,
 documented honestly either way — matching this project's established
 convention for this exact class of gap.
 
-## Status: Not Started
+## Status: Done
