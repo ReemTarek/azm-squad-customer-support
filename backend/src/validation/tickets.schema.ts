@@ -5,7 +5,7 @@ const statusEnum = z.enum(["Open", "InProgress", "Resolved", "Closed"]);
 
 export const createTicketSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
-  category: z.string().min(1).optional(),
+  category: z.string().min(1).max(50).optional(),
   priority: priorityEnum,
   customerId: z.string().uuid().optional(),
   departmentId: z.string().uuid().optional(),
@@ -26,7 +26,7 @@ export const updateTicketSchema = z.object({
   status: statusEnum.optional(),
   priority: priorityEnum.optional(),
   subject: z.string().min(1).optional(),
-  category: z.string().min(1).optional(),
+  category: z.string().min(1).max(50).optional(),
   departmentId: z.string().uuid().nullable().optional(),
   branchId: z.string().uuid().nullable().optional(),
 });

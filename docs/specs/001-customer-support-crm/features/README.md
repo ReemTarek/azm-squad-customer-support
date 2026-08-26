@@ -74,10 +74,13 @@ added SMTP transport timeouts before this pattern's exposure grew
 from a rare status transition to every staff reply). 25 (Live chat) was
 already Done from prior work; verification confirmed Socket.IO
 messaging, room scoping, and RBAC enforcement all functional. 26 (AI
-automatic ticket categorization) is Done as of 2026-08-26 (2 tasks —
-verification confirmed all acceptance criteria via automated tests and
-real-Gemini manual checks; one minor pre-existing test-coverage gap
-noted). 24 remains blocked on credentials (SMS/WhatsApp). 27-28 remain
+automatic ticket categorization) is Done as of 2026-08-26 (2 tasks +
+a final whole-branch review with one fix wave — caught and closed a
+real coverage gap where the "Gemini unavailable" test never actually
+exercised that path (an empty existing-categories list short-circuited
+before Gemini was called), plus a real, working `GEMINI_API_KEY`
+leaking from `backend/.env` into every test run). 24 remains blocked on
+credentials (SMS/WhatsApp). 27-28 remain
 Not Started.
 
 [Custom branding](discussion-custom-branding.md) was originally

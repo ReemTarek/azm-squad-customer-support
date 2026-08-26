@@ -1,5 +1,5 @@
 // backend/tests/tickets.test.ts
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
 import app from "../src/app";
 import { createUser, tokenFor } from "./helpers/fixtures";
@@ -230,16 +230,44 @@ describe("tickets", () => {
   });
 
   it("keeps category General when Gemini is unavailable (test env has no GEMINI_API_KEY)", async () => {
-    const customer = await createUser({ email: "catgeneral@test.com", role: "Customer" });
-    const token = tokenFor(customer);
+    // Spy on console.error so we can assert the enrichment block's catch was
+    // genuinely reached, not just that the final category happens to be
+    // "General" (which could also happen if the AI call were skipped
+    // entirely — see the seeded ticket below, which rules that out).
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const res = await request(app)
-      .post("/api/tickets")
-      .set("Authorization", `Bearer ${token}`)
-      .send({ subject: "My internet keeps disconnecting", priority: "Medium" });
+    try {
+      const customer = await createUser({ email: "catgeneral@test.com", role: "Customer" });
+      const token = tokenFor(customer);
 
-    expect(res.status).toBe(201);
-    expect(res.body.ticket.category).toBe("General");
+      // Seed a real existing non-General category first. Without this, the
+      // enrichment block's `existingCategories.length > 0` guard would
+      // short-circuit before suggestTicketCategory (and therefore Gemini)
+      // is ever called, and this test would pass for the wrong reason.
+      const seedRes = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ subject: "Can't pay my invoice", priority: "Low", category: "Billing" });
+      expect(seedRes.status).toBe(201);
+
+      const res = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ subject: "My internet keeps disconnecting", priority: "Medium" });
+
+      expect(res.status).toBe(201);
+      expect(res.body.ticket.category).toBe("General");
+
+      // Confirms the Gemini call was actually attempted (and threw, since
+      // the test env has no GEMINI_API_KEY) and that the enrichment
+      // block's catch handler is what produced the "General" result above.
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Ticket category suggestion failed (non-fatal):",
+        expect.anything()
+      );
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 
   it("never overrides an explicit non-default category", async () => {

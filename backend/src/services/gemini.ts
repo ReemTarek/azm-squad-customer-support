@@ -12,7 +12,10 @@ function getModel() {
     throw new Error("GEMINI_API_KEY not configured");
   }
   const genAI = new GoogleGenerativeAI(env.geminiApiKey);
-  return genAI.getGenerativeModel({ model: env.geminiModel });
+  // Matches the short-timeout precedent set by smtpEmailChannel.ts's SMTP
+  // transport: a slow/hung Gemini endpoint must not stall the request that
+  // triggered it (ticket creation, reply suggestion, etc.) indefinitely.
+  return genAI.getGenerativeModel({ model: env.geminiModel }, { timeout: 10_000 });
 }
 
 function formatThread(messages: ThreadMessageForPrompt[]): string {

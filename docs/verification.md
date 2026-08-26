@@ -102,3 +102,15 @@ access-blocked test, not errors.
 | Feature | Verification | Result |
 |---|---|---|
 | AI automatic ticket categorization (Gemini-suggested, grounded in existing categories only) | Automated tests (unavailable + explicit-category-respected paths) + real-Gemini manual verification (2 real calls, both correct) | PASS |
+
+A final whole-branch review (2026-08-26) found the "unavailable" test
+above did not actually exercise that path (an empty existing-categories
+list short-circuited the code before Gemini was ever called), and that
+the test environment was leaking a real, working `GEMINI_API_KEY` from
+`backend/.env` into every run. One fix wave closed both: the test now
+seeds a real existing category so the Gemini call is genuinely
+attempted and asserts the failure was actually caught, and
+`backend/tests/env.setup.ts` now blanks `GEMINI_API_KEY` for all test
+runs. See `docs/specs/001-customer-support-crm/features/26-ai-auto-categorization.md`
+AC#3 for full detail. The row above reflects the now-corrected,
+verified state.

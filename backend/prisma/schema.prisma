@@ -116,6 +116,7 @@ model Ticket {
   @@index([status])
   @@index([departmentId])
   @@index([branchId])
+  @@index([category])
 }
 
 model Department {

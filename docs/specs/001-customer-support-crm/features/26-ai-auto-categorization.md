@@ -96,10 +96,37 @@ ticket as the default `"General"`.
       category is preserved and the AI path is skipped entirely.
 - [x] If Gemini is unavailable, ticket creation still succeeds and the
       category stays `"General"` — no error surfaced to the customer.
-      **Evidence:** `backend/tests/tickets.test.ts:232–243` ("keeps
-      category General when Gemini is unavailable...") verifies this
-      path with no configured API key (the test environment's normal
-      state).
+      **Evidence:** `backend/tests/tickets.test.ts:232–271` ("keeps
+      category General when Gemini is unavailable...").
+      **Correction (2026-08-26, caught during a final whole-branch
+      review, fix wave 1):** the original version of this test only
+      created a single ticket, so `beforeEach`'s table wipe left
+      `existingCategories` empty and the enrichment block's
+      `if (existingCategories.length > 0)` guard short-circuited
+      *before* `suggestTicketCategory` — and therefore Gemini — was ever
+      called. The test passed, but for the wrong reason: it never
+      actually exercised the unavailable-Gemini/catch path it claimed
+      to. The same review also found `backend/tests/env.setup.ts` never
+      blanked `GEMINI_API_KEY`, so a real, working key from
+      `backend/.env` was leaking into every test run via `dotenv/config`
+      — meaning naively fixing the coverage gap by seeding a category
+      would have made the suite start issuing real, billable,
+      non-deterministic Gemini calls. Both are now fixed: `env.setup.ts`
+      explicitly blanks `GEMINI_API_KEY` before anything else runs, and
+      the test now (a) creates a ticket with an explicit `"Billing"`
+      category first so a real existing category is present, (b) then
+      creates the actual test ticket with no explicit category so the
+      guard is genuinely satisfied and `suggestTicketCategory` is
+      genuinely invoked, (c) asserts the response category is still
+      `"General"`, and (d) spies on `console.error` and asserts it was
+      called with the exact `"Ticket category suggestion failed
+      (non-fatal):"` message from `tickets.ts`'s catch block — proving
+      `getModel()` threw (no API key) and the catch path, not the
+      empty-list short-circuit, produced the result. Manually verified
+      by temporarily logging the spy's real arguments during a targeted
+      test run: it fired with `Error: GEMINI_API_KEY not configured`,
+      confirming the Gemini call was genuinely attempted and genuinely
+      failed.
 - [x] The AI never assigns a category that didn't already exist
       somewhere in the system (or `"General"`) at the time of the call.
       **Evidence:** Architectural guard in `backend/src/services/gemini.ts:142–143`

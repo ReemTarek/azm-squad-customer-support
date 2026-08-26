@@ -10,3 +10,7 @@ process.env.JWT_REFRESH_SECRET = "test-refresh-secret";
 process.env.JWT_ACCESS_EXPIRES_IN = "15m";
 process.env.JWT_REFRESH_EXPIRES_IN = "7d";
 process.env.PORT = "4001";
+// Blank out any real key that a local backend/.env file (loaded via
+// dotenv/config elsewhere) may have set, so the test suite never issues
+// real, billable, non-deterministic Gemini API calls.
+process.env.GEMINI_API_KEY = "";

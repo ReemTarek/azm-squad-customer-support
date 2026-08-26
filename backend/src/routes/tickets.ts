@@ -120,19 +120,31 @@ router.post("/", requireAuth, requireRole("Admin", "Agent", "Customer"), async (
   let finalTicket = ticket;
   if (ticket.category === "General") {
     try {
-      const distinct = await prisma.ticket.findMany({
+      // groupBy instead of findMany({ distinct }) so this never scans/returns
+      // every row that has a given category — only one row per distinct
+      // category value, capped at 50 (bounds both the query and the
+      // eventual prompt size sent to Gemini).
+      const grouped = await prisma.ticket.groupBy({
+        by: ["category"],
         where: { category: { not: "General" } },
-        distinct: ["category"],
-        select: { category: true },
+        orderBy: { category: "asc" },
+        take: 50,
       });
-      const existingCategories = distinct.map((t) => t.category);
+      const existingCategories = grouped.map((g) => g.category);
       if (existingCategories.length > 0) {
         const suggested = await suggestTicketCategory(body.subject, existingCategories);
         if (suggested !== "General") {
-          finalTicket = await prisma.ticket.update({
-            where: { id: ticket.id },
+          // updateMany (scoped to category still being "General") instead of
+          // update, so a concurrent edit to this ticket's category between
+          // creation and this AI-suggested update can't be silently
+          // clobbered by a stale suggestion.
+          const { count } = await prisma.ticket.updateMany({
+            where: { id: ticket.id, category: "General" },
             data: { category: suggested },
           });
+          if (count > 0) {
+            finalTicket = await prisma.ticket.findUniqueOrThrow({ where: { id: ticket.id } });
+          }
         }
       }
     } catch (err) {
