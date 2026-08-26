@@ -50,6 +50,7 @@ process-gap entry.
 | [26](26-ai-auto-categorization.md) | AI automatic ticket categorization | CRM-AI-006 | **Before** |
 | [27](27-ai-usage-dashboard.md) | AI usage dashboard | CRM-AI-007 | **Before** |
 | [28](28-custom-branding.md) | Custom branding | CRM-BRAND-001 | **Before** — reverses the earlier decline below |
+| [29](29-home-dashboard.md) | Role-aware home dashboard | CRM-DASH-002 | **Before** |
 
 01-18 are Done, except 01-database.md which records one deliberate
 deviation from the original wording of CRM-DB-001 (SQLite instead of
@@ -91,7 +92,12 @@ computed-style button re-tinting, not just a CSS-variable check, plus
 cross-page, hard-refresh, and pre-login persistence, and a full
 clear-and-revert with no leftover DOM artifacts). 24 remains blocked on
 credentials (SMS/WhatsApp) — it is the only Round 2 item still
-outstanding.
+outstanding, so Round 2 is otherwise complete.
+
+29 (Role-aware home dashboard, "Round 3", see `implementation-plan.md`)
+was spec'd on 2026-08-26 after the user pointed out the `/` landing
+page was an unfilled placeholder — never a named requirement in the
+original spec. Not Started as of this writing.
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original

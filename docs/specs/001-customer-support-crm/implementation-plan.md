@@ -353,6 +353,19 @@ last. SMS/WhatsApp stays blocked on credentials regardless of order.
 **Round 2 is now complete except TASK-053** (SMS/WhatsApp), which
 remains blocked on credentials — every other Round 2 item above is Done.
 
+## Round 3 — Home Dashboard
+
+**Date:** 2026-08-26
+**Context:** after Round 2 closed out, the user pointed out the `/`
+landing page was a bare "Welcome, {name}" placeholder with no real
+content — never a named requirement in the original spec, just an
+unfilled placeholder. Spec'd and approved before implementation, per
+this project's spec-first discipline.
+
+| ID | Item | Spec | Status |
+|---|---|---|---|
+| TASK-058 | Role-aware home dashboard (no new backend surface) | `features/29-home-dashboard.md` | Not Started |
+
 **Explicitly out of this round, per user decision (2026-08-24):**
 - **ERP integration** — no target system named; stays a documented,
   unimplemented adapter interface (`features/13-integration-adapters.md`)
