@@ -44,6 +44,16 @@ enum TicketStatus {
   Closed
 }
 
+enum AiUsageEventType {
+  suggest_reply_shown
+  suggest_reply_used
+  summary_requested
+  suggested_articles_shown
+  suggested_article_clicked
+  chatbot_confident
+  chatbot_fallback
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -76,6 +86,7 @@ model User {
   liveChatSessionsAsCustomer LiveChatSession[] @relation("LiveChatCustomer")
   liveChatSessionsAsAgent    LiveChatSession[] @relation("LiveChatAgent")
   liveChatMessages           LiveChatMessage[]
+  aiUsageEvents              AiUsageEvent[]
 }
 
 model CustomerProfile {
@@ -110,6 +121,7 @@ model Ticket {
   statusHistory  TicketStatusHistory[]
   feedback       CustomerFeedback?
   tasks          TicketTask[]
+  aiUsageEvents  AiUsageEvent[]
 
   @@index([customerId])
   @@index([assignedAgentId])
@@ -300,6 +312,21 @@ model LiveChatMessage {
   createdAt  DateTime        @default(now())
 
   @@index([sessionId])
+}
+
+model AiUsageEvent {
+  id        String           @id @default(uuid())
+  eventType AiUsageEventType
+  ticketId  String?
+  ticket    Ticket?          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  createdAt DateTime         @default(now())
+
+  @@index([eventType])
+  @@index([ticketId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model AuditLog {

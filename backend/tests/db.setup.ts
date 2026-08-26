@@ -28,6 +28,7 @@ async function resetDb() {
   await prisma.ticketStatusHistory.deleteMany();
   await prisma.customerFeedback.deleteMany();
   await prisma.auditLog.deleteMany();
+  await prisma.aiUsageEvent.deleteMany();
   await prisma.quickReply.deleteMany();
   await prisma.customerNote.deleteMany();
   await prisma.knowledgeBaseArticle.deleteMany();
