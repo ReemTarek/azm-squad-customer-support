@@ -103,23 +103,28 @@ new backend surface**.
 
 ## Acceptance criteria
 
-- [ ] A Customer landing on `/` sees up to 5 of their own tickets with
+- [x] A Customer landing on `/` sees up to 5 of their own tickets with
       SLA badges and a working "New Ticket" link; a Customer with zero
       tickets sees a clear empty state, not an error or blank page.
-- [ ] An Agent landing on `/` sees up to 5 of their assigned tickets,
+      **VERIFIED:** Live browser testing confirmed Customer role renders ticket widget with SLA badges; empty state displayed for Customer with zero tickets (no error, no blank gap).
+- [x] An Agent landing on `/` sees up to 5 of their assigned tickets,
       with breached/at-risk ones surfaced first, plus an SLA-alerts
       count matching the same numbers shown in the nav badge.
-- [ ] A Manager landing on `/` sees ticket-status/avg-resolution/SLA-
+      **VERIFIED:** Live browser testing confirmed Agent dashboard sorts tickets by urgency (older breached ticket surfaced ahead of newer on-track ticket), SLA-alerts stat tile displays correct counts matching nav badge.
+- [x] A Manager landing on `/` sees ticket-status/avg-resolution/SLA-
       breach-rate stats scoped to their own department (verified
       against a direct comparison to what `/reports` shows the same
       Manager, which must match exactly since both read the same
       endpoints).
-- [ ] An Admin landing on `/` sees the same stats org-wide plus the
+      **VERIFIED:** Live browser testing confirmed Manager dashboard stat tiles matched `/reports` numbers exactly: byStatus counts, avg resolution 8 min, SLA breach rate 0% — all identical in same session.
+- [x] An Admin landing on `/` sees the same stats org-wide plus the
       AI-usage snapshot.
-- [ ] No new backend endpoint or schema change was introduced — every
+      **VERIFIED:** Live browser testing confirmed Admin dashboard displays org-wide stat tiles matching `/reports` numbers (byStatus, avg resolution, SLA breach rate) plus AI-usage tile matching `/reports` AI-trust numbers (100%), all verified in same session.
+- [x] No new backend endpoint or schema change was introduced — every
       widget's data comes from an endpoint that already existed before
       this feature, confirmed by diffing `backend/src/routes/` against
       this feature's commits.
+      **VERIFIED:** `git diff --stat 51034d8..HEAD -- backend/` returns empty output, confirming zero backend files modified across entire feature (Task 1 base commit through HEAD).
 
 ## Implementation
 
@@ -137,4 +142,4 @@ Manager's dashboard numbers match `/reports`'s numbers exactly for the
 same login; confirm a fresh Customer/Agent with zero tickets sees a
 clean empty state.
 
-## Status: Not Started
+## Status: Done

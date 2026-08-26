@@ -126,3 +126,9 @@ verified state.
 | Feature | Verification | Result |
 |---|---|---|
 | Custom branding (name, logo, accent color) | Automated tests (config CRUD, role gating, logo serving/clearing) + live browser verification (visual button re-tint, cross-page persistence, hard-refresh persistence, pre-login rendering, full clear-and-revert) | PASS |
+
+## Round 3 — Home Dashboard
+
+| Feature | Verification | Result |
+|---|---|---|
+| Role-aware home dashboard (no new backend surface) | Live browser verification across all 4 roles (Customer/Agent ticket widgets incl. empty states, Manager/Admin stat tiles cross-checked against /reports, no console errors, 375px responsive) | PASS |

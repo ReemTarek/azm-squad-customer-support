@@ -364,7 +364,7 @@ this project's spec-first discipline.
 
 | ID | Item | Spec | Status |
 |---|---|---|---|
-| TASK-058 | Role-aware home dashboard (no new backend surface) | `features/29-home-dashboard.md` | Not Started |
+| TASK-058 | Role-aware home dashboard (no new backend surface) | `features/29-home-dashboard.md` | Done |
 
 **Explicitly out of this round, per user decision (2026-08-24):**
 - **ERP integration** — no target system named; stays a documented,

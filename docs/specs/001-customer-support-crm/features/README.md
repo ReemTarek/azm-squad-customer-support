@@ -97,7 +97,7 @@ outstanding, so Round 2 is otherwise complete.
 29 (Role-aware home dashboard, "Round 3", see `implementation-plan.md`)
 was spec'd on 2026-08-26 after the user pointed out the `/` landing
 page was an unfilled placeholder — never a named requirement in the
-original spec. Not Started as of this writing.
+original spec. is Done as of 2026-08-26 (2 tasks — feature implementation with live verification across all 4 roles (Customer/Agent ticket widgets incl. empty states, Manager/Admin stat tiles cross-checked against /reports), and spec closeout with zero backend surface changes).
 
 [Custom branding](discussion-custom-branding.md) was originally
 discussed and **decided against** — see that file for the original
