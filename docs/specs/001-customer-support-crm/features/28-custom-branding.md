@@ -60,13 +60,51 @@ theirs," not per-tenant multi-brand theming.
   - New `frontend/src/pages/admin/BrandingSettingsPage.tsx` (Admin
     only), nav link alongside the existing SLA/Org settings pages.
   - App-wide: fetch branding config once at load, render the
-    configured app name/logo in `Layout.tsx`'s nav (replacing the
-    current hardcoded "AZM Support CRM" text), and inject
-    `--bs-primary` (and its dependent shades) as a CSS custom property
-    override if a custom color is set.
+    configured app name/logo in `Layout.tsx`'s nav, and inject a
+    runtime CSS override if a custom color is set.
   - Falls back to the current default look (existing app name, no
     logo, Bootstrap's default blue) when nothing is configured —
     branding is opt-in, never a required setup step.
+  - **Correction (2026-08-26, caught during plan self-review):** two
+    factual corrections to the above. (1) The app name is not
+    hardcoded in `Layout.tsx` — it's `t("nav.brand")`, resolving to
+    "AZM Support CRM" via `frontend/src/i18n/locales/en.json`/`ar.json`.
+    Branding overrides this by rendering the configured name when
+    present, falling back to `t("nav.brand")` otherwise — no i18n
+    file changes needed. (2) `LoginPage.tsx` (`/login`, rendered
+    outside `Layout.tsx` — `Layout` itself returns `null` when logged
+    out) currently shows no app name or logo at all. Since this spec's
+    own stated reason for making the GET endpoint public is "the
+    frontend needs this before login" and the verification plan
+    explicitly reloads the app fresh to confirm branding persists,
+    `LoginPage.tsx` is included in scope: it renders the same
+    configured name/logo (falling back identically) above its "Sign
+    in" heading. This is a minimal, natural extension of already-public
+    data, not new scope — the acceptance criteria's literal "nav bar"
+    wording is read as "wherever the app currently shows its identity,"
+    which is Layout's nav when logged in and LoginPage when logged out.
+  - **Correction (2026-08-26, caught during plan self-review):** the
+    accent-color override is more involved than a single
+    `--bs-primary` custom property. This app's Bootstrap 5.3
+    (precompiled CSS from the `bootstrap` npm package, confirmed by
+    reading `node_modules/bootstrap/dist/css/bootstrap.min.css`) bakes
+    literal hex values into `.btn-primary`/`.btn-outline-primary`'s
+    OWN scoped `--bs-btn-*` custom properties (e.g.
+    `.btn-primary{--bs-btn-bg:#0d6efd;--bs-btn-hover-bg:#0b5ed7;...}`)
+    — these are never derived from `--bs-primary` at runtime, only at
+    Bootstrap's own SASS build time. Setting `--bs-primary` alone at
+    `:root` would satisfy "the CSS variable was set" but would leave
+    every primary button's actual rendered color unchanged, failing
+    this spec's own explicit "verified visually, not just that the CSS
+    variable was set" acceptance criterion. The override must also
+    directly target `.btn-primary`/`.btn-outline-primary`'s `--bs-btn-*`
+    variables (with computed lighter/darker shades for hover/active
+    states) in addition to the `:root`-level variables that DO work
+    generically (`--bs-primary`/`--bs-primary-rgb` for `.text-primary`/
+    `.bg-primary`/`.border-primary` utilities, and
+    `--bs-link-color-rgb`/`--bs-link-hover-color-rgb` for default `<a>`
+    links, confirmed by reading the compiled CSS's `:root` block and
+    its `a{color:rgba(var(--bs-link-color-rgb),...)}` rule).
 
 ## Out of scope
 
