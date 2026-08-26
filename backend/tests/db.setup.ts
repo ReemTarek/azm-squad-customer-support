@@ -18,6 +18,7 @@ async function resetDb() {
   // but a row with neither ticketMessageId nor customerId set (e.g. the
   // invariant-violation fixture in attachments.test.ts) has no cascade path
   // and would otherwise block deleting the uploader User below.
+  await prisma.brandingConfig.deleteMany();
   await prisma.attachment.deleteMany();
   await prisma.chatMessage.deleteMany();
   await prisma.chatConversation.deleteMany();
