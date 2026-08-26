@@ -116,7 +116,23 @@ new backend surface**.
       against a direct comparison to what `/reports` shows the same
       Manager, which must match exactly since both read the same
       endpoints).
-      **VERIFIED:** Live browser testing confirmed Manager dashboard stat tiles matched `/reports` numbers exactly: byStatus counts, avg resolution 8 min, SLA breach rate 0% — all identical in same session.
+      **VERIFIED (re-verified during the fix-wave-1 review pass, replacing
+      prior vacuous evidence):** The original evidence used a test Manager
+      with no `departmentId` set, whose numbers were digit-identical to
+      Admin's org-wide numbers by `getOrgScopeWhere`'s own documented
+      fallback — it never actually exercised department scoping. Re-verified
+      with a Manager genuinely assigned to a department ("DeptA") containing
+      4 tickets (1 InProgress, 2 Open, 1 Resolved), while 1 additional ticket
+      existed in a sibling department ("DeptB") and the org overall held 39
+      tickets across all departments/pre-existing seed data. Live browser
+      testing (Playwright) confirmed: Manager dashboard showed byStatus
+      InProgress 1 / Open 2 / Resolved 1 (4 total), avg resolution 14400 min,
+      SLA breach rate 100% — matching a direct `GET /api/reports/summary`
+      call for the same Manager exactly, and genuinely narrower than the
+      Admin's org-wide dashboard shown in the same session (Closed 2 /
+      InProgress 5 / Open 25 / Resolved 12 = 39 total, avg resolution 2064
+      min, SLA breach rate 14%) — proving real department-scoped filtering
+      this time, not an accidentally-unscoped Manager.
 - [x] An Admin landing on `/` sees the same stats org-wide plus the
       AI-usage snapshot.
       **VERIFIED:** Live browser testing confirmed Admin dashboard displays org-wide stat tiles matching `/reports` numbers (byStatus, avg resolution, SLA breach rate) plus AI-usage tile matching `/reports` AI-trust numbers (100%), all verified in same session.

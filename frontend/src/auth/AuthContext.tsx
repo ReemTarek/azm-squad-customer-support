@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { fetchCurrentUser, loginRequest, registerRequest } from "../lib/authApi";
 import type { PublicUser } from "../lib/authApi";
 import { tokenStorage } from "../lib/tokenStorage";
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const hasToken = Boolean(tokenStorage.getAccessToken());
@@ -53,6 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     disconnectSocket();
     tokenStorage.clear();
     setUser(null);
+    // Clear all cached query data so a same-tab account switch never briefly
+    // paints the previous user's cached tickets/report numbers on the next
+    // user's first render — no query key in this codebase embeds user
+    // identity, so stale cache would otherwise persist across the switch.
+    queryClient.clear();
   }
 
   return (

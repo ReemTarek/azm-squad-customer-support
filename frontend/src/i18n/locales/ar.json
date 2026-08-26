@@ -36,7 +36,14 @@
     "slaBreachRate": "معدل تجاوز اتفاقية مستوى الخدمة",
     "aiTrust": "ثقة الذكاء الاصطناعي",
     "aiTrustSubtext": "الردود المقترحة المستخدمة",
-    "viewFullReport": "عرض التقرير الكامل"
+    "chatbotConfidentSubtext": "معدل ثقة روبوت المحادثة",
+    "viewFullReport": "عرض التقرير الكامل",
+    "ticketsError": "تعذر تحميل تذاكرك.",
+    "slaAlertsError": "تعذر تحميل تنبيهات اتفاقية مستوى الخدمة.",
+    "reportError": "تعذر تحميل بيانات التقرير.",
+    "aiTrustError": "تعذر تحميل بيانات استخدام الذكاء الاصطناعي.",
+    "scopeOrgWide": "على مستوى المؤسسة",
+    "scopeDepartment": "قسمك"
   },
   "tickets": {
     "title": "التذاكر",

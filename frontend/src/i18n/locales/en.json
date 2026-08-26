@@ -36,7 +36,14 @@
     "slaBreachRate": "SLA breach rate",
     "aiTrust": "AI trust",
     "aiTrustSubtext": "suggested replies used",
-    "viewFullReport": "View full report"
+    "chatbotConfidentSubtext": "chatbot confident rate",
+    "viewFullReport": "View full report",
+    "ticketsError": "Failed to load your tickets.",
+    "slaAlertsError": "Failed to load SLA alerts.",
+    "reportError": "Failed to load report data.",
+    "aiTrustError": "Failed to load AI usage data.",
+    "scopeOrgWide": "Organization-wide",
+    "scopeDepartment": "Your department"
   },
   "tickets": {
     "title": "Tickets",

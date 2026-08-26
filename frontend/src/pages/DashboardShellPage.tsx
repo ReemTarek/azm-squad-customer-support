@@ -59,8 +59,17 @@ export function DashboardShellPage() {
 
   const topTickets = useMemo(() => {
     if (!ticketsQuery.data) return [];
-    const sorted = user?.role === "Agent" ? bySlaUrgencyThenRecency(ticketsQuery.data) : byRecency(ticketsQuery.data);
-    return sorted.slice(0, 5);
+    if (user?.role === "Agent") {
+      // Only surface actionable tickets in the urgency-sorted list. A ticket
+      // resolved/closed after its due window keeps slaState "breached"
+      // permanently (existing backend behavior), so without this filter the
+      // "urgent work first" list fills up with dead closed tickets instead of
+      // live at-risk work — and contradicts the SLA-alerts tile below, which
+      // only counts Open/InProgress tickets.
+      const actionable = ticketsQuery.data.filter((t) => t.status === "Open" || t.status === "InProgress");
+      return bySlaUrgencyThenRecency(actionable).slice(0, 5);
+    }
+    return byRecency(ticketsQuery.data).slice(0, 5);
   }, [ticketsQuery.data, user?.role]);
 
   if (!user) return null;
@@ -82,13 +91,16 @@ export function DashboardShellPage() {
               <Link to="/tickets" className="btn btn-sm btn-outline-primary">{t("dashboard.viewAllMyTickets")}</Link>
             )}
           </div>
-          {ticketsQuery.isLoading && <p className="mb-0">{t("dashboard.loading")}</p>}
-          {ticketsQuery.data && topTickets.length === 0 && (
+          {ticketsQuery.error && (
+            <p role="alert" className="alert alert-danger mb-0">{t("dashboard.ticketsError")}</p>
+          )}
+          {!ticketsQuery.error && ticketsQuery.isLoading && <p className="mb-0">{t("dashboard.loading")}</p>}
+          {!ticketsQuery.error && ticketsQuery.data && topTickets.length === 0 && (
             <p className="text-muted mb-0">
               {user.role === "Customer" ? t("dashboard.noTicketsCustomer") : t("dashboard.noTicketsAgent")}
             </p>
           )}
-          {topTickets.length > 0 && (
+          {!ticketsQuery.error && topTickets.length > 0 && (
             <ul className="list-group list-group-flush">
               {topTickets.map((ticket) => (
                 <li key={ticket.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
@@ -102,6 +114,19 @@ export function DashboardShellPage() {
             </ul>
           )}
         </section>
+      )}
+
+      {user.role === "Agent" && notificationsQuery.error && (
+        <div className="row row-cols-1 row-cols-md-2 g-3 mb-3">
+          <div className="col">
+            <div className="card h-100">
+              <div className="card-body">
+                <h2 className="h5 card-title">{t("dashboard.slaAlerts")}</h2>
+                <p role="alert" className="alert alert-danger small mb-0">{t("dashboard.slaAlertsError")}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {user.role === "Agent" && notificationsQuery.data && (
@@ -122,55 +147,78 @@ export function DashboardShellPage() {
         </div>
       )}
 
-      {isStaffReportRole && (summaryQuery.isLoading || trendsQuery.isLoading) && <p>{t("dashboard.loading")}</p>}
-
-      {isStaffReportRole && (summaryQuery.data || trendsQuery.data) && (
+      {isStaffReportRole && (
         <>
-          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-3">
-            {summaryQuery.data?.byStatus.map((s) => (
-              <div className="col" key={s.status}>
-                <div className="card h-100">
-                  <div className="card-body">
-                    <h2 className="h5 card-title">{s.status}</h2>
-                    <p className="display-6 fw-bold mb-0">{s.count}</p>
+          <p className="text-muted small">
+            {user.role === "Admin" ? t("dashboard.scopeOrgWide") : t("dashboard.scopeDepartment")}
+          </p>
+
+          {(summaryQuery.isLoading || trendsQuery.isLoading) && <p>{t("dashboard.loading")}</p>}
+
+          {(summaryQuery.error || trendsQuery.error) && (
+            <p role="alert" className="alert alert-danger">{t("dashboard.reportError")}</p>
+          )}
+
+          {(summaryQuery.data || trendsQuery.data) && (
+            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-3">
+              {summaryQuery.data?.byStatus.map((s) => (
+                <div className="col" key={s.status}>
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h2 className="h5 card-title">{s.status}</h2>
+                      <p className="display-6 fw-bold mb-0">{s.count}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {summaryQuery.data && (
-              <div className="col">
-                <div className="card h-100">
-                  <div className="card-body">
-                    <h2 className="h5 card-title">{t("dashboard.avgResolution")}</h2>
-                    <p className="display-6 fw-bold mb-0">
-                      {summaryQuery.data.avgResolutionMinutes === null ? "—" : `${summaryQuery.data.avgResolutionMinutes} min`}
-                    </p>
+              ))}
+              {summaryQuery.data && (
+                <div className="col">
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h2 className="h5 card-title">{t("dashboard.avgResolution")}</h2>
+                      <p className="display-6 fw-bold mb-0">
+                        {summaryQuery.data.avgResolutionMinutes === null ? "—" : `${summaryQuery.data.avgResolutionMinutes} min`}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {trendsQuery.data && (
-              <div className="col">
-                <div className="card h-100">
-                  <div className="card-body">
-                    <h2 className="h5 card-title">{t("dashboard.slaBreachRate")}</h2>
-                    <p className="display-6 fw-bold mb-0">{trendsQuery.data.slaBreachRatePercent}%</p>
+              )}
+              {trendsQuery.data && (
+                <div className="col">
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h2 className="h5 card-title">{t("dashboard.slaBreachRate")}</h2>
+                      <p className="display-6 fw-bold mb-0">{trendsQuery.data.slaBreachRatePercent}%</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {user.role === "Admin" && aiUsageQuery.data && (
-              <div className="col">
-                <div className="card h-100">
-                  <div className="card-body">
-                    <h2 className="h5 card-title">{t("dashboard.aiTrust")}</h2>
-                    <p className="display-6 fw-bold mb-0">{aiUsageQuery.data.suggestedReply.usedRatePercent}%</p>
-                    <p className="form-text text-muted">{t("dashboard.aiTrustSubtext")}</p>
+              )}
+              {user.role === "Admin" && aiUsageQuery.error && (
+                <div className="col">
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h2 className="h5 card-title">{t("dashboard.aiTrust")}</h2>
+                      <p role="alert" className="alert alert-danger small mb-0">{t("dashboard.aiTrustError")}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+              {user.role === "Admin" && aiUsageQuery.data && (
+                <div className="col">
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h2 className="h5 card-title">{t("dashboard.aiTrust")}</h2>
+                      <p className="display-6 fw-bold mb-0">{aiUsageQuery.data.suggestedReply.usedRatePercent}%</p>
+                      <p className="form-text text-muted">{t("dashboard.aiTrustSubtext")}</p>
+                      <p className="form-text text-muted">
+                        {aiUsageQuery.data.chatbot.confidentRatePercent}% {t("dashboard.chatbotConfidentSubtext")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           <Link to="/reports" className="btn btn-outline-primary">{t("dashboard.viewFullReport")}</Link>
         </>
       )}
