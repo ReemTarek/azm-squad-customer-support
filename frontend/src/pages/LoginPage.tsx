@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { extractApiErrorMessage } from "../lib/apiClient";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { useBranding } from "../context/BrandingContext";
 
 export function LoginPage() {
   const { login } = useAuth();
   const { t } = useTranslation();
+  const { appName, logoUrl } = useBranding();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +35,12 @@ export function LoginPage() {
     <div className="auth-page min-vh-100 d-flex align-items-center justify-content-center bg-light position-relative">
       <div className="position-absolute top-0 end-0 m-3"><LanguageSwitcher /></div>
       <form onSubmit={handleSubmit} className="auth-form card p-4 shadow-sm">
+        {(appName || logoUrl) && (
+          <div className="d-flex align-items-center gap-2 mb-3">
+            {logoUrl && <img src={logoUrl} alt="" style={{ height: 32 }} />}
+            <span className="fw-bold fs-5">{appName ?? t("nav.brand")}</span>
+          </div>
+        )}
         <h1>{t("auth.signIn")}</h1>
         {error && <p role="alert" className="alert alert-danger">{error}</p>}
         <div className="mb-3">

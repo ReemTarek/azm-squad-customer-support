@@ -4,10 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getNotificationsSummary } from "../lib/notificationsApi";
+import { useBranding } from "../context/BrandingContext";
 
 export function Layout() {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const { appName, logoUrl } = useBranding();
   const notificationsQuery = useQuery({
     queryKey: ["notifications-summary"],
     queryFn: getNotificationsSummary,
@@ -23,7 +25,10 @@ export function Layout() {
     <div className="d-flex flex-column min-vh-100">
       <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3">
         <div className="container-fluid">
-          <Link to="/" className="navbar-brand fw-bold">{t("nav.brand")}</Link>
+          <Link to="/" className="navbar-brand fw-bold d-flex align-items-center gap-2">
+            {logoUrl && <img src={logoUrl} alt="" style={{ height: 28 }} />}
+            {appName ?? t("nav.brand")}
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
