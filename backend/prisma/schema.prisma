@@ -250,6 +250,14 @@ model SlaPolicy {
   updatedAt        DateTime @updatedAt
 }
 
+model BrandingConfig {
+  id           String   @id @default("singleton")
+  appName      String?
+  logoPath     String?
+  primaryColor String?
+  updatedAt    DateTime @updatedAt
+}
+
 model CustomerNote {
   id         String   @id @default(uuid())
   customerId String
